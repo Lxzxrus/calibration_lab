@@ -16,7 +16,7 @@
 
 *One sentence. Interrogative. Specific enough that a result could answer it.*
 
-[Does Kadavath et al.'s findings hold up on consumer-grade LLMs?]
+Within the gemma3 family, how do parameter count and weight quantization affect a model's ability to distinguish its own correct answers from its incorrect ones (AUROC), at sizes and precisions that run on consumer hardware?
 
 ## 2. Background
 
@@ -28,24 +28,41 @@
 
 ## 3. Hypotheses
 
-⚠ **The most important section, and the easiest to fudge.** Each hypothesis must be **directional** ("X will be higher than Y") — not "we will explore whether." Exploratory work is legitimate but must be *labeled* exploratory and reported separately, because it doesn't carry the same evidential weight.
+- Definitions: Δ = the within-model AUROC gap across the q8_0 → q4_K_M rung pair: Δ(M) = AUROC(M, q8_0) − AUROC(M, q4_K_M). Used uniformly at all three sizes. fp16 rungs, where published (1b, 4b), are used only for H2a's within-model monotonicity check and never enter Δ.
 
-For each:
+- H1: As parameter count increases across gemma3 1B → 4B → 12B (same family, all sizes at q4_K_M, same prompts), the model's ability to distinguish its own correct from incorrect answers improves: AUROC increases monotonically. 
 
-| | |
-|---|---|
-| **H_n** | *The claim, directional.* |
-| **Rationale** | *Why you expect this — one line.* |
-| **Prediction** | *The specific numeric/ordinal pattern in your results that supports it.* |
-| **Falsifier** | *What result would make you say this was wrong.* |
+Rationale: A larger model has the capacity to store both the facts it was trained on and how reliably it holds each one. A smaller model does not, its capacity goes to the facts themselves, leaving little for the reliability signal. Therefore a larger model's confidence varies with how well it actually knows a given fact, while a smaller model's confidence is comparatively flat. That variation is what AUROC reads.  
 
-- H1: As parameter count increases across gemma3 1B → 4B → 12B (same family, same quantization, same prompts), the model's ability to distinguish its own correct from incorrect answers improves — AUROC increases monotonically. Rationale: Bigger models know more: they were trained on more data, they hold more facts. A question a small model doesn't know and bluffs, a bigger model simply knows because it remembers it from training. A bigger model also knows more of what it doesn't know, therefore, a bigger model bluffs less. They recognize the edge of their knowledge better than a smaller model does.  Prediction: AUROC(1B) < AUROC(4B) < AUROC(12B), with the total gap >= 0.1 confirming. Reporting band: Monotonic gaps in 0.05–0.1 reported as suggestive, below the confirmation threshold. Falsifier: Non-monotonic ordering, or total gap < 0.05.
+Robustness check: The same comparison at q8_0 is reported alongside. It is not the primary test of H1; agreement between rungs strengthens the finding, disagreement is reported as a limitation on generality.
 
-- H2a (main effect): Within each model, AUROC decreases monotonically as precision drops: AUROC(fp16) > AUROC(q8_0) > AUROC(q4_K_M). Applied to each size independently — three separate monotonic checks, not one interleaved chain.
-    H2a rationale: The confidence signal AUROC reads lives in fine-grained differences between logits. Quantization adds noise to those logits, and that noise corrupts the small differences carrying the discrimination signal before it touches the answer. So self discrimination degrades as precision drops.
+Prediction: AUROC(1B) < AUROC(4B) < AUROC(12B), with the total gap >= 0.1 confirming. 
 
-- H2b (interaction — the good one): The size of that drop (fp16 → q4_K_M) is larger for smaller models. Formally: Δ(1B) > Δ(4B) > Δ(12B), where Δ is the AUROC gap between best and worst precision within a model.
-    H2b rationale: Larger models have enough weights that quantization's compression has little effect on the model's salf-assessment capability, where a smaller model does not have enough wieghts to support that same compression without more noticable adverse affects to self-assessment capability. There simply is not "enough" of the model at smaller parameter sizes to handle quantization without capability deterioration.
+Reporting band: Monotonic gaps in 0.05–0.1 reported as suggestive, below the confirmation threshold. 
+
+Falsifier: Non-monotonic ordering, or total gap < 0.05. 
+
+- H2a (main effect): Within each model, AUROC decreases monotonically as precision drops: AUROC(fp16) > AUROC(q8_0) > AUROC(q4_K_M). Three separate monotonic checks, one per model, not one interleaved chain: Three-rung on 1b and 4b model sizes (fp16, q8_0, q4_k_M), fp16 does not exist at 12b, so 12b is a two-rung check at q8_0 and q4_K_M.
+
+Verdict: supported only if all 3 per-model checks confirm AUROC score decreases monotonically as precision drops. A break at any size means H2a is not supported. Per-model verdicts will still be recorded and reported regardless of H2a itself being supported or not. 
+    
+H2a rationale: The confidence signal AUROC reads lives in fine-grained differences between logits. Quantization adds noise to those logits, and that noise corrupts the small differences carrying the discrimination signal before it touches the answer. So self discrimination degrades as precision drops. 
+
+Prediction: At 1b and 4b: AUROC(fp16) > AUROC(q8_0) > AUROC(q4_K_M). At 12b: AUROC(q8_0) > AUROC(q4_K_M). The AUROC gap at each step must independently be ≥ 2 × the pilot-measured noise floor, across all five comparisons: 1b (fp16→q8_0, q8_0→q4_K_M), 4b (fp16→q8_0, q8_0→q4_K_M), 12b (q8_0→q4_K_M).
+
+Falsifier: any ordering other than the predicted one falsifies, or the change (Δ) falls below the magnitude threshold.
+
+- H2b (interaction): The size of that drop (q8_0 → q4_K_M) is larger for smaller models. Formally: Δ(1B) > Δ(12B). 
+
+Precondition: H2b is evaluated only if Δ(1B) > 0. If Δ(1B) ≤ 0, the 1b model did not degrade under compression, H2b's premise does not obtain, and H2b is reported as not evaluable rather than confirmed or falsified.
+
+H2b rationale: Larger models have enough weights that quantization's compression has little effect on the model's self-assessment capability, where a smaller model does not have enough weights to support that same compression without more noticeable adverse effects to self-assessment capability. There simply is not "enough" of the model at smaller parameter sizes to handle quantization without capability deterioration.
+
+Prediction: Δ(1B) > Δ(12B), where Δ is the AUROC gap from q8_0 → q4_K_M at both sizes. The spread Δ(1B) − Δ(12B) must be ≥ 2 × the pilot-measured noise floor for the spread. Δ(4B) is measured and reported as descriptive context but it does not enter the H2b verdict. k = 2 committed 08-01-2026.
+
+Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the large model's, or the spread Δ(1B) − Δ(12B) falls below the magnitude threshold. Cases where the precondition fails (Δ(1B) ≤ 0) are reported as not evaluable, not falsified.
+
+- Note on thresholds. H1's numbers are hardcoded while H2a's and H2b's are a formula (2 × the pilot-measured noise floor). This is intentional. H1's gap is a quantity I have an informed opinion about: "≥0.1 confirming" comes from asking how big a difference would have to be before I'd actually tell someone about it. H2a's per-step gaps and H2b's spread are quantities I have never observed and have no basis for guessing, so the threshold defers to the instrument: the noise floor sets the scale, and k = 2 sets how far above that noise an effect must sit before I'll claim it.
 
 ## 4. Models
 
@@ -136,7 +153,7 @@ differential exclusion named as a limitation.
 
 *If every hypothesis fails and calibration looks basically like Kadavath's picture, what have you learned, and is it still worth writing up?*
 
-[I have learned that model size does not affect a model's ability to predict what it knows.] — **Answer this honestly before you freeze.** If the answer is "nothing," the study is designed wrong and now is the only cheap time to find out.
+If every hypothesis fails and calibration is not noticably different, I've learned that model size and quantization do not reasonably affect model calibration (AUROC). This means that, for consumer models, size and quantization should aid you in choosing what fits into your system resources. i.e, in regards of calibration, simply picking the biggest model that comfortably fits into your system resources (system RAM, VRAM) 
 
 ---
 
