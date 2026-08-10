@@ -81,16 +81,49 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 | `gemma3:4b-it-qat` | `d01ad0579247` | 4.3B | Q4_0 (QAT) | 131072 | yes | exploratory |
 
 **Decisions to make and justify here:**
+- Why only one family? It holds the training recipe fixed, so the claim is clean.
 
+- Why 1b, 4b, and 12b models? They fit on most consumer-level hardware, with 12b being for those with enthusiast level hardware (like me.) Also: three sizes is the minimum for a monotonicity claim. Two points can't be non-monotonic, so H1 would be untestable. Three sizes spanning roughly one order of magnitude is the smallest ladder that can carry the hypothesis.
+
+- Why published quants only? I wanted the models to be ones that any consumer could easily install, with no difference between the one they get via ollama pull or hugging face or other methods, and mine. What I run, is what you can run, provided you've got the hardware. Additionally, gemma3:12b @ fp16 would consume 24gb of VRAM - more than my 16gb and definitely more than most consumers. This is why I opted to leave 12b @ fp16 out, instead of building it myself.
+
+- Why is H1's primary rung q4_K_M instead of q8_0? If a consumer is downloading these models via ollama, like I am, they'd use the command ollama pull gemma3:4b, which is q4_K_M; the bare tag resolves to it.
+
+- Within-model comparisons (H2a) use every rung published at that size. Across-model comparisons (H1, H2b) use only the rung, or rung pair, that exists at every size.
+
+- Why is the QAT arm exploratory only? the 4b QAT model is Q4_0, different than the Q4_K_M I'm using. Using the QAT version of the model raises the question if H2a's damage is inevitable at 4 bits or an artifact of careless quantization. I still decided to incorporate it because normal quant is post-training; QAT simulates that rounding during training. It settles into weight values that survive being rounded. Normal quant: the model didn't know it was coming, so wherever the weight's exact values mattered, the precision is just gone. QAT: the model anticipates and accommodates this. It's genuinely interesting.
+
+- Why not test QAT across the board?: Because the QAT arm moves two variables at once: Quantization-Aware Training and the quantization scheme (Q4_0 vs. Q4_K_M are different algorithms with different effects on the probabilities I'm measuring.) To isolate it, you would need a bit-matched control to separate them: the same exact architecture, at the same scheme and bit-budget, differing only in QAT. The gemma3 family's 1b, 4b, and 12b all shipped with QAT versions, but every QAT model is quantized at q4_0, and their non-QAT counterparts are not quantized at q4_0. I could run a full QAT ladder at 1b, 4b, and 12b, but it would be QAT Q4_0 at every rung, with no non-QAT q4_0 to compare against. So, the QAT arm is exploratory: no falsifier, no direction.
+
+*Note* I checked ollama and hugging face and confirmed the QAT vs quant situation. If Google has published QAT versions at other quants for gemma3 1b, 4b, and/or 12b, I am not aware of it, and if i discover their existence later, it will be logged as a deviation entry.
 
 ## 5. Datasets
 
-- **MMLU subset:** which subjects, why those, how many items. [ ]
-- **TriviaQA:** which split, how many items. [ ]
-- ⚠ **Selection rule + RNG seed.** How items get sampled, with the seed written down. Otherwise "we reran with a different sample" becomes available to you later.
-- **Sample size justification:** target ≥50 items per confidence bin — state the arithmetic that gets you there.
+- Dataset Choice: TriviaQA over MMLU. free-form trivia matches how people would actually query a local model.  Additionally, multiple choice questions from MMLU would introduce recognition vs. recall: a model queried with a multiple choice question could still determine the answer even if it has weak or partial knowledge simply by elimination of the distractors. This overstates what the model knows and lets confidence reflect narrowing rather than knowledge. Free-form has no guessing floor, so a correct answer means the model produced the fact.
+
+- Config Choice: unfiltered.nocontext: I decided to use the TriviaQA's nocontext variant and not use MMLU because the normal TriviaQA variant includes evidence documents that contain the answers, and MMLU gives the answer set to the model, so the model just has to determine which of the candidates it is. So, by using TriviaQA's nocontext variant only, I ensure the dataset will yield a result that is a measure of knowledge, not reading comprehension. Two config strings for nocontext: unfiltered and rc (reading comprehension). I chose unfiltered because rc drops questions whose retrieved evidence documents don't contain the answer, which selects for facts with strong web documentation. Heavily-documented facts are plausibly over-represented in any web training. rc would sample preferentially from high coverage facts, where calibration plausibly looks best, biasing every cell in the same direction and invisibly. unfiltered keeps the original question without the filter, which doesn't solve the contamination, but it does stop the contamination from compounding. 
+
+- Split Choice: Validation: the test-set answers aren't publicly released, so validation is the only split that allows me to grade.
+
+- Consequence: dropping MMLU dropped MC logprobs, which leaves just two elicitation methods: P(True) and verbalized confidence.
+
+- Selection Rule: Using a recorded seed, I'll pull N questions from the dataset: uniform random sample without replacement, then I'll record the question text, answer aliases, and the source TriviaQA question ID to items.jsonl (sampled once, frozen, and read by every cell). I will apply those questions in fixed order, identical across all nine cells in section 4's roster.
+
+- Reasoning: the seed offers provenance and the frozen file offers reproducibility to whoever wishes to carry out this experiment for themselves. As for the item set, per-cell sampling would confound model differences with question difficulty differences. If each cell drew its own sample, one cell might get an easier or harder draw, and its AUROC would partly reflect that rather than the model. Fixed items make the model the only thing varying.
+
+- items.jsonl will be committed in the repo alongside the preregistration.
+
+- Let C be the minimum number of items required in the smaller class, correct or incorrect, in the worst cell. I set the value to 200. C = 200 was chosen on statistical grounds: it puts the noise floor around 0.02–0.03 (Hanley–McNeil approximation), which keeps 2 × floor around 0.04–0.06: small enough that H2a's per-step gaps and H2b's spread can clear it without the threshold swallowing effects the size of H1's suggestive band. The pilot measures the real floor. A materially wider measured floor is a section 12 disclosure.  Runtime checked and found non-binding: 1b-q8_0 at ~166 tok/s, 12b-q8_0 at ~36 tok/s puts a full sweep at roughly 1.5-6 hours depending on N. Next, p_weak = the accuracy of the weakest cell, and p_strong is the accuracy of the strongest cell. The formula: N = 200 / min(p_weak, 1 - p_strong) plus 10% exclusion margin. The pilot spec: 50 items each on gemma3:1b-it-q4_K_M and gemma3:12b-it-q8_0, different seed, and pilot items excluded from the main draw pool and data discarded. 50 pilot items on both extremes to ensure no thin cells in the case of extreme high/low accuracy. So, the pilot has four outputs: p_weak, p_strong, the AUROC noise floor, and the spread noise floor.
+
+- p_weak = [ ] , p_strong = [ ] , N = [ ]
+
+- Note: C = 200 is held regardless of the N it implies.
 
 ## 6. Procedure
+
+- Ollama version is 0.32.6
+
+- note that the parser must tolerate a candidate with no bytes field.
 
 - asymetrical quant ladders is fine: reproducible. My reasoning exactly, "What is available to me via an ollama shell command is also available to anyone reading my paper in the future. This research project doubles as an academic portfolio project and a community finding: a college professor could read my paper and find that Im learning to navigate researching, and a community member could read my paper and discover that x model at y quant is measured to be better calibrated for a z memory constraint."
 
