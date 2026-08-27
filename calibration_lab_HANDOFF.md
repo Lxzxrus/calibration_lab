@@ -2,21 +2,44 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-08-09 · **Status:** Slice 0 (pre-registration) in draft, not frozen
+**Last updated:** 2026-08-27 · **Synthesized against commit:** `23e58ee` · **Status:** Slice 0 (pre-registration) in draft, not frozen
 
 ---
 
 ## 0. YOU ARE HERE
 
-The pre-registration is **~80% drafted**. Complete and locked: **§3 (hypotheses)**, **§4 (roster + justification block)**, **§5 (datasets)**, §7 (metrics), §9 (exclusions).
+**§6 (Procedure) is COMPLETE** — content, structure, and internal consistency. Every block written, every decision recorded, reordered into a navigable shape, committed as `23e58ee`. That was the longest-running open section on the project.
 
-Remaining: §1, §2, §6, §8 (partial), §10 (partial), §11.
+**Pre-session brief (written 2026-08-27, end of the 08-26 session):**
 
-**Next action: §6 (Procedure).** It is the heaviest remaining section and the only one that still blocks the pilot. It also has stale content — it still describes *three* elicitation methods including MC logprobs, which was dropped with MMLU. §1, §2, and §10 are transcription-grade and can be done at low energy; §11 needs a real redesign (see §5 status table).
+Last session ran long and did three things. (1) Closed §6 entirely: both parsing rules, the grader-rule development declaration, logging split into per-run/per-row, digest and version verification, flash attention, and the environment block including a full hardware spec. (2) Discovered mid-session that the throughput table predated the current AMD driver, re-measured all nine cells, and found the `12b-it-q8_0` spill was a **driver artifact, not a hardware limit** — that cell went 15.4 → 43.9 tok/s and is now fully resident. The old table would have frozen a false mechanism into the document. (3) Repaired seventeen days of uncommitted git history and stood up `lab_log.md`.
 
-**The empirical logprob check is DONE** (2026-08-08) — three findings, recorded in §6 Environment below. This unblocks P(True)'s design.
+**Next actions, in order:**
+1. **§5's runtime paragraph.** Still carries `~166 / ~36 tok/s` and "4-6+ hours" and the spill claim. Now stale against *three* generations of numbers. Recompute from the current table. **This has been flagged for three consecutive sessions — do it first, it takes two minutes.**
+2. **§10 transcription.** Delete the stale qwen3/MMLU bullets, fill `[others]` from the accumulated list below, rewrite the extrapolation-limit entry around the driver finding, add the ECE-declined entry.
+3. **§11 redesign.** The current text is a placeholder recording the ECE decision, not the rule. Needs the full null-result structure plus the option-four interpretation rule.
+4. **§8's noise-floor procedure** — blocking, two floors required.
+5. **§1 header line, §2 background** — transcription of material already articulated.
+6. **E1 is missing from §3 entirely**, and §7 has no throughput or footprint metric to feed it.
 
-**No study data has been run.** No harness code exists except a synthetic ECE/reliability-diagram experiment (`ece_test.py`) written for learning purposes. The only Ollama calls made so far were the logprob and throughput probes, which are environment characterization, not study data.
+**No study data has been run.** No harness code exists except a synthetic ECE/reliability-diagram experiment (`ece_test.py`) written for learning. All Ollama calls so far are environment characterization.
+
+---
+
+## 0b. Working protocol (adopted 2026-08-26)
+
+Established after a stale handoff caused a session to open on false premises and produced three incorrect corrections.
+
+- **One chat = one session = one handoff update = one commit.** A single chat holding several days of work is what produced the date confusion and the drift.
+- **Commit before uploading.** The uploaded file is then the committed file by construction.
+- **Upload the prereg AND handoff together**, with `git log -1 --format="%h %ad %s"` and `git status --short`. The hash proves which version; a clean status proves nothing was edited after.
+- **Claude synthesizes the handoff against the actual file** and reports every claim that doesn't verify. A handoff composed from conversation rather than from the page is how six settled decisions evaporated.
+- **The handoff header records the commit it was synthesized against.** Next session opens by checking that against `HEAD`.
+- **Open-but-undecided items get their own section** (§5c below) and leave it only by being decided — including "considered and declined."
+- **The prereg governs where prereg and handoff disagree.**
+- Handoff stays descriptive. Reasoning that belongs in the prereg gets written by Laz, into the prereg, in his words.
+
+**Known failure mode, still live:** decisions get logged in the handoff as *landed* when they were only *decided*. Every mismatch found on 2026-08-26 was of this kind. §10's fix #2 — a running "decided but not yet written" list at the bottom of the section being worked — was adopted in August and never actually maintained. §5c is that list.
 
 ---
 
@@ -30,7 +53,7 @@ Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language 
 
 **Research identity it serves:** *"I study whether AI systems know what they know and how humans stay meaningfully in control when they don't."*
 
-**Timeline:** first reliability diagrams by September 2026.
+**Timeline:** first reliability diagrams by September 2026. Note: this is self-imposed. The real external gates are the REU in mid-December and PNNL CCI in January.
 
 ---
 
@@ -38,85 +61,125 @@ Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language 
 
 *These are settled. The rationale is the part that doesn't survive a context reset, so it's recorded here.*
 
-**Standalone repo, entirely separate from ARIA.** `C:\Users\legen\Projects\calibration_lab\`, own git repo, own venv. Reason: the August ARIA decision leans toward a *curated public research mirror* rather than full open-source. If `calibration_lab` lived inside ARIA, publishing it later would require history surgery on a repo containing a gitignored personal memory store. Starting separate means the public artifact is already the public artifact — zero extraction. Ollama is shared, but as a service on `localhost:11434`, not a code dependency. **The harness talks to Ollama directly, never through ARIA** — ARIA's vault injection could silently prepend material to a frozen prompt template.
+**Standalone repo, entirely separate from ARIA.** `C:\Users\legen\Projects\calibration_lab\`, own git repo, own venv. Reason: the August ARIA decision leans toward a *curated public research mirror* rather than full open-source. If `calibration_lab` lived inside ARIA, publishing it later would require history surgery on a repo containing a gitignored personal memory store. Ollama is shared, but as a service on `127.0.0.1:11434`, not a code dependency. **The harness talks to Ollama directly, never through ARIA** — ARIA's vault injection could silently prepend material to a frozen prompt template.
 
-**Own venv, and free to pin a different Python.** ARIA is on 3.14; the scientific stack (numpy, matplotlib, HuggingFace `datasets`) may not have 3.14 wheels. Check before committing; drop to 3.12/3.13 if needed. Separation is what makes that choice free.
+**Own venv, and free to pin a different Python.** ARIA is on 3.14; the scientific stack may not have 3.14 wheels. Check before committing; drop to 3.12/3.13 if needed.
 
-**gemma3 family only.** All three hypotheses are within-family. Holding family and training recipe fixed is what makes the scale claim clean — cross-family comparison confounds size with everything else. Cross-family replication (qwen, deepseek, llama, phi) is deferred to a **follow-up study**, explicitly a post-September discussion.
+**gemma3 family only.** All three hypotheses are within-family. Holding family and training recipe fixed is what makes the scale claim clean. Cross-family replication is deferred to a follow-up study, explicitly post-September.
 
-**TriviaQA only; MMLU dropped.** Reason: free-form trivia is closer to how people actually use models. Nobody asks a local model multiple-choice questions. **Consequence — this is load-bearing:** MC logprobs requires lettered options, so dropping MMLU drops it. Two elicitation methods remain: **P(True)** and **verbalized confidence**.
+**TriviaQA only; MMLU dropped.** Free-form trivia is closer to how people actually use models. **Consequence — load-bearing:** MC logprobs requires lettered options, so dropping MMLU drops it. Two elicitation methods remain: **P(True)** and **verbalized confidence**.
 
-**The MMLU and `nocontext` decisions are one principle applied twice: never hand the model material that lets it succeed without knowing the fact.** Context supplies the answer to read; multiple choice supplies the answer set to pick from. The MC-specific harm is **recognition vs. recall** — with distractors, partial knowledge can produce a correct answer by elimination, so a correct MC response is *ambiguous evidence* (knowledge or elimination, indistinguishable from the outcome). That matters more than the accuracy inflation: under MC, confidence can track distractor quality rather than the model's own knowledge, which is a different quantity than the one AUROC is supposed to read. Free-form has no guessing floor.
+**The MMLU and `nocontext` decisions are one principle applied twice: never hand the model material that lets it succeed without knowing the fact.** Context supplies the answer to read; multiple choice supplies the answer set to pick from. The MC-specific harm is **recognition vs. recall** — with distractors, partial knowledge can produce a correct answer by elimination, so a correct MC response is *ambiguous evidence*. Under MC, confidence can track distractor quality rather than the model's own knowledge, which is a different quantity than the one AUROC is supposed to read. Free-form has no guessing floor.
 
-**Config: `unfiltered.nocontext`, validation split.** `rc` drops questions whose retrieved evidence documents don't contain the answer, which selects for facts with strong web documentation — plausibly correlated with training-data over-representation. That would sample preferentially from high-coverage facts where calibration likely looks best, biasing every cell in the same direction and invisibly. `unfiltered` does not *solve* contamination (gemma3 has almost certainly seen TriviaQA — that stays in §10); it avoids compounding it. Validation because test-set answers aren't publicly released. **Still to verify on HuggingFace before freeze:** the exact config string, and the alias field shape (`answer.aliases` / `answer.normalized_aliases`) — aliases are the raw material §6's grader rules run on.
+**Config: `unfiltered.nocontext`, validation split.** `rc` drops questions whose retrieved evidence documents don't contain the answer, which selects for facts with strong web documentation — plausibly correlated with training-data over-representation, biasing every cell in the same direction and invisibly. `unfiltered` does not *solve* contamination; it avoids compounding it. Validation because test-set answers aren't publicly released. **Verified on HuggingFace 2026-08-16** (`mandarjoshi/trivia_qa`, validation, 4.39 MB parquet).
 
-**Identical item set across all nine cells.** Sample once with a recorded seed, freeze to `items.jsonl`, every cell reads that file in fixed order. Per-cell sampling would confound model differences with question-difficulty differences — a cell could draw an easier set and its AUROC would partly reflect the draw. **Seed and file do different jobs:** the seed is provenance (how the set was drawn, auditable); the file is the guarantee (a replicator gets the exact items regardless of `datasets` version or platform). `items.jsonl` is **committed to the repo**. Fixed order also makes per-item cross-cell comparison possible — item 47 means the same thing everywhere.
+**Identical item set across all nine cells.** Sample once with a recorded seed, freeze to `items.jsonl`, every cell reads that file in fixed order. **Seed and file do different jobs:** the seed is provenance; the file is the guarantee. `items.jsonl` is **committed to the repo** — NOT YET DONE, see §5c.
 
-**C = 200, held regardless of the N it implies.** C = the minimum items required in the smaller class (correct *or* incorrect) in the worst cell. Chosen on statistical grounds: puts the AUROC noise floor around 0.02–0.03 (Hanley–McNeil approximation), keeping `2 × floor` around 0.04–0.06 — small enough that H2a's per-step gaps and H2b's spread can clear it without the threshold swallowing effects the size of H1's suggestive band. **The escape hatch was deliberately removed.** An earlier draft said "if runtime exceeds 8 hours I'll adjust" — but the only knob is C, and that clause triggers precisely when p_weak is lowest, i.e. when the small model's signal is thinnest and the items are most needed. Runtime is an inconvenience; C is whether the thresholds can detect the study's own effects. Any change to C post-freeze is a §12 deviation.
+**C = 200, held regardless of the N it implies.** Puts the AUROC noise floor around 0.02–0.03 (Hanley–McNeil), keeping `2 × floor` around 0.04–0.06. **The escape hatch was deliberately removed** — an earlier "if runtime exceeds 8 hours I'll adjust" clause triggers precisely when p_weak is lowest, i.e. when the items are most needed. Any change to C post-freeze is a §12 deviation.
 
-**N is two-sided: `N = 200 / min(p_weak, 1 − p_strong)`, +10% exclusion margin.** AUROC needs both classes populated. Sizing only on the weakest cell's *correct* count misses the mirror problem — the strongest cell's *incorrect* count is its thin class. A 12b at 90% accuracy on N=1000 has only 100 wrong answers, below C, and the binding constraint silently flips ends of the roster. Costs 50 extra pilot items to cover both directions.
+**N is two-sided: `N = 200 / min(p_weak, 1 − p_strong)`, +10% exclusion margin.** AUROC needs both classes populated. The strongest cell's *incorrect* count is its thin class, so the binding constraint can silently flip ends of the roster.
 
-**AUROC is the primary metric.** All three hypotheses rest on it. Chosen over ECE because the practitioner question is "can I *trust* this model's confidence" — i.e. does high confidence actually track correctness (discrimination) — rather than "does 70% mean 70%" (calibration). Convenient side effect: AUROC is bin-independent, so the binning debate can't touch the hypotheses.
+**Forced response, not permitted refusal.** Permitting "I don't know" gives clean refusals, but §9 excludes refusals and the 1b would refuse far more often — differential exclusion straight into H1 and H2b. Forced guessing pollutes the correct class with lucky hits instead, but free-form has **no guessing floor**, so the pollution is small *and uniform across cells*.
 
-**Accuracy measured per cell as a control.** Free (already grading every answer). It's the instrument that adjudicates the open mechanistic question — see §4 below.
+**Prompt constraint over a smart grader.** A smart grader is a second measuring instrument whose errors land unevenly across cells (small models produce messier prose, so a lenient grader rescues more of the 1b's answers than the 12b's). Prompt constraint moves the burden somewhere identical across cells and makes compliance a *measurable* property. **Design: constrain hard, then a small, mechanical, auditable grader on top — never a smart one.**
 
-**Published quants only; asymmetric ladders accepted.** Laz's reasoning, verbatim: *"What is available to me via an ollama shell command is also available to anyone reading my paper in the future."* Building custom quants with `llama-quantize` would make the study *less* reproducible for the target reader. This is a methodological principle, not a fallback.
+**Non-compliance is counted, not eliminated.** Hedging and degenerate output at 1b are real model properties that correlate with size. They become per-cell *reported rates*. Same move applied four times now: negation, compliance, truncation, retained mass.
 
-**Δ for H2b is defined over q8_0 → q4_K_M**, not fp16 → q4_K_M. Reason: **`gemma3:12b` has no published fp16** (tops out at q8_0). Using fp16 as the top rung would mean the 12b's Δ spans 8→4.8 bits while the 1b/4b span 16→4.8 — the 12b would show a smaller Δ *because it was compressed less*, artifactually confirming H2b. The q8_0→q4_K_M rung exists at all three sizes. fp16 stays in the study as a third rung at 1b and 4b for H2a's within-model check. **This decision has been re-derived three separate times after evaporating between sessions — it is now written into the pre-registration's Definitions block, not just here.**
+**Negation is detected, never corrected.** A "not"-near-alias handler has no natural stopping point, and each rule misfires more often on messy prose, i.e. more often on the 1b — rebuilding the differential-grader problem in a subtler form. Flag, log, report the rate, never touch the score.
 
-**Within-model vs. across-model rung rule.** The general principle underneath the above: **within-model comparisons (H2a) use every rung available at that size; across-model comparisons (H1, H2b) use only the rung pair or rung that exists at every size.** This is why H2a's ladders can be asymmetric and Δ's cannot.
+**Grader: token-boundary matching over `normalized_value` + all `normalized_aliases`.** Not exact-match, not raw substring (short aliases hit inside longer words — `exile` inside `exiled`). **No article stripping, no prefix stripping** — boundary matching absorbs leading scaffolding for free.
 
-**H1's primary quantization rung is q4_K_M.** Both q8_0 and q4_K_M exist at all three sizes, so "same quantization" left two admissible studies and a free post-hoc choice. q4_K_M chosen because it is what the target reader actually runs — consistent with every other decision on this project favoring the community half of the dual audience. **q8_0 is a declared robustness check**, reported alongside, explicitly not the primary test; agreement strengthens the finding, disagreement is reported as a limitation on generality. **Cost, must land in §10:** at q4_K_M every model is compressed, so the headline size effect is scale *and* compression entangled.
+**P(True): renormalize over affirmative+negative, and log the retained mass per row.** Raw True-mass conflates *uncertainty about the answer* with *failure to follow the format*, and format-following scales with model size — a size effect riding inside the measurement, and H1 is a size hypothesis. Renormalizing removes it; logging the retained mass preserves the format-following signal as a reported statistic.
 
-**H2b uses endpoints, not strict monotonicity.** `Δ(1B) > Δ(12B)`, not `Δ(1B) > Δ(4B) > Δ(12B)`. Reason: three points in the predicted order occur ~17% of the time under pure noise, and a difference-of-differences is three subtractions deep, so a noisy middle measurement could null the study's most original claim. Δ(4B) is still measured (H2a needs those cells anyway) and is **declared descriptive context, not part of the verdict** — written down so it can't be selectively mentioned only when flattering.
+**P(True): fixed position 0, exact match, no floor** (settled 2026-08-21/26, full rule now in §6).
+- **Position 0, no exceptions.** Scanning forward for a matching position would rescue more items on the 1b than the 12b — differential exclusion — and searching for the position where you find what you want is a degree of freedom. Probe confirmed position 0 carries the answer at both roster extremes.
+- **Strict format compliance: exact match against `{true}` / `{false}` only**, after strip-and-lowercase. Reversed an earlier lean toward prefix/stem matching: the probe showed `Truth` at 0.00024 matching `tru*` as a false positive, and showed the real variant set is narrow (`True`/`TRUE`/`true`/`[sp]True`). The prompt names two tokens, so two tokens count; semantic enumeration (`Yes`, `Correct`, `Right`) has no natural stopping point. **Empirical reversal, not aesthetic.**
+- **Affirmative mass is the SUM** over all candidates normalizing to `true`. Four surface variants collapsing to one string is the normal case, not an edge case.
+- **Single letters excluded.**
+- **Zero retained mass → unparseable → §9 exclusion.** 0.5 manufactures a value the model never expressed; 0 treats absence of `true` as evidence for `false`.
+- **No minimum-mass floor.** Structurally identical to the minimum-alias-length knob already rejected: a number with nothing to justify it from. Handled by reporting per-cell mean retained mass instead, with the instability named in §10.
+- **Computed from raw logprobs at full precision** — concentrated mass can round the denominator to zero.
 
-**H2b has a sign precondition.** Δ is signed, and ordering-by-value is not ordering-by-magnitude: all-negative Δs (compression *helped*) can satisfy `Δ(1B) > Δ(12B)` while contradicting the hypothesis's premise. So H2b is evaluated only if Δ(1B) > 0; otherwise it is reported **not evaluable**, not falsified. *Not evaluable* (test conditions didn't obtain) and *not supported* (test ran, prediction failed) are kept as distinct verdicts throughout §3.
+**P(True) framing is non-self-referential — a deliberate deviation from Kadavath.** Every call is stateless; the model has no memory of producing the answer, so "your answer" would assert something false about the context.
 
-**k = 2 for both H2a and H2b, committed blind 2026-08-01.** Magnitude thresholds are `k × the pilot-measured noise floor`. Rationale for the structure: multiplication, not subtraction — the noise floor is in AUROC units, k is a bare count of noise-widths, and multiplying makes the threshold scale automatically with the instrument's precision. Rationale for identical k: **the differing noise floors already account for the differing noise.** H2b's spread is three subtractions deep so its floor will be wider; adding a larger k on top would charge H2b twice for the same fact and could make a true hypothesis unreachable. Identical k = identical skepticism applied to two instruments of different precision.
+**Verbalized confidence: strict integer, permissive normalization** (settled 2026-08-26).
+- Entire response must parse as an integer after stripping **whitespace, then trailing `%`, then leading zeros**, in that order. Divided by 100 to put both methods on [0,1] so AUROC can compare them.
+- **Leading zeros stripped, not rejected.** `int("085")` is total and unambiguous — no judgment, no stopping-point problem, unlike the `Yes` case. Also a reporting argument: excluding would bury a formatting artifact in the same bucket as refusals, inflating a rate the exclusion table reports as a finding.
+- **`done_reason: "length"` → flag, never exclude.** The strict entire-response-is-an-integer rule plus the [0,100] bound mean a truncated response almost always fails parsing on other grounds. The flag is a check that the hazard didn't materialize, not a caveat on the numbers. **The strict rule and the flag-don't-exclude decision are load-bearing on each other.**
+- Exclusion-on-`length` was considered and rejected: it fires on a *risk* rather than an absent value, and would land disproportionately on the 1b. Rejected because it buys nothing, NOT because "we can't afford differential exclusion" — that reasoning would also have kept refusals in.
 
-**H1 keeps hardcoded thresholds; H2a/H2b use the formula.** Deliberate asymmetry, explained in a note inside §3. H1's gap is a quantity Laz has an informed opinion about (decision-relevance: "how much better before I'd tell someone to upgrade"). H2a's per-step gaps and H2b's spread are quantities never observed, with no basis for a guess — so they defer to measured noise. **Where you have judgment, use it; where you don't, defer to the instrument.**
+**`num_predict` = 25 / 5 / 10 for A / B / C, all below 32.** On `gemma3:1b-it-q8_0`, one TriviaQA item producing degenerate repeating output returned `done: false` with **no metadata fields** at `num_predict ≥ 32`, and returned normally with `done_reason: "length"` at ≤ 31. Confirmed on Ollama 0.32.6 and 0.32.14, same digest. **Observed on a single item — two versions makes the boundary stable, not general.** Staying below it means degenerate items return cleanly with usable metadata. Above that floor, each value gives headroom over a compliant response: C's worst case is three digit tokens for `100` plus a stop token, four total. **The prompt bounds the output space, so the parser only handles what the prompt permits** — same principle as prompt-constraint-over-smart-grader.
 
-**H2a's verdict rule: supported only if all three per-model checks hold**, with per-model verdicts reported individually regardless of the aggregate. The second half is load-bearing — a 2-of-3 outcome (quantization damage not uniform across scale) is a genuine finding and must not vanish under a bare "not supported," and the reporting obligation removes the freedom to foreground only the checks that worked.
+**Grader-rule development against pilot outputs is permitted, with a stated test** (settled 2026-08-26).
+- **May change:** code that fails to implement a written rule.
+- **May not change:** the rules themselves. Not because changing them "skews data" — because after seeing outputs you cannot *prove* a change wasn't chosen for its effect on results.
+- **The test:** does the fix make the code do what §6 already says, or does it change what §6 says? Adding `hasn t` to the negation list is a fix (§6 says detect negation; the list is the implementation). Loosening boundary matching to catch more of the 1b's prose is a rule change (§6 specifies boundary matching).
+- Pre-freeze rule changes: amend and record. Post-freeze: §12 deviation, and should be near-nonexistent because the pilot runs pre-freeze precisely so the grader is debugged by then.
 
-**H2a's magnitude threshold is per-step, not total span.** Every adjacent gap must independently clear `2 × noise floor`, across all five comparisons (two at 1b, two at 4b, one at 12b). Per-step is the more faithful reading of "monotonic decline" — the claim is that each drop in precision costs something, not merely that the endpoints differ.
+**KV cache `f16`, and the decision is overdetermined.** *A priori:* a quantized attention cache adds a second noise source on top of the weight quantization H2a is about, and the probabilities are the dependent variable. *A posteriori:* measured **faster** than q8_0 at all three sizes — at `num_ctx=2048` the cache is small enough that per-token dequantization overhead outweighs bandwidth savings. KV quantization pays off at 32K–128K context, the opposite regime from this study. **Those comparison numbers are from the old driver and are scoped as such in §6.**
 
-**QAT arm is exploratory, not confirmatory.** `gemma3:4b-it-qat` is **Q4_0**; the standard 4b is **Q4_K_M**. Those are different schemes (Q4_K_M is a k-quant, ~4.8 bpw with higher-precision outlier tensors; Q4_0 is legacy uniform 4-bit), so the comparison moves two variables — quantization-aware training *and* the quantization scheme. The arm carries **no falsifier and no direction**.
+**Flash attention: enabled, pinned, verified from the server log** — not assumed from the environment variable, since Ollama falls back silently if hardware or model doesn't support it (AMD/ROCm especially). Mathematically equivalent to standard attention but not bit-identical, so it's pinned under "inherit nothing," same as `top_k`/`top_p`. Held constant across all nine cells, so it cannot produce a differential.
 
-**The QAT/non-QAT scheme split is structural across the whole gemma3 family** — verified 2026-08-09 on both Ollama and HuggingFace. QAT is published at 1b, 4b, *and* 12b, and is **always Q4_0**; non-QAT is **never Q4_0** at any size. So no bit-matched control exists anywhere in the family, not just at 4b. This closes the obvious follow-up ("try a different size"). A full QAT ladder at 1b/4b/12b was therefore declined not only on scope but because it would be Q4_0 at every rung with no non-QAT Q4_0 to compare against — a separate study, not a repair. Ollama's quantizer also refuses Q4_0 (`supported types are F32, F16, Q4_K_S, Q4_K_M, Q8_0`), and hand-building via llama.cpp was ruled out against September. **If a non-QAT Q4_0 build is later discovered, that is a §12 deviation entry, not a quiet correction.**
+**`keep_alive` replaces the `ollama stop` subprocess.** Generous within a cell, `keep_alive: 0` on the final call to each model, `ollama ps` as verification. The request field travels in the body — in code, in version control, logged per run — where an env var needs a tray restart and can silently fail to reach the running server. `keep_alive: 0` on *every* call would be wrong: it defeats the loop order and cold-loads constantly, breaking the warm-up guarantee.
 
-**10 bins for ECE, dual scheme.** Equal-width is **primary** (comparable to published work), equal-mass is a robustness check against clumped confidence distributions. Declaring primacy in advance is required — otherwise reporting two ECEs is a fresh researcher degree of freedom. Bin count justified by Laz's own synthetic experiment: ECE stable at 5–10 bins (0.0535), inflating to 0.0921 at 500 and 0.1168 at 1000 on data with *fixed, known* miscalibration. The inflation is systematic, not random — `|gap|` can't go negative, so bin noise only ever adds.
+**Digest and version verification, hard stop on mismatch.** Ollama tags are mutable pointers. Verify each model's digest at load against §4's frozen values; read the Ollama version at process start. Hard stop rather than warning — a warning scrolls past on a multi-hour run, and a cell computed across two different sets of weights is uninterpretable in a way no §12 disclosure repairs. **Observed once already**, when Ollama auto-updated 0.32.6 → 0.32.14 unprompted.
 
-**Thresholds (H1): ≥0.1 confirms · 0.05–0.1 suggestive · <0.05 refutes.** Three pre-committed buckets so no result lands in an unlabeled zone. Chosen by *decision relevance* — "how much better before I'd tell someone to upgrade" — not statistical convention. The middle band exists because the scholarly-interest threshold (~0.03–0.08) and the practitioner-recommendation threshold (~0.1) genuinely differ, and the dual-audience framing means neither should be silently discarded.
+**AUROC is the primary metric.** All three hypotheses rest on it. Chosen over ECE because the practitioner question is "can I *trust* this model's confidence" — discrimination, not calibration. Side effect: AUROC is bin-independent, so the binning debate can't touch the hypotheses.
 
-**Exclusion rules are mechanical, per-item decision procedures**, not interpretations. The "items where all models fail" rule was **deleted** — it's a data-dependent exclusion (defined by the outcome measured) and it would delete the hardest, most informative items. Refusals are excluded from calibration metrics *and reported as their own per-cell rate table*.
+**ECE as co-primary: considered and DECLINED (2026-08-26).** The vulnerability is real — AUROC is invariant under monotonic transformations, so if quantization compresses confidence while preserving rank, AUROC reports a null that is true and misleading. Four options were weighed; **option four adopted**: keep AUROC confirmatory, and pre-register an interpretation rule in §11 stating that AUROC-flat-while-ECE-or-Brier-degrades is reported as a named finding rather than a null. Costs no new confirmatory threshold and no third noise floor; lands in §11, which needs rewriting anyway. **Only works if written before the pilot.** Co-primary was declined against the timeline; that goes in §10 as considered-and-rejected, which is judgment rather than omission.
+
+**Accuracy measured per cell as a control.** Free, and it's the instrument that adjudicates the open mechanistic question — see §4.
+
+**Published quants only; asymmetric ladders accepted.** Laz's reasoning, verbatim: *"What is available to me via an ollama shell command is also available to anyone reading my paper in the future."* Methodological principle, not a fallback.
+
+**Δ for H2b is defined over q8_0 → q4_K_M**, not fp16 → q4_K_M. **`gemma3:12b` has no published fp16.** Using fp16 as the top rung would mean the 12b's Δ spans 8→4.8 bits while the 1b/4b span 16→4.8 — the 12b would show a smaller Δ *because it was compressed less*, artifactually confirming H2b. **Re-derived three separate times after evaporating between sessions — now in the prereg's Definitions block.**
+
+**Within-model vs. across-model rung rule.** Within-model (H2a) uses every rung available at that size; across-model (H1, H2b) uses only the rung or rung pair that exists at every size.
+
+**H1's primary quantization rung is q4_K_M.** Both exist at all three sizes, so "same quantization" left a free post-hoc choice. q4_K_M because a bare `ollama pull` resolves to it — what the target reader actually runs. **q8_0 is a declared robustness check.** **Cost, must land in §10:** at q4_K_M every model is compressed, so the headline size effect is scale *and* compression entangled.
+
+**H2b uses endpoints, not strict monotonicity.** Three points in the predicted order occur ~17% of the time under pure noise, and a difference-of-differences is three subtractions deep. Δ(4B) is measured and **declared descriptive context, not part of the verdict**.
+
+**H2b has a sign precondition.** All-negative Δs can satisfy `Δ(1B) > Δ(12B)` while contradicting the premise. Evaluated only if Δ(1B) > 0; otherwise **not evaluable**, not falsified. *Not evaluable* and *not supported* are distinct verdicts throughout §3.
+
+**k = 2 for both H2a and H2b, committed blind 2026-08-01.** Multiplication, not subtraction — the floor is in AUROC units, k is a bare count of noise-widths. Identical k because **the differing noise floors already account for the differing noise**; a larger k on H2b would charge it twice for the same fact.
+
+**H1 keeps hardcoded thresholds; H2a/H2b use the formula.** **Where you have judgment, use it; where you don't, defer to the instrument.**
+
+**H2a's verdict rule: supported only if all three per-model checks hold**, with per-model verdicts reported individually regardless. A 2-of-3 outcome is a genuine finding and must not vanish under a bare "not supported."
+
+**H2a's magnitude threshold is per-step, not total span.** The claim is that each drop in precision costs something.
+
+**QAT arm is exploratory.** `gemma3:4b-it-qat` is **Q4_0**; the standard 4b is **Q4_K_M**. Different schemes, so the comparison moves two variables. **The QAT/non-QAT scheme split is structural across the whole family** — verified 2026-08-09 — so no bit-matched control exists anywhere in gemma3. Ollama's quantizer also refuses Q4_0.
+
+**10 bins for ECE, dual scheme.** Equal-width primary, equal-mass robustness check. Declaring primacy in advance is required, or reporting two ECEs is a fresh degree of freedom.
+
+**Thresholds (H1): ≥0.1 confirms · 0.05–0.1 suggestive · <0.05 refutes.** Chosen by decision relevance, not statistical convention. **Total gap now defined** as `AUROC(12B) − AUROC(1B)`.
+
+**Exclusion rules are mechanical, per-item decision procedures.** The "items where all models fail" rule was **deleted** — data-dependent, and it would delete the hardest, most informative items.
 
 ---
 
 ## 3. Hypotheses (§3 COMPLETE — locked 2026-08-02)
 
-**Definitions block (sits above H1).** Δ(M) = AUROC(M, q8_0) − AUROC(M, q4_K_M). Uniform at all three sizes. fp16 rungs, where published (1b, 4b), serve only H2a's within-model check and never enter Δ.
+**Definitions block.** Δ(M) = AUROC(M, q8_0) − AUROC(M, q4_K_M). Uniform at all three sizes. fp16 rungs serve only H2a's within-model check and never enter Δ.
 
-**H1 (confirmatory).** As parameter count increases across gemma3 1B → 4B → 12B — same family, **all sizes at q4_K_M**, same prompts — AUROC increases monotonically.
-*Rationale (rebuilt this session):* a larger model has capacity to store both the facts it was trained on and how reliably it holds each one; a smaller model's capacity goes to the facts themselves, leaving little for the reliability signal. So a larger model's confidence **varies** with how well it actually knows a given fact, while a smaller model's is comparatively flat — and that variation is what AUROC reads.
-*Rationale history — do not let this regress:* drafts 1–2 were circular (restating the metric); draft 3 named the wrong cause (knowledge → **accuracy**, not discrimination); draft 4 added metacognition; draft 5 (current) cut the accuracy material entirely and replaced "knows more of what it doesn't know" — which was H1 restated in different words — with the capacity mechanism. **Two failure modes to watch: accuracy creep, and circularity.** Test: could you delete the rationale and lose any information beyond H1's statement? If not, it's circular again.
-*Prediction:* AUROC(1B) < AUROC(4B) < AUROC(12B), total gap ≥ 0.1 confirming. *Band:* 0.05–0.1 suggestive. *Falsifier:* non-monotonic ordering, or total gap < 0.05.
-*Robustness check:* same comparison at q8_0, reported alongside, explicitly not primary.
+**H1 (confirmatory).** As parameter count increases across gemma3 1B → 4B → 12B — same family, all sizes at q4_K_M, same prompts — AUROC increases monotonically.
+*Rationale:* a larger model has capacity to store both the facts it was trained on and how reliably it holds each one; a smaller model's capacity goes to the facts themselves. So a larger model's confidence **varies** with how well it knows a given fact, while a smaller model's is comparatively flat — and that variation is what AUROC reads.
+*Rationale history — do not let this regress:* drafts 1–2 circular; draft 3 named the wrong cause (knowledge → accuracy, not discrimination); draft 5 (current) cut the accuracy material and replaced "knows more of what it doesn't know" with the capacity mechanism. **Two failure modes: accuracy creep, and circularity.** Test: could you delete the rationale and lose any information beyond H1's statement?
+*Prediction:* AUROC(1B) < AUROC(4B) < AUROC(12B), total gap `AUROC(12B) − AUROC(1B)` ≥ 0.1 confirming. *Band:* 0.05–0.1 suggestive. *Falsifier:* non-monotonic ordering, or total gap < 0.05.
 
-**H2a (confirmatory, main effect).** Within each model, AUROC decreases monotonically as precision drops. Three separate per-model checks, **not** one interleaved chain across sizes — an interleaved ordering would silently assume every size effect beats every quantization effect. Three rungs at 1b and 4b (fp16 > q8_0 > q4_K_M); two at 12b (q8_0 > q4_K_M), no fp16 published.
+**H2a (confirmatory, main effect).** Within each model, AUROC decreases monotonically as precision drops. Three separate per-model checks, not one interleaved chain.
 *Rationale:* the confidence signal lives in fine-grained logit differences; quantization noise corrupts those before it touches the argmax.
-*Prediction:* the stated orderings, with the AUROC gap at **each step independently** ≥ 2 × pilot noise floor, across all five comparisons.
-*Verdict:* supported only if all three per-model checks hold; per-model verdicts reported individually regardless.
-*Falsifier:* any ordering other than the predicted one, or any step below the magnitude threshold.
+*Prediction:* stated orderings, each step independently ≥ 2 × pilot noise floor, across all five comparisons.
+*Falsifier:* any ordering other than predicted, or **any per-step gap** below the magnitude threshold. (Corrected 2026-08-26 — previously said "the change (Δ)", which misused Δ.)
 
 **H2b (confirmatory, interaction — the most original claim).** Δ(1B) > Δ(12B).
-*Rationale:* larger models have enough weights to absorb compression; smaller models have no slack — there isn't "enough of the model" to lose.
-*Precondition:* evaluated only if Δ(1B) > 0; otherwise **not evaluable**.
-*Prediction:* Δ(1B) > Δ(12B), with the spread Δ(1B) − Δ(12B) ≥ 2 × the pilot-measured noise floor **for the spread** (a different number from H2a's floor — the wobble of a difference of differences, not of a single gap). Δ(4B) measured and reported as descriptive context only.
-*Falsifier:* Δ(1B) ≤ Δ(12B), or spread below threshold. Precondition failure → not evaluable, not falsified.
+*Rationale:* larger models have enough weights to absorb compression; smaller models have no slack.
+*Precondition:* evaluated only if Δ(1B) > 0.
+*Prediction:* spread ≥ 2 × the pilot-measured floor **for the spread** — a different number from H2a's.
 
-**E1 (exploratory, labeled).** Sweet-spot map: calibration and throughput against memory footprint, so a reader can pick a model for their constraint. No falsifier, no direction. Deliberately exploratory so post-hoc pattern-finding can't be laundered into a claim.
-
-**Known tension to acknowledge in §10:** H1's "bigger models bluff less" is contestable. Some literature suggests scale and post-training make bluffing *more fluent*. Sources gathered — see §7.
+**E1 (exploratory, labeled).** Sweet-spot map: calibration and throughput against memory footprint. **NOT YET IN §3 — see §5c.**
 
 ---
 
@@ -124,161 +187,232 @@ Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language 
 
 Does quantization degrade **the stored knowledge** or **the confidence signal that tracks it**?
 
-Laz's honest answer is "both, somewhere in the gray" — which is likely correct and, importantly, *testable* rather than a hedge. The accuracy control reads out the mixture:
-
+The accuracy control reads out the mixture:
 - AUROC drops **and** accuracy drops in lockstep → knowledge decay
 - AUROC drops **but** accuracy barely moves → signal fragility
 - both degrade at different rates → gray, and the ratio is measurable
-
-This is why accuracy-per-cell went from nice-to-have to load-bearing.
 
 ---
 
 ## 5. Section status — pre-registration file
 
+*Verified against commit `23e58ee` for §6. §1–5 and §7–13 checked against the 2026-08-27 morning upload; re-verify next session.*
+
 | § | Status | What's left |
 |---|---|---|
-| Header | ⚠️ stale | "Study:" line still uses the old Kadavath framing |
-| 1. Research question | ❌ **stale** | Still the original Kadavath one-liner. **Must name AUROC**, not ECE — the hypotheses are all AUROC. Should scope to gemma3 + consumer hardware. |
-| 2. Background | ❌ unwritten | 3–5 sentences. Kadavath on base models, Tian 2023 on verbalized confidence, why small/quantized/instruct-tuned might differ, and the community motivation (strongest material — already articulated, never written). The stray 3×3-cell note at the top belongs in §8 or §11, not here. |
-| 3. Hypotheses | ✅ **COMPLETE** | Locked 2026-08-02. All four fields on all three hypotheses, plus definitions block and threshold-philosophy note. |
-| 4. Models | ✅ **COMPLETE** | Locked 2026-08-08. Roster + IDs pinned, justification block written: family-fixed rationale, three-sizes-for-monotonicity, published-quants principle, q4_K_M as H1's primary rung, within-model/across-model rung rule, QAT/bit-matched-control block with verification note. |
-| 5. Datasets | ✅ **COMPLETE** | Locked 2026-08-09. Four sub-blocks: dataset choice, config choice, split choice, selection rule, N. Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. |
-| 6. Procedure | ❌ mostly stale | **Heaviest remaining section, and the only one blocking the pilot.** Still says "three elicitation methods" incl. MC logprobs — now two. See below. |
-| 7. Metrics | ✅ done | — |
-| 8. Analysis plan | 🟡 partial | Has the differential-exclusion line. Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure** (see New pending items). |
-| 9. Exclusion rules | ✅ done | — |
-| 10. Confounds | 🟡 partial | Stale bullets reference qwen3 and MMLU — both dropped. Consolidate the accumulated list (below), and add the q4_K_M entanglement consequence. |
-| 11. Null result | ❌ **stale** | Still the original underpowered-trap text. Needs full redesign — three hypotheses can null *independently*, and H2b can now also come back *not evaluable*, which is a third outcome the section must handle. |
+| Header | ⚠️ stale | "Study:" line still uses the old Kadavath framing. `Drafted: [7-15-2026]` is a filled value inside brackets — a pre-freeze bracket scan will false-positive on it. |
+| 1. Research question | ✅ done | Written, names AUROC, scoped to gemma3 + consumer hardware. |
+| 2. Background | ❌ unwritten | 3–5 sentences. Kadavath on base models, Tian 2023 on verbalized confidence, why small/quantized/instruct-tuned might differ, the community motivation. The stray 3×3-cell note belongs in §8 or §11. |
+| 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. **E1 missing entirely.** |
+| 4. Models | ✅ COMPLETE | Locked 2026-08-08. |
+| 5. Datasets | 🟡 **one stale paragraph** | **Runtime paragraph still says ~166 / ~36 tok/s, 4-6+ hours, and "spills into system RAM." All three superseded.** Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. |
+| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Committed `23e58ee`. |
+| 7. Metrics | 🟡 partial | No throughput or memory-footprint metric, so nothing feeds E1. |
+| 8. Analysis plan | 🟡 partial | Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure**. |
+| 9. Exclusion rules | 🟡 near-done | Timeout filled at 90s. `no_valid_response` still carries a leftover "within N seconds" clause duplicating the timeout rule — should be `done: false` only. **Exclusion table has no `no_valid_response` column.** Consider adding mean-retained-mass and truncation-rate columns; it's the only per-cell reporting structure in the document. |
+| 10. Confounds | 🟡 partial | Stale qwen3/MMLU bullets. `[others]` unfilled. Extrapolation entry needs rewriting around the driver finding. ECE-declined entry needed. |
+| 11. Null result | ❌ **placeholder** | Records the ECE decision but not the rule. Needs full redesign — three hypotheses can null independently, and H2b can come back *not evaluable*. Option-four interpretation rule lands here. |
 | 12. Deviations | ✅ ready | Empty by design until freeze. |
-| 13. Freeze | ⏳ blocked | Two threshold numbers stay blank until the pilot reports. See freeze blockers. |
-
-**§6 contains, specifically:**
-- Two prompt templates, verbatim (frozen artifacts — prompt wording measurably moves calibration)
-- Sampling params pinned identically across all cells: `temperature`, `top_k`, `top_p`, `seed`, `num_ctx`, `num_predict`. **Inherit nothing.** Gemma3 Modelfiles default to `temperature 1, top_k 64, top_p 0.95` — identical across all three sizes, but must still be set explicitly per call.
-- **`num_ctx` ≤ 32768** — the 1b models cap at 32K while 4b/12b are 128K. Must be uniform across cells.
-- **KV cache decision.** Currently `OLLAMA_KV_CACHE_TYPE=q8_0`, inherited from ARIA config, never chosen for this study. A quantized attention cache perturbs the exact probabilities being measured. Either set `f16` or declare q8_0 — but decide. Interacts with VRAM: `gemma3:12b-it-q8_0` is 13GB on a 16GB card, leaving ~3GB for cache, and f16 roughly doubles cache size. **Setting this requires a Windows environment variable + Ollama restart from the tray** — `set` in a cmd window will not reach the already-running server. Verify it applied.
-- ~~**Empirical logprob check**~~ ✅ **DONE 2026-08-08** — findings in §6 Environment. Three consequences land in §6: the warm-up requirement, the parser's `bytes` edge case, and the P(True) surface-variant decision.
-- **⚠ P(True) surface-variant decision — OPEN, and a real degree of freedom.** The returned distribution contains multiple surface forms of the same answer: on the probe, `True` (0.969), `TRUE` (0.0058), `T` (0.0022), `Yes` (0.0017), `true` (0.0012). Read **only the exact `"True"` token**, or **sum the mass** across variants? Both defensible. The gap is small on a 1b at q8_0 and may not be on a 1b at q4_K_M with a fuzzier distribution. Must be chosen and frozen — "we tried it the other way" is exactly what §6 exists to prevent.
-- **⚠ Resumability — HARNESS REQUIREMENT, do not lose this.** JSONL keeps the log *valid* under interruption but does not make a run *continuable*; restarting re-runs from item 1 and appends duplicates. Fix: log the `(item ID, model tag, elicitation method)` triple per row; on startup read the log, collect completed triples, skip them. ~15 lines. **Warm-up call fires again on resume** — a resumed run cold-loads, and cold ≠ warm (see Environment). With this, a mid-sweep interruption is not a deviation: same items, same seed, deterministic warm.
-- **Model-swap loop order:** hold one model, run all items, then swap. Nine loads at ~2.3s each is trivial that way and brutal the other way.
-- **Answer-generation structure — OPEN.** Generate the answer once and run both elicitations against it (cheaper, holds the answer fixed across methods), or let each method generate its own (methods fully independent)? Determines whether an item costs 2 or 3 calls per cell.
-- **Grader-rule development against pilot outputs — OPEN, needs an explicit pre-freeze declaration.** Writing normalization rules while looking at real outputs is where unconscious tuning-toward-generosity lives. Probably permissible (separate sample, discarded, same status as the noise floor and N) — but it needs the same explicit treatment those got, including a stated rule about what may and may not change after seeing pilot data.
-- **Grader normalization rules.** Free-form TriviaQA means exact-match fails ("It was white, covered in rhinestones" vs. key "white"). TriviaQA ships answer aliases; still needs case/article/punctuation/substring rules. **This is the single biggest engineering task** — grading produces the correct/incorrect labels every metric is computed from.
-- **Throughput logging:** `eval_count` / `eval_duration` → tokens/sec, plus model size on disk and whether it fit in VRAM. Free from Ollama's response. Catches VRAM spill, which produces *slow successes*, not timeouts — invisible to §9. Feeds E1: a cell with great AUROC at 2 tok/s is not a recommendation.
-
-**§10 accumulated list:**
-benchmark contamination (gemma3 has likely seen TriviaQA) · quantization confounded with scale · **H1's primary rung is q4_K_M, so the headline size effect is measured on compressed models throughout — scale and compression are entangled in that specific result** · vision asymmetry (1b is text-only; 4b/12b are multimodal) · context asymmetry (32K vs 128K) · differential exclusion across cells threatening H1/H2b · thin positive class on the weakest cells (no guessing floor in free-form) · **floor compression: if the 1b's AUROC at q8_0 is near 0.5 it has little room to fall, squeezing Δ(1B) and biasing against H2b — so an H2b null with a near-chance 1b cannot distinguish "small models are robust" from "the 1b had no signal to lose"** · **the k × noise-floor rule is a heuristic approximation; bootstrapped confidence intervals are the statistically clean version, and if they aren't implemented that must be stated** · QAT arm not bit-matched · single hardware/runtime · **extrapolation limit** — one machine (RX 9070 XT 16GB, 32GB DDR5-6000); can report footprint + measured throughput, cannot claim what happens on a reader's DDR4 8GB rig · H1's "bluffs less" contested in literature · **cold-load logprob variance observed once (n=1); mitigated by the warm-up requirement rather than characterized** · **the AUROC noise floor is estimated via Hanley–McNeil pre-pilot; the pilot's measured floor governs, and a materially wider one is disclosed** · **`unfiltered` avoids compounding contamination with rc's coverage filter but does not remove contamination itself**.
+| 13. Freeze | ⏳ blocked | Two threshold numbers bracketed until the pilot. `items.jsonl` not yet committed. |
 
 ---
 
-## 5b. New pending items (created by §3's completion)
+## 5b. §6 contents (COMPLETE — reference map)
 
-**1. Noise-floor measurement procedure — §6 or §8, blocking.** Two magnitude thresholds now depend on a number, and nothing yet specifies how to produce it. Needs: what gets resampled (graded items, with replacement), how many resamples, and which statistic counts as "the floor" (standard deviation of the resampled AUROCs is the usual choice). **Two distinct floors are required** — H2a's is the wobble of a single AUROC gap; H2b's is the wobble of the spread, a difference of differences. Decide whether H2b's is measured directly or estimated from components.
+Order: **environment → findings → templates → parsing rules → parameters → throughput → harness → negation → grader spec → grader-rule declaration → logging**
 
-**2. Bootstrapping decision.** Resample graded items *with replacement* (not scrambling — that's a permutation test, a different tool), recompute AUROC, repeat ~1000×, take percentiles. This is the principled answer to "is this spread real," and it would replace the k-heuristic with reported confidence intervals. **More resamples do not narrow the underlying uncertainty — only N does.** Cost: a Slice 4 task plus statistics Laz would need to defend. Genuine tradeoff against September; if declined, say so in §10.
+- **Environment** — hardware spec, display config, Ollama version, KV cache (full, with driver-scoped numbers), flash attention
+- **Findings** — probe results · logprobs raw not temperature-scaled · `top_k` doesn't truncate reporting · cold ≠ warm · degenerate generation · `num_ctx` pinning cost (driver-scoped)
+- **Templates** — A/B/C, Kadavath non-self-referential note, flag/exclusion lines
+- **Parsing rules** — P(True), then verbalized confidence
+- **Parameters** — `num_predict` 25/5/10 with the 32-boundary justification, `num_ctx` 2048, temperature 0, `top_k` 64, `top_p` 0.95, seed 42
+- **Throughput** — Conditions / Table / Readings / Contamination sources
+- **Harness requirements** — 11 entries
+- **Negation marker list** — 17 markers, 4-word window, observational
+- **Grader spec** — normalize, match, four flags with parallel definitions
+- **Grader-rule declaration** — may/may-not change, the test, pre- vs post-freeze, pilot isolation
+- **Logging** — per run (11 fields), per row (5 categories)
 
-**3. Freeze blockers for §13.** Both threshold numbers (H2a's per-step, H2b's spread) stay bracketed until the pilot reports. §13 cannot be signed with a bracket unfilled. The k values are already committed and dated; only the multiplicands are outstanding.
+---
 
-~~**4. §4's empty justification block**~~ ✅ done 2026-08-08.
+## 5c. DECIDED BUT NOT YET WRITTEN
 
-**5. Open decisions now living in §6** (listed in full in the §6 contents block above): P(True) surface-variant rule · resumability · answer-generation structure (2 vs 3 calls per item) · grader-rule development against pilot data · KV cache · the two prompt templates.
+*Items leave this list only by landing on the page. Nothing else.*
 
-**6. Pre-freeze verification, small but blocking:** confirm the exact TriviaQA config string on HuggingFace and inspect the alias field shape in the validation split. §6's grader normalization rules are speculative until this is done.
+1. **§5 runtime paragraph** — recompute from the current table. Three sessions overdue.
+2. **§10: extrapolation limit, rewritten** — on a 16 GB card driving four 1440p displays, the largest cell fits with under 1 GB of margin, and a driver update moved it from spilling to resident. Peak 15474 MB against 16304 MB available, 2256 MB desktop baseline.
+3. **§10: ECE co-primary considered and declined**, with the reason.
+4. **§10: delete qwen3/MMLU bullets**, fill `[others]` from §5d.
+5. **§11: the option-four interpretation rule** — currently a placeholder. Must be written before the pilot or it's post-hoc.
+6. **§3: E1**, and **§7: throughput + memory footprint metrics** to feed it.
+7. **§9: delete the "within N seconds" clause** from `no_valid_response`; add its column to the exclusion table.
+8. **§8: noise-floor measurement procedure.** Two floors.
+9. **`items.jsonl` committed** — §5 promises it.
+10. **Lab log placement decided** — currently untracked in the repo. §10's rule says vault, but the prereg now cites it by name and a frozen published document can't cite a vault note. Commit or `.gitignore`, don't leave untracked.
+11. **Re-enable AMD driver auto-update and Ollama auto-update post-study.** Disabled 2026-08-26.
+12. *Optional:* `eval_count` on a compliant Template C response, to settle whether gemma3 splits digits. Two minutes.
+13. *Optional:* re-run the three 1b cells at higher `num_predict` for a longer timing window, so every row in the throughput table means something.
+
+---
+
+## 5d. §10 accumulated list
+
+benchmark contamination (gemma3 has likely seen TriviaQA) · quantization confounded with scale · **H1's primary rung is q4_K_M, so the headline size effect is measured on compressed models throughout** · vision asymmetry (1b text-only; 4b/12b multimodal) · context asymmetry (32K vs 128K) · differential exclusion across cells threatening H1/H2b · thin positive class on the weakest cells · **floor compression: if the 1b's AUROC at q8_0 is near 0.5 it has little room to fall, squeezing Δ(1B) and biasing against H2b** · **saturation: the 12b pinning near 1.0 risks ties in P(True); ties push AUROC toward 0.5, biasing against H1 for reasons unrelated to the capacity mechanism — the mirror of floor compression, different mechanism, different hypothesis** · **the k × noise-floor rule is a heuristic; bootstrapped CIs are the clean version, and if not implemented that must be stated** · QAT arm not bit-matched · **extrapolation limit, driver-aware version** (see §5c item 2) · H1's "bluffs less" contested in literature · **cold-load logprob variance observed once (n=1)** · **the AUROC noise floor is estimated via Hanley–McNeil pre-pilot; the pilot's measured floor governs** · **`unfiltered` avoids compounding contamination but does not remove it** · **degenerate generation at 1b: some "incorrect" answers are non-answers rather than wrong facts** · **forced response puts lucky guesses in the correct class; uniform across cells** · **TriviaQA used off-label** — built as a reading-comprehension benchmark, so its Wikipedia-harvested aliases are deliberately permissive; closed-book generation makes that permissiveness a false-positive hazard · **the `value` field carries scraping artifacts** (`"A: Basketball"` on tc_543) — `normalized_value` is canonical · **throughput numbers are only valid on an otherwise-idle GPU with the previous model unloaded** · **low retained mass produces a renormalized value computed from tail probabilities, less stable than the same value from dominant ones; a minimum-mass threshold was considered and rejected as an unjustifiable free parameter** · **ECE co-primary considered and declined against the timeline** · **throughput measured on one driver version; a driver update moved the largest cell from spilling to resident**
 
 ---
 
 ## 6. Environment
 
-- **Hardware:** AMD RX 9070 XT, 16GB VRAM · 32GB DDR5-6000 · Windows · 4K
-- **Ollama 0.32.6** — corrected 2026-08-08; the docs previously said 0.31.1. Version is a logged-per-run field, and a mid-study version change would be a §12 deviation. **Do not upgrade Ollama between the pilot and the sweep.**
-- Flash attention **on**, KV cache **q8_0** — both inherited from ARIA, both still need an explicit §6 decision
-- **PowerShell chains with `;`, not `&&`.** cmd has **no `#` comments** — a `# 5.0 GB` annotation on a command line breaks it. `curl` is aliased to `Invoke-WebRequest`; use `Invoke-RestMethod` or `curl.exe`.
-- Roster on disk: 9 cells, all IDs pinned in §4 of the pre-reg.
+- **Hardware:** AMD Ryzen 7 9850X3D (8C/16T, 4.70 GHz) · 32 GB (2×16 GB) G.Skill F5-6000J3636F16G DDR5-6000, EXPO enabled, verified at 3003.4 MHz CL36 · XFX Swift Radeon RX 9070 XT, 16 GB GDDR6, reference clocks (2400 MHz game clock), 644 GB/s bandwidth, PCIe 5.0 x16 · Windows 10 22H2
+- **Displays:** 4 × 1440p (2 @ 60 Hz, 1 @ 75 Hz, 1 @ 180 Hz), all on the 9070 XT. Framebuffer allocation eats into the margin on the largest cell.
+- **AMD Adrenalin 26.8.1**, driver `32.0.31041.1004`. **Auto-update disabled 2026-08-26** — re-enable post-study.
+- **Ollama 0.32.14** — drifted from 0.32.6 via auto-update, discovered 2026-08-16. Auto-update now disabled. §13 freezes on 0.32.14.
+- **KV cache `f16`** — set via `OLLAMA_KV_CACHE_TYPE` in System Properties, then **quit Ollama from the tray and relaunch**; a shell `set` never reaches the running server. Verify it applied.
+- **Flash attention on**, verified from the server log (`%LOCALAPPDATA%\Ollama\server.log`, grep "flash"), not assumed from the env var.
+- **PowerShell chains with `;`, not `&&`.** cmd has **no `#` comments**. `curl` is aliased to `Invoke-WebRequest`; use `Invoke-RestMethod` or `curl.exe`.
 
 ### Logprob check — COMPLETE 2026-08-08
 
-Run against `gemma3:1b-it-q8_0` via native `/api/chat`, `logprobs: true`, `top_logprobs: 10`.
+Run against `gemma3:1b-it-q8_0` via `/api/chat`, `logprobs: true`, `top_logprobs: 10`.
 
-**1. Logprobs are RAW, not temperature-scaled.** Same prompt/seed at `temperature 0` vs `temperature 2`: True −0.0310 vs −0.0324, False −4.3070 vs −4.3420. Scaling at temp 2 would have roughly halved the logit gap (False would sit near −2.2). It didn't move. **Temperature choice does not change the measured quantity.** Temperature *did* change generation (`eval_count` 3 → 2), which is exactly the separation wanted.
+1. **Logprobs are RAW, not temperature-scaled.** Temp 0 vs temp 2: True −0.0310 vs −0.0324, False −4.3070 vs −4.3420. **Temperature does not change the measured quantity**, though it does change generation.
+2. **`top_k` does NOT truncate the returned distribution.** `top_logprobs: 10` with `top_k: 5` returned 10 candidates. Independent knobs.
+3. **Cold-load ≠ warm-load. PROCEDURE REQUIREMENT.** First call after load differed at identical temp/seed (TRUE −5.1499 vs −4.9346, tail reordered); three warm calls at *differing* temp/`top_k` were bit-identical. **Every model gets a discarded warm-up call.** Caveat: n=1 on the cold side.
+4. **Parser edge case.** A candidate with an empty token string and **no `bytes` key**. Present at position 0 on the 12b, not just position 1.
 
-**2. `top_k` does NOT truncate the returned distribution.** `top_logprobs: 10` with `top_k: 5` returned 10 candidates. `top_k` governs the sampling pool; `top_logprobs` governs reporting. Independent knobs.
+### P(True) probe — 2026-08-21
 
-**3. Cold-load ≠ warm-load. THIS IS A PROCEDURE REQUIREMENT.** The first (cold, `load_duration` 2.52s) call differed from all subsequent warm calls at identical temp/seed: TRUE −5.1499 vs −4.9346, and the tail reordered. Three warm runs at *differing* temp and `top_k` were bit-identical to each other; a warm re-run of the cold run's exact config matched them to the last digit. **Every model gets a discarded warm-up call before measurement**, or the first item of every cell is measured on a different instrument than the rest. **Log `load_duration` per call** to verify no cell silently cold-started mid-run. Honest caveat for §10: n=1 on the cold side — it is known that cold differed once, not whether cold noise is deterministic-but-different or arbitrary. The warm-up requirement makes the question moot, which is why it's the fix rather than an investigation.
+Template B, hand-written question (not a TriviaQA item, so no draw-pool contamination), both roster extremes.
 
-**4. Parser edge case.** In the second generated token's candidate list, one entry has an **empty token string and no `bytes` field at all**. Any parser doing `entry["bytes"]` unconditionally will crash. Present in both multi-token runs.
+- **Position 0 carries the answer.** `1b-q4_K_M`: `True` 0.94765, `False` 0.04254, retained mass 0.99493, renormalized P(True) 0.95724. `12b`: `True` ~1.0, retained mass ~1.0.
+- **Observed variants:** `True`, `TRUE`, `true`, `[sp]True`, `Yes`.
+- **`Truth` matched `tru*`** — the false positive that killed prefix matching.
+- **`Correct` in the tail**, unmatched — a semantically affirmative but format-noncompliant response, correctly outside retained mass.
+- **Empty-token candidates with absent `bytes` at position 0** on the 12b.
+- **12b saturated** at ~1.0 → the tie/AUROC risk now in §10.
 
-### Throughput — measured 2026-08-08
+### Throughput — re-measured 2026-08-26 on driver 26.8.1
 
-Warm, `num_predict: 64`, real trivia question. `gemma3:1b-it-q8_0` **~166 tok/s** (37 tok, 0.22s); `gemma3:12b-it-q8_0` **~35.9 tok/s** (51 tok, 1.42s). Four repeats each.
+Conditions: `num_ctx=2048`, KV f16, warm, previous model unloaded, no other GPU consumers, one item per cell. tok/s from `eval_count / eval_duration`, both server-side.
 
-**The 12b is NOT spilling to system RAM** — an earlier reading of these numbers said it was. Generation is bandwidth-bound (every token streams the whole model), so the ceiling is ~640 GB/s ÷ 13GB ≈ 49 tok/s; 35.9 is ~73% of theoretical, a normal realized fraction. Spill would cost an order of magnitude (single digits), not 27%. The stability is the stronger tell — 35.9/35.9/35.8/35.9 across four runs, where spill is erratic. The ~4% variation that *does* appear is in the **1b**, because a 0.22s eval makes timer granularity a meaningful fraction of the measurement. Expect throughput logging to look jitterier on fast cells for reasons unrelated to the model.
+| cell | tok/s |
+|---|---|
+| `gemma3:1b-it-q8_0` | 248.7 |
+| `gemma3:1b-it-q4_K_M` | 234.3 |
+| `gemma3:1b-it-fp16` | 184.4 |
+| `gemma3:4b-it-qat` | 134.4 |
+| `gemma3:4b` (q4_K_M) | 132.5 |
+| `gemma3:4b-it-q8_0` | 110.6 |
+| `gemma3:4b-it-fp16` | 67.8 |
+| `gemma3:12b` (q4_K_M) | 66.0 |
+| `gemma3:12b-it-q8_0` | **43.9** |
 
-Extrapolated full sweep (9 cells × 2 methods, ~60 generated tokens/item): **~7.5s per item across the full roster** → ~38 min at N=300, ~63 min at N=500, ~2.1 hrs at N=1000, ~6 hrs at N≈2750. **Runtime is not the binding constraint.** 4b and fp16 cells are extrapolated, not measured; the pilot logs real per-cell throughput.
+**THE SPILL WAS A DRIVER ARTIFACT.** On the previous driver, `12b-it-q8_0` measured 15.4 tok/s — ~31% of the 644 GB/s ceiling, which is what spilling looks like. On 26.8.1 it is **fully resident at 43.9, ~89% of ceiling**. The q8_0→q4_K_M step is now **1.49×** against a ~1.6× file-size ratio: ordinary bandwidth scaling. That cell is now **~25% of sweep runtime**, not 48%. The old "4× step / VRAM ceiling / 48%" reading is superseded and must not be reintroduced.
 
-**Prompt processing is compute-bound, not bandwidth-bound** (the whole prompt goes through in parallel), which is why `prompt_eval_duration` and `eval_duration` are reported separately.
+**The 1b cells are within run-to-run noise.** Two runs put the ordering in opposite directions, ~6% either way. A 22-token generation is too short a timing window. **Do not read the ordering between them.**
+
+**QAT 134.4 beside the standard 4b at 132.5** — near-identical bit budgets, consistency check passes.
+
+**VRAM:** peak 15474 MB against 16304 MB available, 2256 MB desktop baseline (PowerShell + Adrenalin only). It fits with under 1 GB of margin.
+
+**Desktop applications cost nothing measurable.** With Discord in a call, Claude, VS Code, PowerShell and Adrenalin open: 44.2 tok/s on the critical cell vs 43.9 closed — 0.7%, inside noise. Baseline 2866–2874 MB, peak 16002 MB. **Discord was never poisoning the numbers.**
+
+**⚠ Three contamination sources, all of which produced clean-looking numbers:**
+1. **Cold-load / first-in-loop.** `1b-q4_K_M` read 57.9 tok/s leading the loop, ~239 in isolation.
+2. **Keep-alive stacking.** `OLLAMA_KEEP_ALIVE` defaults to 5m; nine models called inside five minutes all stay resident, stacking exhausts VRAM, later cells spill. Degradation scaling with model size is the tell.
+3. **Other GPU consumers.** A game in the background cost `4b-q8_0` 31.5 vs 105.2.
+
+**None showed up in `load_duration`** — every bad run reported ~0.23s. No automatic check exists, so the protection is procedural.
+
+### `localhost` vs `127.0.0.1` — measured 2026-08-16
+
+5 calls: `localhost` 5,855 ms · `127.0.0.1` 1,338 ms → ~900 ms per call. Windows resolves `localhost` to IPv6 first; Ollama binds IPv4. At 27 calls per item that's ~24 s/item of pure latency. **The throughput table is unaffected** — tok/s comes from server-side fields.
+
+### Degenerate generation — confirmed on 0.32.6 AND 0.32.14
+
+`gemma3:1b-it-q8_0` (digest `0fdb9c7fefee`, unchanged across versions), one TriviaQA item — *"Which Lloyd Webber musical premiered in the US on 10th December 1993?"* — produces degenerate repeating asterisks. `num_predict ≥ 32` → `done: false`, **no metadata**. ≤ 31 → normal, `done_reason: "length"`. Re-verified 2026-08-21: `np=25` and `31` returned `done=True`; `np=32/64/100` returned `done=False`.
+
+**Process note.** An ARIA background task reported this as "no longer reproduces on 0.32.14." Re-running the *original* item disproved it — the probe had used a trivial prompt. **A non-reproduction is only evidence if it reproduces the original conditions.**
+
+### `num_ctx` pinning cost throughput
+
+Dropping `num_ctx` 131072 → 2048 cost the 12b throughput (35.9 → ~20 tok/s at the time). Counterintuitive and unexplained. **Both numbers are from the old driver and have not been re-checked on 26.8.1** — scoped as such in §6.
 
 ---
 
 ## 7. Sources gathered
 
-- **Kadavath et al. 2022** — arXiv 2207.05221. The paper being replicated. Read the reliability diagrams first.
-- **Tian et al. 2023** — *Just Ask for Calibration*. Source of the verbalized-confidence-beats-logits finding.
-- **Leng et al. 2025** — arXiv 2410.09724, *Taming Overconfidence in LLMs: Reward Calibration in RLHF* (ICLR 2025). The canonical counter-direction cite. **Scope carefully:** it's about *verbalized* confidence under RLHF, so it's a prediction about one elicitation method, not a head-on refutation of H1. Also the cite for why "more confident" ≠ "better calibrated" — relevant to H1's rationale, which must claim confidence *varies appropriately*, never that it is *higher*.
-- **"Mind the Confidence Gap"** — OpenReview, Sept 2025. Most directly relevant to H1: large RLHF-tuned models show calibration strengths but can be *more* miscalibrated on easy queries; small models remain significantly miscalibrated. Implies the size effect may not be uniform across difficulty.
-- **Dunning-Kruger paper** — arXiv 2603.09985 (2026, read critically). Argues models are well-calibrated in domains of strong pre-training coverage and overconfident outside them. **This is H1's rationale in different words** — chase the primary source.
-- **arXiv 2311.13240** — *On the Calibration of LLMs and Alignment*. Finds *no* significant ECE degradation from RLHF applied atop instruction tuning. Cite alongside Leng to show the field disagrees with itself.
+- **Kadavath et al. 2022** — arXiv 2207.05221. The paper being replicated.
+- **Tian et al. 2023** — *Just Ask for Calibration*. Verbalized-confidence-beats-logits.
+- **Leng et al. 2025** — arXiv 2410.09724, *Taming Overconfidence in LLMs* (ICLR 2025). **Scope carefully:** about *verbalized* confidence under RLHF, so a prediction about one elicitation method, not a refutation of H1. Also the cite for why "more confident" ≠ "better calibrated."
+- **"Mind the Confidence Gap"** — OpenReview, Sept 2025. Large RLHF-tuned models can be *more* miscalibrated on easy queries; small models remain significantly miscalibrated.
+- **Dunning-Kruger paper** — arXiv 2603.09985 (2026, read critically). **This is H1's rationale in different words** — chase the primary source.
+- **arXiv 2311.13240** — *On the Calibration of LLMs and Alignment*. Finds *no* significant ECE degradation from RLHF atop instruction tuning. Cite alongside Leng to show the field disagrees with itself.
 
 ---
 
 ## 8. Slice roadmap
 
-- **Slice 0** — pre-registration. ← *here. §3, §4, §5, §7, §9 done. §6 is the blocker.*
+- **Slice 0** — pre-registration. ← *here. §3, §4, §6, §7 done. Blockers: §5 runtime, §8 noise floor, §11 redesign, §10 transcription.*
 - **Slice 1** — dataset loader. TriviaQA validation → local JSONL.
-- **Slice 2** — runner (one model, one method) + grader. Append-only JSONL, never overwrite raw data.
+- **Slice 2** — runner (one model, one method) + grader. Append-only JSONL.
 - **Slice 3** — second elicitation method; loop the roster.
-- **Slice 4** — analysis: reliability diagrams, ECE, Brier, AUROC, accuracy, exclusion table, throughput. **Plus the noise-floor computation, and bootstrapping if adopted.**
+- **Slice 4** — analysis: reliability diagrams, ECE, Brier, AUROC, accuracy, exclusion table, throughput. Plus the noise-floor computation.
 
-**Pilot is mandatory, runs before freeze, and its data is discarded and never enters analysis.** Spec fixed 2026-08-09: **50 items each on `gemma3:1b-it-q4_K_M` and `gemma3:12b-it-q8_0`** — both extremes, because N's constraint is two-sided. Drawn with a **different seed** than the main sample, and **pilot items are excluded from the main draw pool** (otherwise a handful of items were seen during grader development).
+**Pilot is mandatory, runs before freeze, data discarded.** 50 items each on `gemma3:1b-it-q4_K_M` and `gemma3:12b-it-q8_0` — both extremes, because N's constraint is two-sided. **Different seed**, and **pilot items excluded from the main draw pool**.
 
-It now determines **four** numbers: **p_weak** (1b accuracy), **p_strong** (12b accuracy), the **AUROC noise floor** (fills H2a's magnitude threshold), and the **spread noise floor** (fills H2b's — the wobble of a difference of differences, a different number). All logged as pre-freeze decisions, not peeks. The Hanley–McNeil estimate says the floor should land ~0.02–0.03 at C=200; **a materially wider measured floor is a §12 disclosure**, stated in advance so it reads as a caveat rather than a scramble.
+Determines **four** numbers: p_weak, p_strong, the AUROC noise floor, and the spread noise floor. **A materially wider measured floor is a §12 disclosure**, stated in advance.
 
-**Freeze mechanics:** the pre-registration should be the **first commit** in the repo, so the history reads as prediction-then-test and can't be reordered. Then `git tag -a prereg-frozen -m "Slice 0 frozen"`. Record the hash in the header.
+**Freeze mechanics:** `git tag -a prereg-frozen -m "Slice 0 frozen"`. Record the hash in the header. **Before tagging, hash the file you edited and confirm it matches the commit** — a stale handoff costs a session; a stale freeze costs the claim.
+
+**Scope risk worth naming:** the document is nearly done; the harness doesn't exist. Slices 1–4 are where beginners lose months. If something must be cut for time, cut there — drop the QAT arm, or run at smaller N and disclose — not from the parts that make the study interpretable.
 
 ---
 
 ## 9. Working process
 
-**Division of labor is deliberately different from ARIA.** Laz writes the research content — hypotheses, rationales, thresholds, predictions, falsifiers. Claude's job is adversarial review: hunt unfalsifiable phrasing, circular rationales, data-dependent exclusions, metrics that don't answer the stated question, and contradictions between sections. Claude **declined** to draft the hypotheses; that's load-bearing, because the pre-registration *is* the research identity and a borrowed rationale reads as borrowed. When Claude has supplied bullet-list scaffolding, Laz has correctly called it out as too close to drafting.
+**Division of labor.** Laz writes the research content — hypotheses, rationales, thresholds, predictions, falsifiers. Claude's job is adversarial review: unfalsifiable phrasing, circular rationales, data-dependent exclusions, metrics that don't answer the stated question, contradictions between sections. Claude **declined** to draft the hypotheses; that's load-bearing, because the pre-registration *is* the research identity.
 
-**Explanation protocol — added 2026-08-02, important.** Laz flagged mid-session that the guidance had outpaced him: not the research, the *vocabulary*. Terms like "magnitude threshold," "sign precondition," and "bootstrapping" were being used as labels for concepts he had, in several cases, already invented independently (H1's three-bucket threshold structure is a magnitude threshold, built from scratch before he knew the term). The fix that worked, and should continue: **name the term, state the problem it exists to solve, show the concrete failure it prevents — then apply it to the file.** Don't slow down; decompress. Laz will say "unpack that" when needed. Worked examples with actual numbers land far better than definitions.
+**Explanation protocol.** Name the term, state the problem it exists to solve, show the concrete failure it prevents — then apply it to the file. Don't slow down; decompress. Worked examples with actual numbers land far better than definitions.
 
-**Confirmed misconceptions corrected this session** (worth not re-explaining from scratch, and worth checking haven't regressed): threshold = k × floor is *multiplicative* because k is a unitless count of noise-widths, not a quantity in AUROC units; bootstrapping is resampling *with replacement*, not scrambling (scrambling is a permutation test); more resamples measure uncertainty more precisely but do not reduce it — only N does; true negative vs. false negative; *not evaluable* vs. *not supported*.
+**Concepts explained and confirmed landed** (don't re-explain from scratch; do check they haven't regressed): threshold = k × floor is multiplicative · bootstrapping is resampling *with replacement* · more resamples don't reduce uncertainty, only N does · *not evaluable* vs *not supported* · `num_ctx` vs `num_predict` · raw vs renormalized mass · **digest = cryptographic hash, same thing as a git commit hash** · **a priori vs a posteriori** · **AUROC = P(random correct ranks above random incorrect), ties count 0.5, which is why saturation degrades it**.
 
-**Manual mile.** ARIA is ~5% Laz / 95% Claude by his own honest assessment, which is why he won't claim it as engineering credit. `calibration_lab` is the corrective: small enough to write alone (a loader, a runner, a JSONL log, a matplotlib script), and the artifact he can put his name on without an asterisk. The bar: rebuild the harness solo from a blank editor by OSU arrival.
+**Manual mile.** ARIA is ~5% Laz / 95% Claude by his own assessment. `calibration_lab` is the corrective — small enough to write alone, the artifact he can put his name on without an asterisk. The bar: rebuild the harness solo from a blank editor by OSU arrival.
 
-**Progress note.** Wrote a synthetic ECE + reliability-diagram script (with Gemini's help, typed not pasted), then passed a blank-editor retest of the ECE concept. Conceptual understanding is solid; Python fluency is early and improving. §3's completion is the strongest evidence so far — the endpoints decision, the k reasoning, the capacity mechanism, and the q4_K_M rung choice were all his calls.
+**Progress note, 2026-08-26.** Longest session yet. Four things worth recording as evidence. (1) **He caught the stale handoff himself** at the top of the session — noticed the date was wrong and stopped the session rather than working from it. That prevented hours of work built on false premises. (2) **The P(True) probe reopened a decision he'd already made**, and he took the reversal on evidence rather than defending the earlier call. (3) **He questioned whether the driver mattered**, which surfaced that the throughput table predated it — and chose re-measurement over disclosure, which turned out to invalidate a mechanism he'd have otherwise frozen into the document. (4) He asked "should we hold the number accountable to both value and format?" on leading zeros — the right frame, and he reached the correct answer via his own precedent rather than by being told.
 
-**Progress note, 2026-08-09.** The review work has shifted register: less concept-explanation, more editing for precision, structure, and don't-lose-this. Two things worth recording as evidence rather than encouragement. (1) He proposed a run-until-threshold loop for sizing cells, then identified its flaw himself mid-explanation before the objection finished — the flaw being that stopping on a quantity computed from the outcome is his own §8 stopping rule inverted. (2) He caught the missing-bracket convention as soon as it was named, having already internalized why §3's thresholds were bracketed. Caveat against over-reading this: §4 and §5 are *specification* sections, where the work is precision rather than argument, and genuine concept explanation was still needed this session (JSONL, recognition-vs-recall, the C-is-chosen-not-measured knot, bandwidth-bound generation). The register shift is partly real skill and partly the kind of section.
+**The recurring correction pattern — his stated achilles heel.** Drafts contain the *evidence* for a claim without the claim itself. Diagnosis: curse of knowledge, not a comprehension gap. Rereading won't fix it because his brain supplies the missing inference. **The mechanical check: after writing a justification, ask whether a reader who doesn't know the answer could reconstruct it from the page — and run it on the last sentence of each block specifically**, since the conclusion is what gets dropped. Note the variation observed 2026-08-26: he began keeping the conclusion and dropping the *provenance* instead (the quantity without the observation that produced it). Same root, different half.
 
-**A recurring correction pattern worth naming.** Several times now his draft has contained the *evidence* for a claim without the claim itself — the QAT bullet listed the published-quant correlation but never named the two confounded variables; the rc bullet had the filter's effect but not its mechanism. Fix that generalizes: after writing a justification, check whether a reader who doesn't already know the answer could reconstruct it from what's on the page.
+**Register.** Trend is real and improving: the throughput block took three passes, P(True) took five, `num_predict` took three, and he caught more himself each time. Two months from precalculus to a pre-registered study with locked hypotheses and empirically-grounded parameters.
 
-**Tone that works:** direct pushback with reasoning; flagging the crack rather than smoothing it; handing back the rows that must be his. He asks to be graded honestly and uses it well.
+**Tone that works:** direct pushback with reasoning; flagging the crack rather than smoothing it; handing back the rows that must be his. He asks to be graded honestly and uses it well. He'll say "unpack that" when vocabulary outruns him — and does, reliably.
 
 ---
 
 ## 10. Living-doc gap — the reason this file exists
 
-`calibration_lab` had **no home** in the doc system. ARIA has four living documents; this project had none, so it fell through the gap and evaporated from awareness during midterms.
+`calibration_lab` had **no home** in the doc system, so it fell through the gap and evaporated from awareness during midterms.
 
-**The leak is real and measured.** Across sessions, six settled decisions had to be re-derived from scratch — the Δ rung pair (three times), the definitions block, Δ(4B)'s role, the threshold rule, H2a's verdict rule, and the endpoints choice. None was a comprehension failure; all were transfer failures between conversation and disk.
+**The leak is real and measured.** Six settled decisions had to be re-derived from scratch — the Δ rung pair (three times), the definitions block, Δ(4B)'s role, the threshold rule, H2a's verdict rule, the endpoints choice. All were transfer failures between conversation and disk.
 
-**Two fixes, both adopted 2026-08-02:**
-1. ✅ **DONE — the pre-registration is committed and Laz has been committing after every editing session since.** *This line previously read as a pending instruction, which caused at least one fresh session to open by telling him to do something he'd already done. Status, not instruction.* Freezing is a *tag*, not the first commit, so committing early cost nothing and the history still reads prediction-then-test. Each session now opens with a diff instead of a memory.
-2. **Keep a running "decided but not yet written" list at the bottom of the section being worked on**, deleted from as items land.
+**Second failure mode, identified 2026-08-26:** the handoff recorded decisions as *landed* when they were only *decided*. Fixed by §0b's protocol and §5c's list.
 
-Two companions still to stand up:
-- **Lab log** — append-only, daily, prose. Vault.
-- **Decisions log** — what was chosen and why. Vault.
+**Companions:**
+- ✅ **Lab log** — `lab_log.md`, created 2026-08-26. Placement decision outstanding (see §5c item 10).
+- ⬜ **Decisions log** — what was chosen and why. §2 here is doing this job informally.
 
-Repo holds the pre-registration and data. Vault holds interpretation. The pre-reg is the one deliberate exception to that split: **canonical copy in the repo only** — a frozen artifact in a mutable store isn't frozen, and two copies means two versions and an argument about which was frozen. The vault gets a pointer note, not a copy.
+Repo holds the pre-registration and data. Vault holds interpretation. **Canonical prereg copy in the repo only** — a frozen artifact in a mutable store isn't frozen.
+
+---
+
+## 11. Git state
+
+```
+23e58ee  2026-08-27  S6: reorder + throughput re-measurement on driver 26.8.1
+a37c996  2026-08-27  S6: parsing rules, throughput, logging, grader-rule declaration, verification requirements
+8438601  2026-08-09  section 5 completed in prereg
+f8a12b4  2026-08-01  Section 3 completed
+3496554  2026-06-24  pre-registration template WIP
+```
+
+`lab_log.md` untracked. `core.autocrlf` set to false to stop LF→CRLF conversion, so the bytes on disk match the bytes in the commit — relevant because the freeze mechanic is "the hash is my witness."
