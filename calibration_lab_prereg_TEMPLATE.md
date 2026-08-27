@@ -72,10 +72,10 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 |---|---|---|---|---|---|---|
 | `gemma3:1b-it-q4_K_M` | `8648f39daa8f` | 999.89M | Q4_K_M | 32768 | no | H1, H2a, H2b |
 | `gemma3:1b-it-q8_0` | `0fdb9c7fefee` | 999.89M | Q8_0 | 32768 | no | H1, H2a, H2b |
-| `gemma3:1b-it-fp16` | `16d00907691b` | 999.89M | F16 | 32768 | no | H2a (3rd rung) |
+| `gemma3:1b-it-fp16` | `16d00907691b` | 999.89M | FP16 | 32768 | no | H2a (3rd rung) |
 | `gemma3:4b` (= q4_K_M) | `a2af6cc3eb7f` | 4.3B | Q4_K_M | 131072 | yes | H1, H2a, H2b |
 | `gemma3:4b-it-q8_0` | `2376388dec16` | 4.3B | Q8_0 | 131072 | yes | H1, H2a, H2b |
-| `gemma3:4b-it-fp16` | `c4da438ae756` | 4.3B | F16 | 131072 | yes | H2a (3rd rung) |
+| `gemma3:4b-it-fp16` | `c4da438ae756` | 4.3B | FP16 | 131072 | yes | H2a (3rd rung) |
 | `gemma3:12b` (= q4_K_M) | `f4031aab637d` | 12.2B | Q4_K_M | 131072 | yes | H1, H2a, H2b |
 | `gemma3:12b-it-q8_0` | `997a7c2c0975` | 12.2B | Q8_0 | 131072 | yes | H1, H2a, H2b |
 | `gemma3:4b-it-qat` | `d01ad0579247` | 4.3B | Q4_0 (QAT) | 131072 | yes | exploratory |
@@ -123,33 +123,17 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 
 ## 6. Procedure
 
-- Per run (Constant for the process or the cell): model tag, model digest, quantization, Ollama version, KV cache type, temperature, seed, num_ctx, top_k, top_p, and timestamp.
+- Environment: 
 
-- Per row (varies per call) — grading fields and flags are specified in the Grader Spec.
+ Hardware spec: AMD Ryzen 7 9850X3D (8C/16T, 4.70 GHz) · 32 GB (2×16 GB) G.Skill F5-6000J3636F16G DDR5-6000, EXPO enabled, verified at 3003.4 MHz, CL36 · XFX Swift Radeon RX 9070 XT, 16 GB GDDR6, reference clocks (2400 MHz game clock), 644 GB/s memory bandwidth, PCIe 5.0 x16 · Windows 10 22H2 · AMD Adrenalin 26.8.1, driver 32.0.31041.1004. Reported so the throughput measurements are interpretable and so §10's extrapolation limit is concrete.
 
- Identity: item ID, elicitation method, prompt template ID, num_predict
- Response: done, done_reason
-Timing: load_duration, eval_count, eval_duration, prompt_eval_count, prompt_eval_duration
- P(True) rows: renormalized P(True), retained mass, raw logprobs of both matched tokens, full top-10 candidate list (recompute insurance if the parsing rule needs re-deriving)
- Template C rows: parsed integer, mapped confidence
+ Display configuration: 4 × 1440p (2 at 60 Hz, 1 at 75 Hz, 1 at 180 Hz), all driven by the 9070 XT. Reported because framebuffer allocation reduces VRAM available to the model, and the largest cell fits with under 1 GB of margin.
 
-- What may change? Code that fails to implement a written rule.
+ Ollama version is 0.32.14 *Note: the version changed between drafting and freeze, observed rather than intended. Originally ollama version 0.32.6 - I have since disabled auto update for Ollama.
 
-- What may not change? The rules themselves. Changing the rules after seeing data means I cannot prove that the change wasn't chosen for its effect on the results.
+ KV cache is set to f16. The reason is methodological: quantizing the cache adds a second noise source on top of the weight quantization H2a is about, and the probabilities are the dependent variable. Measured afterward, f16 was also faster than q8_0 - 12b 20 vs 19, 4b 91 vs 78, 1b 200 vs 162 tok/s * measured on the previous driver, comparison between cache types rather than absolute throughput, not re-checked on 26.8.1. That inverts the usual result, because KV quantization pays off at 32K–128K context where the cache is large; at num_ctx = 2048 the cache is small enough that per-token dequantization overhead outweighs any bandwidth savings. So the choice is overdetermined — cleaner and faster — rather than a tradeoff.
 
-- How to decide where your case falls? Does the fix make the code do what section 6 already says, or does it change what section 6 says? If the former, permitted. If the latter, not permitted.
-
-- What if a rule genuinely needs changing? If pre-freeze: amend and record the reasoning. If post-freeze: record in section 12 as a deviation.
-
-- The pilot: the pilot is run pre-freeze - fixing grader bugs post-freeze means fixing them against real study data which is worse than fixing against pilot data. The pre-freeze pilot should eliminate any post-freeze grader changes. the pilot is genuinely safe to look at because it is run with a separate seed, excluded from the draw pool, discarded, and never analyzed. Any fix made against the pilot's outputs is recorded pre-freeze.
-
-- KV cache is set to f16. The reason is methodological: quantizing the cache adds a second noise source on top of the weight quantization H2a is about, and the probabilities are the dependent variable. Measured afterward, f16 was also faster than q8_0 - 12b 20 vs 19, 4b 91 vs 78, 1b 200 vs 162 tok/s. That inverts the usual result, because KV quantization pays off at 32K–128K context where the cache is large; at num_ctx = 2048 the cache is small enough that per-token dequantization overhead outweighs any bandwidth savings. So the choice is overdetermined — cleaner and faster — rather than a tradeoff.
-
-- Throughput Measurements - I measured throughput on the models in question at num_ctx = 2048, KV cache = f16, warmed model, with the previous model unloaded, and ensuring nothing else was consuming GPU resources. I tested with one item per cell to estimate runtime, not benchmark. (Pre-Note: tok/s is calculated from eval_count / eval_duration, both server-side) - Table: 1b at Q4_K_M: 239.2 tok/s, 1b at Q8_0: 233.8 tok/s, 1b at fp16: 175.4 tok/s, 4b-it-qat at Q4_0: 127.2 tok/s, 4b at Q4_K_M: 126.9 tok/s (note that the 4b-it-qat at Q4_0 and 4b at Q4_K_M have near identical tok/s - this is evidence the measurements are sound.), 4b at Q8_0: 105.2 tok/s, 4b at fp16: 64.6 tok/s, 12b at Q4_K_M: 61.1 tok/s, 12b at Q8_0: 15.4 tok/s. Note that the last item, 12b at Q8_0, has a step down in tok/s of 4x (every other q8_0→q4_K_M step in the roster costs about 1–1.2x and file size alone predicts about 2x for a q8_0→q4_K_M step.), which is evidence of a spill over VRAM into system RAM. This will cost me runtime - ~48% of the total sweep in runtime will be the 12b at Q8_0 cell alone. Three contamination sources found: 1: cold-load/first-in-loop - the 1b read 57.9 tok/s when it led the loop, ~239 in isolation. 2: Keep-alive stacking: OLLAMA_KEEP_ALIVE defaults to 5m, so nine models called within five minutes all stay resident and the later cells spill; degradation scaling with model size is the tell. And 3: Other GPU consumers: a game running in the background cost 4b-q8_0 31.5 against 105.2. None of the three showed up in load_duration, so every contaminated run looked healthy with a report of ~0.23s. There's no automatic check, so the protection is procedural: warm models before run, unload models in between runs, and ensure GPU resources are free.
-
-- Verbalized confidence parsing rule: The entire response, after stripping whitespaces, stripping a trailing % (since 85% is the same as 85/100), and stripping any leading zeros, must parse as an integer. The integer is then divided by 100 to put it on a scale [0,1] so the two elicitation methods end up on the same scale, since AUROC needs them comparable. When a response returns done_reason: "length" flag, log, and report the per-cell rate but never exclude. Reasoning: A truncated response that is long enough to be cut off is almost certainly a response that failed the entire-response-is-an-integer rule so it's already excluded on those grounds. The only case that could survive to corrupt a value is a bare integer that was clipped midway through the digits, which needs a digits-only response longer than num_predict. The [0,100] scale makes that impossible. So the flag is simply a check that the hazard didnt show up. anything else is unparseable → §9 exclusion, logged. Leading zeros are stripped. 085 parses as 85 - the transformation is unambiguous and adds no degree of freedom, and excluding it would put a formatting artifact in the same bucket as refusals and genuine non-answers, inflating a rate the exclusion table reports as a finding.
-
-- P(True) - Why renormalize at all: raw True-mass conflates uncertainty about the answer with failure to follow the format. Format-following degrades at smaller model sizes, especially across this consumer-level order of magnitude - a 12b obeys "answer with True or False" more consistently than a 1b does. So raw mass would be systematically lower on small models for a reason unrelated to calibration, and H1 is a size hypothesis. Renormalizing removes that effect from the measurement; logging the retained mass keeps the format-following signal visible as a reported statistic instead of letting it slip away. Read the generated token position 0 only, fixed, no exceptions because scanning forward for a position that matches would rescue more items on the 1b than the 12b which is differential exclusion, and searching for the position where you find what you want is a degree of freedom. Normalize each candidate: strip whitespaces, make lowercase. The affirmative mass is the sum of the probabilities of all candidates whose normalized form is `true`, and likewise for `false` 'True' , 'TRUE' , 'true' , and [sp]True will all normalize to true after strip and lowercase. Strict format compliance; exact match against {true} / {false} only. The prompt names two tokens, so two tokens count; semantic enumeration has no natural stopping point. Anything else is non-compliant and remains outside the retained mass. P(True) = affirmative mass / (affirmative + negative mass); computed from raw logprobs at full precision because concentrated mass can round to a zero in the denominator - unacceptable. Zero retained mass will be recorded as unparseable and logged in section 9 as an exclusion (logged with the per-cell rate); 0.5 manufactures a number the model never expressed, and  0 treats the absence of 'true' as evidence for 'false'. No minimum mass floor; I considered but rejected it because any threshold I could come up with would just be an invented number with no basis. Retained mass is logged per row and per-cell mean is reported in the main body. Raw logprobs of both matched tokens will be logged per row too. And the parser will tolerate a candidate with an absent 'bytes' key and an empty token string.
+ Flash Attention: enabled. Verified from the Ollama server log at model load rather than assumed from the environment variable, since Ollama falls back silently if the model or hardware doesn't support it. Mathematically equivalent to standard attention but not bit-identical.
 
 - Findings: 
 
@@ -162,6 +146,49 @@ Timing: load_duration, eval_count, eval_duration, prompt_eval_count, prompt_eval
  Cold ≠ warm. First call after load differed from every warm call at identical temp and seed (TRUE −5.1499 vs −4.9346, tail reordered). Three warm calls at differing temp and top_k were bit-identical to each other. Consequence: the warm-up requirement. Caveat: n=1 on the cold side.
 
  Degenerate generation. On gemma3:1b-it-q8_0 (digest 0fdb9c7fefee), one TriviaQA item produced degenerate repeating output. With num_predict ≥ 32 the response returned done: false with no metadata fields; at ≤ 31 it returned normally with done_reason: "length". Confirmed on Ollama 0.32.6 and 0.32.14, same digest, identical boundary. Observed on a single item - two versions makes the boundary stable, not general.
+
+ Pinning num_ctx from 131072 to 2048 cost throughput on the 12b (35.9 → ~20 tok/s), which is counterintuitive and unexplained. Uniform across cells, so it threatens nothing, but recorded as a measured fact. * measured on the previous driver, not re-checked on 26.8.1
+
+Templates
+- A: [Question] Answer with only the answer, no explanation, in 10 words or fewer. If unsure, give your single best guess.
+- B: Question: [Question]
+
+  Answer: [Answer]
+
+  Is the Answer correct? Respond with only True or False.
+
+* Note: Deviation from Kadavath et al. Each call is stateless, the model doesn't remember that the answer in question is its own. Self-referential framing would assert something false about the context.
+
+- C: Question: [Question]
+
+  Answer: [Answer]
+
+  How confident are you that the answer is correct? Respond with any integer between 0 and 100 where 0 is not confident and 100 is certain that the answer is correct. Respond with only that integer and nothing else.
+
+Template A word count → flag, reported, never excludes.
+Template C unparseable confidence → §9 exclusion, logged with reason, appears in the exclusion table.
+
+- P(True) - Why renormalize at all: raw True-mass conflates uncertainty about the answer with failure to follow the format. Format-following degrades at smaller model sizes, especially across this consumer-level order of magnitude - a 12b obeys "answer with True or False" more consistently than a 1b does. So raw mass would be systematically lower on small models for a reason unrelated to calibration, and H1 is a size hypothesis. Renormalizing removes that effect from the measurement; logging the retained mass keeps the format-following signal visible as a reported statistic instead of letting it slip away. Read the generated token position 0 only, fixed, no exceptions because scanning forward for a position that matches would rescue more items on the 1b than the 12b which is differential exclusion, and searching for the position where you find what you want is a degree of freedom. Normalize each candidate: strip whitespaces, make lowercase. The affirmative mass is the sum of the probabilities of all candidates whose normalized form is `true`, and likewise for `false` 'True' , 'TRUE' , 'true' , and [sp]True will all normalize to true after strip and lowercase. Strict format compliance; exact match against {true} / {false} only. The prompt names two tokens, so two tokens count; semantic enumeration has no natural stopping point. Anything else is non-compliant and remains outside the retained mass. P(True) = affirmative mass / (affirmative + negative mass); computed from raw logprobs at full precision because concentrated mass can round to a zero in the denominator - unacceptable. Zero retained mass will be recorded as unparseable and logged in section 9 as an exclusion (logged with the per-cell rate); 0.5 manufactures a number the model never expressed, and  0 treats the absence of 'true' as evidence for 'false'. No minimum mass floor; I considered but rejected it because any threshold I could come up with would just be an invented number with no basis. Retained mass is logged per row and per-cell mean is reported in the main body. Raw logprobs of both matched tokens will be logged per row too. And the parser will tolerate a candidate with an absent 'bytes' key and an empty token string.
+
+- Verbalized confidence parsing rule: The entire response, after stripping whitespaces, stripping a trailing % (since 85% is the same as 85/100), and stripping any leading zeros, must parse as an integer. The integer is then divided by 100 to put it on a scale [0,1] so the two elicitation methods end up on the same scale, since AUROC needs them comparable. When a response returns done_reason: "length" flag, log, and report the per-cell rate but never exclude. Reasoning: A truncated response that is long enough to be cut off is almost certainly a response that failed the entire-response-is-an-integer rule so it's already excluded on those grounds. The only case that could survive to corrupt a value is a bare integer that was clipped midway through the digits, which needs a digits-only response longer than num_predict. The [0,100] scale makes that impossible. So the flag is simply a check that the hazard didn't show up. Anything else is unparseable → §9 exclusion, logged. Leading zeros are stripped. 085 parses as 85 - the transformation is unambiguous and adds no degree of freedom, and excluding it would put a formatting artifact in the same bucket as refusals and genuine non-answers, inflating a rate the exclusion table reports as a finding.
+
+Parameters
+- num_predict = Template A: 25 tokens; generous headroom well beyond a ten-words-or-fewer answer, including hedging. Template B: 5 tokens; one token for True/False plus a stop token, with margin. Template C: 10 tokens; worst case is three digit tokens for 100 plus a stop token, four total, plus headroom.
+All three sit below 32. On gemma3:1b-it-q8_0, one TriviaQA item producing degenerate repeating output returned done: false with no metadata fields at num_predict ≥ 32, and returned normally with done_reason: "length" at ≤ 31 - confirmed on Ollama 0.32.6 and 0.32.14, same digest. Observed on a single item, so the boundary is stable rather than general. Staying below it means degenerate items return cleanly with usable metadata instead of malformed responses I cannot grade or log.
+- num_ctx = 2048 tokens. num_ctx is an allocation, not a limit, so oversizing costs VRAM for nothing. 2048 is chosen as a round number well above the measured worst case.
+- temperature = 0
+- top_k = 64 (inert at temperature = 0)
+- top_p = 0.95 (inert at temperature = 0)
+- seed = 42
+
+Throughput Measurements:
+
+* Conditions - num_ctx = 2048, KV cache = f16, model warmed, previous model unloaded, nothing else consuming GPU resources. One item per cell: estimates runtime, not a benchmark. tok/s is calculated from eval_count / eval_duration, both server-side. Measured on Adrenalin 26.8.1 / driver 32.0.31041.1004.
+* Table - 1b at Q4_K_M: 234.3 tok/s, 1b at Q8_0: 248.7 tok/s, 1b at fp16: 184.4 tok/s, 4b-it-qat at Q4_0: 134.4 tok/s, 4b at Q4_K_M: 132.5 tok/s, 4b at Q8_0: 110.6 tok/s, 4b at fp16: 67.8 tok/s, 12b at Q4_K_M: 66.0 tok/s, 12b at Q8_0: 43.9 tok/s.
+* Readings - The two 1b cells are within run to run noise - two runs put the ordering in opposite directions, ~6% swing either way. A 22 token generation is too short of a window, so don't read the ordering between them. - QAT at 134.4 beside the standard 4b at 132.5 is near identical bit budgets, consistency check passes. 
+- Re-measured after finding the original table predated the current driver. On the old driver, 12b-q8_0 spilled into system RAM and yielded 15.4 tok/s, ~31% of the 644 GB/s ceiling. On driver version 26.8.1 it is fully resident and yields 43.9 tok/s, ~89%. Old value in the lab log. 
+- 12b q8_0 -> q4_K_M is 1.49x against a ~1.6x file size ratio: ordinary bandwidth scaling, no spill. Separately, that cell is the slowest in the roster and accounts for ~25% of sweep runtime.
+* Contamination Sources - 1: cold-load/first-in-loop. the 1b read 57.9 tok/s when it led the loop, ~239 in isolation. 2: Keep-alive stacking: OLLAMA_KEEP_ALIVE defaults to 5m, so nine models called within five minutes all stay resident - stacking exhausts VRAM and the later cells spill; degradation scaling with model size is the tell. And 3: Other GPU consumers: a game running in the background cost 4b-q8_0 31.5 against 105.2. None of the three showed up in load_duration, so every contaminated run looked healthy with a report of ~0.23s. There's no automatic check, so the protection is procedural: warm models before run, unload models in between runs, and ensure GPU resources are free.
 
 - Harness Requirements:
 
@@ -189,55 +216,41 @@ Timing: load_duration, eval_count, eval_duration, prompt_eval_count, prompt_eval
 
 - Negation Marker List: not, no, never, isn t, won t, wasn t, doesn t, aren t, couldn t, can t, wouldn t, shouldn t, cannot, don t, didn t, hasn t, haven t
 
- 4 word marker window: 4 words becasue something like "couldn t ever be vancouver" is a realistic answer and is 4 words back from "vancouver" after normalization. 
+ 4 word marker window: 4 words because something like "couldn t ever be vancouver" is a realistic answer and is 4 words back from "vancouver" after normalization. 
 
  What happens when the negation marker flags? Set a boolean on the row. It never changes the score. It is for recording only. If the rate comes back high on any cell, I'll know that the substring matching is producing false positives and I can report that.
 
-- KV Cache: set to f16 for full precision, as quantization here adds a secondary noise layer. Full precision keeps it clean.
-
-- Pinning num_ctx from 131072 to 2048 cost throughput on the 12b (35.9 → ~20 tok/s), which is counterintuitive and unexplained. Uniform across cells, so it threatens nothing, but recorded as a measured fact.
-
-- Ollama version is 0.32.14 *Note: the version changed between drafting and freeze, observed rather than intended. Originally ollama version 0.32.6 - I have since disabled auto update for Ollama.
-
-**Logged per run, always:** model tag, quantization, temperature, seed, prompt template ID, Ollama version, timestamp.
-
-Grader Spec
+Grader Spec:
 - Normalize: lowercase, punctuation -> space, collapse whitespace. Applied identically to the response and to TriviaQA's strings.
-- Match: normalized_value plus all of normalized_aliases , checked as complete words/phrases (word boundary regex) against the normalized repsonse.
+- Match: normalized_value plus all of normalized_aliases , checked as complete words/phrases (word boundary regex) against the normalized response.
 - Any match = correct. No match = incorrect.
 - No article stripping, no prefix stripping. Boundary matching absorbs leading scaffolding.
-- Per-row logging: raw response, matched (bool), which alias matched, negation flag (bool), compliance flag (bool).
-- Negation detector: marker list frozen, 4-word window preceding the matched alias, purely observational - never changes the score.
+- Per-row logging: raw response, matched (bool), which alias matched, negation flag (bool), compliance flag (bool), truncation flag (bool).
+- Compliance detector: raw word count ≤ 10, measured on the raw response rather than the normalized one — normalization only ever splits words apart, so raw is what the model actually emitted. Purely observational, never changes the score, per-cell rate reported.
+- Truncation detector: set when done_reason is "length". Purely observational, never changes the score, per-cell rate reported.
+- Negation detector: marker list frozen, 4-word window preceding the matched alias, purely observational — never changes the score.
 
-Templates
-- A: [Question] Answer with only the answer, no explanation, in 10 words or fewer. If unsure, give your single best guess.
-- B: Question: [Question]
+Grader Rule Declaration:
+- What may change? Code that fails to implement a written rule.
 
-  Answer: [Answer]
+- What may not change? The rules themselves. Changing the rules after seeing data means I cannot prove that the change wasn't chosen for its effect on the results.
 
-  Is the Answer correct? Respond with only True or False.
+- How to decide where your case falls? Does the fix make the code do what section 6 already says, or does it change what section 6 says? If the former, permitted. If the latter, not permitted.
 
-* Note: Deviation from Kadavath et al. Each call is stateless, the model doesn't remember that the answer in question is it's own. Self-referential framing would assert something false about the context.
+- What if a rule genuinely needs changing? If pre-freeze: amend and record the reasoning. If post-freeze: record in section 12 as a deviation.
 
-- C: Question: [Question]
+- The pilot: the pilot is run pre-freeze - fixing grader bugs post-freeze means fixing them against real study data which is worse than fixing against pilot data. The pre-freeze pilot should eliminate any post-freeze grader changes. the pilot is genuinely safe to look at because it is run with a separate seed, excluded from the draw pool, discarded, and never analyzed. Any fix made against the pilot's outputs is recorded pre-freeze.
 
-  Answer: [Answer]
+Logging:
+- Per run (Constant for the process or the cell): model tag, model digest, quantization, Ollama version, KV cache type, temperature, seed, num_ctx, top_k, top_p, and timestamp.
 
-  How confident are you that the answer is correct? Respond with any integer between 0 and 100 where 0 is not confident and 100 is certain that the answer is correct. Respond with only that integer and nothing else.
+- Per row (varies per call) - grading fields and flags are specified above in the Grader Spec.
 
-Template A word count → flag, reported, never excludes.
-Template C unparseable confidence → §9 exclusion, logged with reason, appears in the exclusion table.
-
-Parameters
-- num_predict = Template A: 25 tokens; generous headroom well beyond a ten-words-or-fewer answer, including hedging. Template B: 5 tokens; one token for True/False plus a stop token, with margin. Template C: 10 tokens; worst case is three digit tokens for 100 plus a stop token, four total, plus headroom.
-All three sit below 32. On gemma3:1b-it-q8_0, one TriviaQA item producing degenerate repeating output returned done: false with no metadata fields at num_predict ≥ 32, and returned normally with done_reason: "length" at ≤ 31 - confirmed on Ollama 0.32.6 and 0.32.14, same digest. Observed on a single item, so the boundary is stable rather than general. Staying below it means degenerate items return cleanly with usable metadata instead of malformed responses I cannot grade or log.
-- num_ctx = 2048 tokens. num_ctx is an allocation, not a limit, so oversizing costs VRAM for nothing. 2048 is chosen as a round number well above the measured worst case.
-- temperature = 0
-- top_k = 64 (inert at temperature = 0)
-- top_p = 0.95 (inert at temperature = 0)
-- seed = 42
-- Flash Attention: enabled. Verified from the Ollama server log at model load rather than assumed from the environment variable, since Ollama falls back silently if the model or hardware doesn't support it. Mathematically equivalent to standard attention but not bit-identical.
-
+ Identity: item ID, elicitation method, prompt template ID, num_predict
+ Response: done, done_reason
+ Timing: load_duration, eval_count, eval_duration, prompt_eval_count, prompt_eval_duration
+ P(True) rows: renormalized P(True), retained mass, raw logprobs of both matched tokens, full top-10 candidate list (recompute insurance if the parsing rule needs re-deriving)
+ Template C rows: parsed integer, mapped confidence
 
 ## 7. Metrics
 
@@ -321,6 +334,8 @@ If every hypothesis fails and calibration is not noticably different, I've learn
 |---|---|---|---|
 | | | | |
 
+
+* Post-Study note: re-enable Ollama auto-update and AMD Adrenalin driver auto-update.
 ---
 
 ## 13. Freeze declaration
