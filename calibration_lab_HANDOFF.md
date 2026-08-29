@@ -2,44 +2,83 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-08-27 · **Synthesized against commit:** `23e58ee` · **Status:** Slice 0 (pre-registration) in draft, not frozen
+**Last updated:** 2026-08-29 · **Synthesized against commit:** `99a126d` · **Status:** Slice 0 (pre-registration) in draft, not frozen
+
+*Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
 ---
 
 ## 0. YOU ARE HERE
 
-**§6 (Procedure) is COMPLETE** — content, structure, and internal consistency. Every block written, every decision recorded, reordered into a navigable shape, committed as `23e58ee`. That was the longest-running open section on the project.
+**§5 and §6 are COMPLETE and internally consistent.** Every measured number in the
+document now has exactly one home; every other mention cites the section instead of
+restating the figure. That closes the failure class that produced three stale-number
+sessions in a row.
 
-**Pre-session brief (written 2026-08-27, end of the 08-26 session):**
+**Pre-session brief (written 2026-08-29, end of the 08-29 session):**
 
-Last session ran long and did three things. (1) Closed §6 entirely: both parsing rules, the grader-rule development declaration, logging split into per-run/per-row, digest and version verification, flash attention, and the environment block including a full hardware spec. (2) Discovered mid-session that the throughput table predated the current AMD driver, re-measured all nine cells, and found the `12b-it-q8_0` spill was a **driver artifact, not a hardware limit** — that cell went 15.4 → 43.9 tok/s and is now fully resident. The old table would have frozen a false mechanism into the document. (3) Repaired seventeen days of uncommitted git history and stood up `lab_log.md`.
+Long session, four things. (1) Rebuilt §5's runtime block and §6's load/unload block
+from the 08-28 probe data, then ran a consistency sweep across both — `~2.3s` is gone
+from the document entirely, `~51 s` lives only in §6, the 215.5 ms constant only in §5.
+(2) Began §10: qat clause and roster-asymmetry entry landed; ECE and differential
+exclusion were considered and resolved as *not* §10 material. (3) **Corrected a
+load-bearing factual error about Kadavath** — see below. (4) Adopted
+`SESSION_PROTOCOL.md` after a handoff desync opened the session on two competing
+documents.
+
+**Kadavath correction — read this before touching §1.** Kadavath et al. studied models
+at **800M, 3B, 12B, and 52B parameters**, and they were **base pretrained models**, not
+instruct-tuned. The long-held belief that their smallest model was ~120B was wrong. The
+consequences:
+
+- §1's "consumer scale is uncharted" framing is **built on a false premise** and must be
+  rewritten. The 1b and 12b *overlap two of Kadavath's four sizes.*
+- The stronger replacement framing: the scale range overlaps published results, so any
+  difference is attributable to what was actually varied — instruct-tuning,
+  quantization, lineage, and the free-form task.
+- Check §3's H1 rationale for leakage of the old "uncharted" framing.
+- Separately: Kadavath found RLHF-finetuned models poorly calibrated, largely repaired
+  by setting temperature to 2.5. Relevant to §2 and possibly §11, given §6's finding
+  that logprobs come back un-scaled. **Parked, not chased.**
 
 **Next actions, in order:**
-1. **§5's runtime paragraph.** Still carries `~166 / ~36 tok/s` and "4-6+ hours" and the spill claim. Now stale against *three* generations of numbers. Recompute from the current table. **This has been flagged for three consecutive sessions — do it first, it takes two minutes.**
-2. **§10 transcription.** Delete the stale qwen3/MMLU bullets, fill `[others]` from the accumulated list below, rewrite the extrapolation-limit entry around the driver finding, add the ECE-declined entry.
-3. **§11 redesign.** The current text is a placeholder recording the ECE decision, not the rule. Needs the full null-result structure plus the option-four interpretation rule.
-4. **§8's noise-floor procedure** — blocking, two floors required.
-5. **§1 header line, §2 background** — transcription of material already articulated.
-6. **E1 is missing from §3 entirely**, and §7 has no throughput or footprint metric to feed it.
+1. **§1 header line and framing sentence.** Highest-visibility stale claim in the
+   document — it's the first thing any reader sees, and it is currently wrong.
+2. **Finish §10.** Four items: contamination rewrite (see §5c), extrapolation block
+   split into three (see §5c), one-line differential-exclusion entry citing §8, and
+   delete the four scaffold bullets plus the orphan `differential exclusion named as a
+   limitation` fragment.
+3. **§11 redesign.** Still a placeholder. It *announces* a rule for the
+   AUROC-flat-while-calibration-degrades case and never states it. Needs the full
+   null-result structure plus that rule.
+4. **§8** — noise-floor procedure (blocking, two floors required), plus one clause
+   noting differential exclusion biases *toward the null*.
+5. **§2 background** — transcription of material already articulated, now including the
+   corrected Kadavath picture.
+6. **E1 is missing from §3 entirely**, and §7 has no throughput or footprint metric to
+   feed it.
 
-**No study data has been run.** No harness code exists except a synthetic ECE/reliability-diagram experiment (`ece_test.py`) written for learning. All Ollama calls so far are environment characterization.
+**No study data has been run.** No harness code exists except a synthetic
+ECE/reliability-diagram experiment (`ece_test.py`) written for learning, and the three
+`probe*.ps1` environment-characterization scripts. All Ollama calls so far are
+environment characterization.
 
 ---
 
-## 0b. Working protocol (adopted 2026-08-26)
+## 0b. Working protocol
 
-Established after a stale handoff caused a session to open on false premises and produced three incorrect corrections.
+**Moved to `SESSION_PROTOCOL.md` (adopted 2026-08-29).** That file is now the single
+home for session discipline: closing checklist, the opening `git` block, what Claude
+verifies on open, the harness-phase prereg-drift rule, and the post-freeze
+`git diff` integrity check.
 
-- **One chat = one session = one handoff update = one commit.** A single chat holding several days of work is what produced the date confusion and the drift.
-- **Commit before uploading.** The uploaded file is then the committed file by construction.
-- **Upload the prereg AND handoff together**, with `git log -1 --format="%h %ad %s"` and `git status --short`. The hash proves which version; a clean status proves nothing was edited after.
-- **Claude synthesizes the handoff against the actual file** and reports every claim that doesn't verify. A handoff composed from conversation rather than from the page is how six settled decisions evaporated.
-- **The handoff header records the commit it was synthesized against.** Next session opens by checking that against `HEAD`.
-- **Open-but-undecided items get their own section** (§5c below) and leave it only by being decided — including "considered and declined."
-- **The prereg governs where prereg and handoff disagree.**
-- Handoff stays descriptive. Reasoning that belongs in the prereg gets written by Laz, into the prereg, in his words.
+Do not restate its rules here. If handoff and protocol ever disagree, the protocol file
+governs on process; the prereg governs on content.
 
-**Known failure mode, still live:** decisions get logged in the handoff as *landed* when they were only *decided*. Every mismatch found on 2026-08-26 was of this kind. §10's fix #2 — a running "decided but not yet written" list at the bottom of the section being worked — was adopted in August and never actually maintained. §5c is that list.
+**Known failure mode, still live:** decisions get logged in the handoff as *landed* when
+they were only *decided*. §5c is the list that catches it. On 2026-08-29 this fired in
+the opposite direction too — the §10 qat clause was recorded as complete in conversation
+and had never been pasted into the file. Verification is against the page, both ways.
 
 ---
 
@@ -196,22 +235,22 @@ The accuracy control reads out the mixture:
 
 ## 5. Section status — pre-registration file
 
-*Verified against commit `23e58ee` for §6. §1–5 and §7–13 checked against the 2026-08-27 morning upload; re-verify next session.*
+*Verified against commit `99a126d`, 2026-08-29. §4, §5, §6, §10 read directly from the file this session; §1–3 and §7–13 carried forward from the 2026-08-27 pass — re-verify next session.*
 
 | § | Status | What's left |
 |---|---|---|
-| Header | ⚠️ stale | "Study:" line still uses the old Kadavath framing. `Drafted: [7-15-2026]` is a filled value inside brackets — a pre-freeze bracket scan will false-positive on it. |
-| 1. Research question | ✅ done | Written, names AUROC, scoped to gemma3 + consumer hardware. |
+| Header | ⚠️ stale | "Study:" line still uses the old Kadavath framing — **and that framing is now known to be factually wrong**, not merely dated. `Drafted: [7-15-2026]` is a filled value inside brackets; a pre-freeze bracket scan will false-positive on it. |
+| 1. Research question | ⚠️ **stale premise** | The question itself is fine — names AUROC, scoped to gemma3 + consumer hardware. The surrounding framing assumes Kadavath measured only ~120B+ models. He did not. **Rewrite before anything else.** |
 | 2. Background | ❌ unwritten | 3–5 sentences. Kadavath on base models, Tian 2023 on verbalized confidence, why small/quantized/instruct-tuned might differ, the community motivation. The stray 3×3-cell note belongs in §8 or §11. |
-| 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. **E1 missing entirely.** |
-| 4. Models | ✅ COMPLETE | Locked 2026-08-08. |
-| 5. Datasets | 🟡 **one stale paragraph** | **Runtime paragraph still says ~166 / ~36 tok/s, 4-6+ hours, and "spills into system RAM." All three superseded.** Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. |
-| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Committed `23e58ee`. |
+| 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. Δ verified 2026-08-29 as the `q8_0 → q4_K_M` pair, present at all three sizes — H2b is testable. **E1 missing entirely.** Check H1's rationale for the old "uncharted" framing. |
+| 4. Models | ✅ COMPLETE | Locked 2026-08-08. Amended 2026-08-29: the one-family line now states the recipe is fixed across all nine with QAT carrying an additional training stage. |
+| 5. Datasets | ✅ COMPLETE | Runtime block rebuilt from probe data 2026-08-28, probe date corrected and load/unload figures de-duplicated 2026-08-29. Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. |
+| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. |
 | 7. Metrics | 🟡 partial | No throughput or memory-footprint metric, so nothing feeds E1. |
 | 8. Analysis plan | 🟡 partial | Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure**. |
 | 9. Exclusion rules | 🟡 near-done | Timeout filled at 90s. `no_valid_response` still carries a leftover "within N seconds" clause duplicating the timeout rule — should be `done: false` only. **Exclusion table has no `no_valid_response` column.** Consider adding mean-retained-mass and truncation-rate columns; it's the only per-cell reporting structure in the document. |
-| 10. Confounds | 🟡 partial | Stale qwen3/MMLU bullets. `[others]` unfilled. Extrapolation entry needs rewriting around the driver finding. ECE-declined entry needed. |
-| 11. Null result | ❌ **placeholder** | Records the ECE decision but not the rule. Needs full redesign — three hypotheses can null independently, and H2b can come back *not evaluable*. Option-four interpretation rule lands here. |
+| 10. Confounds | 🟡 partial | qat clause and roster-asymmetry entry landed 2026-08-29. **Still open:** contamination rewrite, extrapolation split, differential-exclusion line, and deletion of the four scaffold bullets + orphan fragment. ECE resolved as *not* §10 — it is §11's unwritten rule. |
+| 11. Null result | ❌ **placeholder** | Records the ECE decision but not the rule — it announces a rule for the AUROC-flat-while-calibration-degrades case and never states it. Needs full redesign — three hypotheses can null independently, and H2b can come back *not evaluable*. Option-four interpretation rule lands here. |
 | 12. Deviations | ✅ ready | Empty by design until freeze. |
 | 13. Freeze | ⏳ blocked | Two threshold numbers bracketed until the pilot. `items.jsonl` not yet committed. |
 
@@ -239,19 +278,23 @@ Order: **environment → findings → templates → parsing rules → parameters
 
 *Items leave this list only by landing on the page. Nothing else.*
 
-1. **§5 runtime paragraph** — recompute from the current table. Three sessions overdue.
-2. **§10: extrapolation limit, rewritten** — on a 16 GB card driving four 1440p displays, the largest cell fits with under 1 GB of margin, and a driver update moved it from spilling to resident. Peak 15474 MB against 16304 MB available, 2256 MB desktop baseline.
-3. **§10: ECE co-primary considered and declined**, with the reason.
-4. **§10: delete qwen3/MMLU bullets**, fill `[others]` from §5d.
-5. **§11: the option-four interpretation rule** — currently a placeholder. Must be written before the pilot or it's post-hoc.
-6. **§3: E1**, and **§7: throughput + memory footprint metrics** to feed it.
-7. **§9: delete the "within N seconds" clause** from `no_valid_response`; add its column to the exclusion table.
-8. **§8: noise-floor measurement procedure.** Two floors.
-9. **`items.jsonl` committed** — §5 promises it.
-10. **Lab log placement decided** — currently untracked in the repo. §10's rule says vault, but the prereg now cites it by name and a frozen published document can't cite a vault note. Commit or `.gitignore`, don't leave untracked.
-11. **Re-enable AMD driver auto-update and Ollama auto-update post-study.** Disabled 2026-08-26.
-12. *Optional:* `eval_count` on a compliant Template C response, to settle whether gemma3 splits digits. Two minutes.
-13. *Optional:* re-run the three 1b cells at higher `num_predict` for a longer timing window, so every row in the throughput table means something.
+**Closed 2026-08-29:** §5 runtime paragraph (landed). §10 ECE-declined entry (**resolved as not §10** — §7 already reports ECE with its binning spec, so nothing is hidden from a reader; the real gap is §11's unwritten rule, now item 6). Lab-log placement (**committed**). Template C `eval_count` (measured — four tokens, §6's reasoning confirmed).
+
+1. **§1 framing sentence and header "Study:" line** — the Kadavath scale belief was wrong. Rewrite around overlap, not absence. Highest-visibility stale claim in the document.
+2. **§10: contamination bullet, rewritten.** Gemma3 has almost certainly seen TriviaQA. The version currently drafted in conversation still contains a contradiction — it argues uniform inflation cancels, then concedes magnitude scales with size. Resolve in favour of the concession, because larger models memorise more of their training data, so contamination is a gradient along H1's own axis. Follow it into AUROC: a memorised item is answered correctly *and* confidently, which is a correctly-discriminated item, so memorisation plausibly inflates AUROC more in larger models — H1's predicted result arriving by a non-calibration mechanism. Then restore the half that survives: H2a and H2b compare quantizations *within* a size, sharing a memorisation baseline, so uniform inflation genuinely does cancel there. Cite §5's `unfiltered` choice rather than re-arguing it.
+3. **§10: extrapolation limit, rewritten and split into three blocks, conclusion first.** (a) Scope and split — every performance figure is configuration-bound and E1 does not transfer; the calibration results *do*, because AUROC is computed from probabilities and a spilling model is slow, not differently confident. (b) Evidence — 15.4 → 43.9 tok/s on a driver update alone, framed as a regime change: the largest cell changed bottleneck, so **no scaling factor recovers the table from different hardware.** Silicon lottery as a subordinate clause only. (c) For replicators — re-measure your own constants, scripts committed (`probe*.ps1` at repo root, CSVs in `probe_out/`). Two things to check while writing: §6 documents flash attention as *not bit-identical*, so "same distribution" overclaims by one clause; and the ~6% run-to-run swing on the 1b cells is the only spread figure actually measured. Context: peak 15474 MB against 16304 MB available, 2256 MB desktop baseline, four 1440p displays, under 1 GB margin on the largest cell.
+4. **§10: one-line differential-exclusion entry** citing §8. §8 already carries the mechanism and the interpretation rule; the only thing missing is direction — the bias runs *toward the null*, against H1. Then delete the orphan `differential exclusion named as a limitation` fragment at the top of §10.
+5. **§10: delete the four scaffold bullets** (qwen3/MMLU contamination, quantization-as-confound, instruct-tuning-is-not-RLHF, single hardware/runtime) and the `[others]` placeholder. Fill from §5d.
+6. **§11: the option-four interpretation rule** — currently a placeholder that announces a rule and never states it. Must be written before the pilot or it's post-hoc.
+7. **§10 or §2: the instruct-tuning limitation, correctly stated.** Not "recipes differ from each other" — one family fixed that. Relative to Kadavath, *four* things change at once: instruct-tuning, quantization, scale, and lineage. Within-roster comparisons are clean; the cross-study framing sentence is what's limited.
+8. **§3: E1**, and **§7: throughput + memory footprint metrics** to feed it.
+9. **§9: delete the "within N seconds" clause** from `no_valid_response`; add its column to the exclusion table.
+10. **§8: noise-floor measurement procedure.** Two floors. Plus the direction-of-bias clause from item 4.
+11. **`items.jsonl` committed** — §5 promises it.
+12. **Re-enable AMD driver auto-update and Ollama auto-update post-study.** Disabled 2026-08-26.
+13. **Fix the 08-28 lab-log line** saying scripts and CSVs are both under `probe_out/`. The scripts are at repo root.
+14. *Optional:* §10's roster-asymmetry entry could be reworded — "the shape across the two steps on the 1b and across the two steps on the 4b" is clumsy. Content is correct.
+15. *Optional:* re-run the three 1b cells at higher `num_predict` for a longer timing window, so every row in the throughput table means something.
 
 ---
 
@@ -398,7 +441,8 @@ Determines **four** numbers: p_weak, p_strong, the AUROC noise floor, and the sp
 **Second failure mode, identified 2026-08-26:** the handoff recorded decisions as *landed* when they were only *decided*. Fixed by §0b's protocol and §5c's list.
 
 **Companions:**
-- ✅ **Lab log** — `lab_log.md`, created 2026-08-26. Placement decision outstanding (see §5c item 10).
+- ✅ **Lab log** — `lab_log.md`, created 2026-08-26, tracked as of 2026-08-29. Placement decision outstanding (see §5c item 10).
+- ✅ **Session protocol** — `SESSION_PROTOCOL.md`, adopted 2026-08-29.
 - ⬜ **Decisions log** — what was chosen and why. §2 here is doing this job informally.
 
 Repo holds the pre-registration and data. Vault holds interpretation. **Canonical prereg copy in the repo only** — a frozen artifact in a mutable store isn't frozen.
@@ -408,6 +452,9 @@ Repo holds the pre-registration and data. Vault holds interpretation. **Canonica
 ## 11. Git state
 
 ```
+99a126d  2026-08-29  08-29-2026 another small post-session fix
+101b7db  2026-08-29  08-29-2026 quick fix post-session
+a213298  2026-08-28  (last verified hash of the 08-28 session)
 23e58ee  2026-08-27  S6: reorder + throughput re-measurement on driver 26.8.1
 a37c996  2026-08-27  S6: parsing rules, throughput, logging, grader-rule declaration, verification requirements
 8438601  2026-08-09  section 5 completed in prereg
@@ -415,4 +462,18 @@ f8a12b4  2026-08-01  Section 3 completed
 3496554  2026-06-24  pre-registration template WIP
 ```
 
-`lab_log.md` untracked. `core.autocrlf` set to false to stop LF→CRLF conversion, so the bytes on disk match the bytes in the commit — relevant because the freeze mechanic is "the hash is my witness."
+Working tree clean at `99a126d`. Verified this session:
+
+- `lab_log.md` — **now tracked.** No longer untracked as of the 08-29 range.
+- `SESSION_PROTOCOL.md` — committed.
+- `probe_out/` — **committed, five CSVs.** This closes the open verification item; §10's
+  extrapolation block may cite the path. Note the three `probe*.ps1` scripts sit at repo
+  root, not inside `probe_out/` — the 08-28 lab-log entry says otherwise and would send a
+  replicator to the wrong place.
+
+`core.autocrlf` set to false to stop LF→CRLF conversion, so the bytes on disk match the
+bytes in the commit — relevant because the freeze mechanic is "the hash is my witness."
+
+Commit messages for the last two are `quick fix post-session` / `another small
+post-session fix`. Accurate for what they contain, but the session's substantive work is
+only findable through `lab_log.md`. Worth more descriptive messages going forward.
