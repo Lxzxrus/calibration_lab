@@ -81,7 +81,7 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 | `gemma3:4b-it-qat` | `d01ad0579247` | 4.3B | Q4_0 (QAT) | 131072 | yes | exploratory |
 
 **Decisions to make and justify here:**
-- Why only one family? It holds the training recipe fixed across all nine, with QAT carrying an aditional training sage (which is why it's exploratory), so the claim is clean.
+- Why only one family? It holds the training recipe fixed across all nine, with QAT carrying an additional training stage (which is why it's exploratory), so the claim is clean.
 
 - Why 1b, 4b, and 12b models? They fit on most consumer-level hardware, with 12b being for those with enthusiast level hardware (like me.) Also: three sizes is the minimum for a monotonicity claim. Two points can't be non-monotonic, so H1 would be untestable. Three sizes spanning roughly one order of magnitude is the smallest ladder that can carry the hypothesis.
 
@@ -339,7 +339,9 @@ differential exclusion named as a limitation.
 
 - saturation: the 12b pinning near 1.0 risks ties in P(True); ties push AUROC toward 0.5; that biases against H1 for reasons unrelated to the capacity mechanism.
 
-- The asymmetry in the model roster in section 4 (the lack of 12b-fp16) causes asymmetry in section 3's H2a within-model check: 2 rungs for the 1b, 2 rungs for the 4b (excluding the exploratory 4b-qat), but just 1 rung for the 12b. This means the shape across the two steps on the 1b and 4b are observable, but the 12b is only a directional test between two quants.
+- The QAT exploratory arm clause -"All nine models share the same gemma3 instruct recipe, but 4b-qat has a caveat: it confounds quantization-aware training with quantization scheme and has no bit-matched control, so it can neither confirm nor disconfirm H2a. See section 4."
+
+- The asymmetry in the model roster in section 4 (the lack of 12b-fp16) causes asymmetry in section 3's H2a within-model check: 2 rungs for the 1b, 2 rungs for the 4b (excluding the exploratory 4b-qat), but just 1 rung for the 12b. This means the shape across the two steps on the 1b and across the two steps on the 4b are observable, but the 12b is only a directional test between two quants.
 
 ## 11. What a null result looks like
 
