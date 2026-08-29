@@ -81,7 +81,7 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 | `gemma3:4b-it-qat` | `d01ad0579247` | 4.3B | Q4_0 (QAT) | 131072 | yes | exploratory |
 
 **Decisions to make and justify here:**
-- Why only one family? It holds the training recipe fixed, so the claim is clean.
+- Why only one family? It holds the training recipe fixed across all nine, with QAT carrying an aditional training sage (which is why it's exploratory), so the claim is clean.
 
 - Why 1b, 4b, and 12b models? They fit on most consumer-level hardware, with 12b being for those with enthusiast level hardware (like me.) Also: three sizes is the minimum for a monotonicity claim. Two points can't be non-monotonic, so H1 would be untestable. Three sizes spanning roughly one order of magnitude is the smallest ladder that can carry the hypothesis.
 
@@ -121,7 +121,7 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 
  ~8.1s/item comes from the constant 5.82 seconds (27 calls per item * 215.5 ms) plus ~2.3 seconds (prompt_eval, eval and server_slack summed across the nine cells).
 
- The runtime probe (run 2026-08-27, complete) yielded that the load_duration was nearly identical between 12b-q8_0 and 1b-q4_K_M - 215.73 ms and 215.39 ms respectively. This accounts for ~72% of projected runtime and it is invariant across model size, quantization, template, prompt length, and logprobs, therefore it is a constant. The remaining ~28% is made up of prompt_eval, eval, and server_slack measurements. When accounted for, the 12b-q8_0 has a wall-clock time of 317.86 ms per call, and the 1b-q4_K_M 251.52 ms per call. Nine cold loads plus nine unloads: ~51 seconds total - measured total confirms section 6's conclusion that model loading is negligible, while replacing the ~2.3s each figure behind it.  (More in section 6's findings block).
+ The runtime probe (run 2026-08-28, complete) yielded that the load_duration was nearly identical between 12b-q8_0 and 1b-q4_K_M - 215.73 ms and 215.39 ms respectively. This accounts for ~72% of projected runtime and it is invariant across model size, quantization, template, prompt length, and logprobs, therefore it is a constant. The remaining ~28% is made up of prompt_eval, eval, and server_slack measurements. When accounted for, the 12b-q8_0 has a wall-clock time of 317.86 ms per call, and the 1b-q4_K_M 251.52 ms per call. Model load and unload across all nine cells is negligible against the sweep; per-model figures and total are in section 6's findings block.
 
  The pilot is specified below, not yet run. p_weak = the accuracy of the weakest cell, and p_strong is the accuracy of the strongest cell. The formula: N = 200 / min(p_weak, 1 - p_strong) plus 10% exclusion margin. The pilot spec: 50 items each on gemma3:1b-it-q4_K_M and gemma3:12b-it-q8_0, different seed, and pilot items excluded from the main draw pool and data discarded. 50 pilot items on both extremes to ensure no thin cells in the case of extreme high/low accuracy. So, the pilot has four outputs: p_weak, p_strong, the AUROC noise floor, and the spread noise floor.
 
@@ -171,7 +171,7 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
  | 12b-q4_K_M | 8.21 s | 7670 MB | 247 ms |
  | 12b-q8_0 | 11.93 s | 12642 MB | 391 ms |
 
- The table above shows cold load ranges 2.15-11.93 s and scales, unload scales with resident VRAM, and nine loads plus nine unloads total ~51 s. unload_polls was 0 on every row, so each unload figure is the latency of a single blocking /api/ps call rather than a polled interval - probably teardown given the clean scaling on VRAM but not proven, and doesn't affect the conclusion that model loading is negligible against the multi-hour sweep. The line "nine model loads at ~2.3s each" below was the 1b's figure generalized to the roster and is wrong for eight of nine models.
+ The table above shows cold load ranges 2.15-11.93 s and scales with model size, unload scales with resident VRAM, and nine loads plus nine unloads total ~51 s. unload_polls was 0 on every row, so each unload figure is the latency of a single blocking /api/ps call rather than a polled interval - probably teardown given the clean scaling on VRAM but not proven, and doesn't affect the conclusion that model loading is negligible against the multi-hour sweep.
 
 Templates
 - A: [Question] Answer with only the answer, no explanation, in 10 words or fewer. If unsure, give your single best guess.
@@ -224,11 +224,11 @@ Throughput Measurements:
 
  Log the (item ID, model tag, elicitation method) triple on every row. On startup, read the existing log, collect completed triples, skip them. JSONL keeps the log valid under interruption but it won't make a run continuable. On resume, the log reader tolerates a malformed final line and discards it. An interrupted run can leave a partial JSON object at the end of the file. Because every completed row is a self contained line, only the incomplete line is lost. Re run that call.
 
- Log 'load_duration' per call. Lets me verify no cell silently cold started mid run. Checkable threshold: warm = ~215ms, cold = 2.15-11.93s, per call. (Based on probe data, see section 5's runtime block)
+ Log 'load_duration' per call. Lets me verify no cell silently cold started mid run. The warm value is a fixed per-call constant (section 5, runtime block); cold load is model-dependent (findings table above). A row whose load_duration sits near its own model's cold figure rather than near the constant means that cell reloaded mid-run.
 
  Parser tolerates an absent bytes field.
 
- Loop order: hold one model, run all items, unload model, then swap. nine model loads at ~2.3s each is negligible when you swap nine times total, and costly if you swap on every item.
+ Loop order: hold one model, run all items, unload model, then swap.  One load and one unload per cell is negligible against a multi-hour sweep; measured per-model figures and the total are in the findings block above. Swapping on every item would pay that cost once per item instead of once per cell.
 
  All Ollama calls use http://127.0.0.1:11434, never localhost. On Windows, localhost resolves to the IPv6 loopback first; Ollama binds IPv4, so every call pays a connection-failure fallback. Measured: 5 calls took 5,855 ms via localhost versus 1,338 ms via 127.0.0.1 , roughly 900 ms per call. At 27 calls per item this would add ~24 s per item to wall-clock runtime. Server-side eval_duration is unaffected, so the throughput table is unchanged by this.
 
@@ -319,7 +319,7 @@ Required output. An exclusion table reported in the results, one row per cell (m
  Spelled-out numbers (eighty-five)
 
  Out of range — the prompt bounds the answer to [0, 100], so anything outside it isn't a confidence value
- iiuuuuuuuuuuuuu;;;\
+
  Any response that isn't wholly an integer (preamble, trailing prose, units)
 
 ## 10. Known confounds and limitations
@@ -332,13 +332,14 @@ differential exclusion named as a limitation.
 - **Quantization as confound.** Your q4 weights are not the full-precision model. You cannot cleanly separate "small" from "quantized" — say so.
 - **Instruct-tuning is not RLHF.** Your models' post-training recipes differ from each other and from Kadavath's. Family effects and tuning effects are entangled.
 - **Single hardware/runtime.** One GPU, one Ollama version.
-- [others]
 
 - degenerate output means some of the 1b's incorrect answers may be non-answers rather than wrong facts, which affects how the accuracy control reads.
 
 - low retained mass produces a renormalized value that was computed from tail probabilities. This is less stable than the same value computed from dominant ones. A minimum mass threshold was considered here, but I rejected the idea because I'd have to invent a number I could not defend; it would be an unjustifiable free parameter. Per-cell mean retained mass is reported so that the reader can weigh any cell's AUROC accordingly.
 
 - saturation: the 12b pinning near 1.0 risks ties in P(True); ties push AUROC toward 0.5; that biases against H1 for reasons unrelated to the capacity mechanism.
+
+- The asymmetry in the model roster in section 4 (the lack of 12b-fp16) causes asymmetry in section 3's H2a within-model check: 2 rungs for the 1b, 2 rungs for the 4b (excluding the exploratory 4b-qat), but just 1 rung for the 12b. This means the shape across the two steps on the 1b and 4b are observable, but the 12b is only a directional test between two quants.
 
 ## 11. What a null result looks like
 
