@@ -339,7 +339,7 @@ differential exclusion named as a limitation.
 
 - saturation: the 12b pinning near 1.0 risks ties in P(True); ties push AUROC toward 0.5; that biases against H1 for reasons unrelated to the capacity mechanism.
 
-- The QAT exploratory arm clause -"All nine models share the same gemma3 instruct recipe, but 4b-qat has a caveat: it confounds quantization-aware training with quantization scheme and has no bit-matched control, so it can neither confirm nor disconfirm H2a. See section 4."
+- All nine models share the same gemma3 instruct recipe, but 4b-qat has a caveat: it confounds quantization-aware training with quantization scheme and has no bit-matched control, so it can neither confirm nor disconfirm H2a. See section 4.
 
 - The asymmetry in the model roster in section 4 (the lack of 12b-fp16) causes asymmetry in section 3's H2a within-model check: 2 rungs for the 1b, 2 rungs for the 4b (excluding the exploratory 4b-qat), but just 1 rung for the 12b. This means the shape across the two steps on the 1b and across the two steps on the 4b are observable, but the 12b is only a directional test between two quants.
 
