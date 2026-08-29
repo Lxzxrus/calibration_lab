@@ -115,7 +115,15 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 
 - items.jsonl will be committed in the repo alongside the preregistration.
 
-- Let C be the minimum number of items required in the smaller class, correct or incorrect, in the worst cell. I set the value to 200. C = 200 was chosen on statistical grounds: it puts the noise floor around 0.02–0.03 (Hanley–McNeil approximation), which keeps 2 × floor around 0.04–0.06: small enough that H2a's per-step gaps and H2b's spread can clear it without the threshold swallowing effects the size of H1's suggestive band. The pilot measures the real floor. A materially wider measured floor is a section 12 disclosure.  Runtime checked and found non-binding: 1b-q8_0 at ~166 tok/s, 12b-q8_0 at ~36 tok/s puts a full sweep at roughly 4-6+ hours depending on N (Almost 50% of the runtime is 12b-q8_0 because it spills into system RAM). Next, p_weak = the accuracy of the weakest cell, and p_strong is the accuracy of the strongest cell. The formula: N = 200 / min(p_weak, 1 - p_strong) plus 10% exclusion margin. The pilot spec: 50 items each on gemma3:1b-it-q4_K_M and gemma3:12b-it-q8_0, different seed, and pilot items excluded from the main draw pool and data discarded. 50 pilot items on both extremes to ensure no thin cells in the case of extreme high/low accuracy. So, the pilot has four outputs: p_weak, p_strong, the AUROC noise floor, and the spread noise floor.
+- Let C be the minimum number of items required in the smaller class, correct or incorrect, in the worst cell. I set the value to 200. C = 200 was chosen on statistical    grounds: it puts the noise floor around 0.02–0.03 (Hanley–McNeil approximation), which keeps 2x the floor around 0.04–0.06: small enough that H2a's per-step gaps and H2b's spread can clear it without the threshold swallowing effects the size of H1's suggestive band.
+
+ At ~8.1s/item across all nine cells, N=900 takes 2.0 hours, N=1500 takes 3.4h, and N=2200 takes 5.0h.
+
+ ~8.1s/item comes from the constant 5.82 seconds (27 calls per item * 215.5 ms) plus ~2.3 seconds (prompt_eval, eval and server_slack summed across the nine cells).
+
+ The runtime probe (run 2026-08-27, complete) yielded that the load_duration was nearly identical between 12b-q8_0 and 1b-q4_K_M - 215.73 ms and 215.39 ms respectively. This accounts for ~72% of projected runtime and it is invariant across model size, quantization, template, prompt length, and logprobs, therefore it is a constant. The remaining ~28% is made up of prompt_eval, eval, and server_slack measurements. When accounted for, the 12b-q8_0 has a wall-clock time of 317.86 ms per call, and the 1b-q4_K_M 251.52 ms per call. Nine cold loads plus nine unloads: ~51 seconds total - measured total confirms section 6's conclusion that model loading is negligible, while replacing the ~2.3s each figure behind it.  (More in section 6's findings block).
+
+ The pilot is specified below, not yet run. p_weak = the accuracy of the weakest cell, and p_strong is the accuracy of the strongest cell. The formula: N = 200 / min(p_weak, 1 - p_strong) plus 10% exclusion margin. The pilot spec: 50 items each on gemma3:1b-it-q4_K_M and gemma3:12b-it-q8_0, different seed, and pilot items excluded from the main draw pool and data discarded. 50 pilot items on both extremes to ensure no thin cells in the case of extreme high/low accuracy. So, the pilot has four outputs: p_weak, p_strong, the AUROC noise floor, and the spread noise floor.
 
 - p_weak = [ ] , p_strong = [ ] , N = [ ]
 
@@ -148,6 +156,22 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
  Degenerate generation. On gemma3:1b-it-q8_0 (digest 0fdb9c7fefee), one TriviaQA item produced degenerate repeating output. With num_predict ≥ 32 the response returned done: false with no metadata fields; at ≤ 31 it returned normally with done_reason: "length". Confirmed on Ollama 0.32.6 and 0.32.14, same digest, identical boundary. Observed on a single item - two versions makes the boundary stable, not general.
 
  Pinning num_ctx from 131072 to 2048 cost throughput on the 12b (35.9 → ~20 tok/s), which is counterintuitive and unexplained. Uniform across cells, so it threatens nothing, but recorded as a measured fact. * measured on the previous driver, not re-checked on 26.8.1
+
+ Model load/unload timing data table:
+
+ | model | cold load | VRAM | unload |
+ |---|---|---|---|
+ | 1b-q4_K_M | 2.15 s | 835 MB | 42 ms |
+ | 1b-q8_0 | 2.19 s | 1086 MB | 51 ms |
+ | 1b-fp16 | 2.94 s | 1979 MB | 73 ms |
+ | 4b-q4_K_M | 4.45 s | 2740 MB | 100 ms |
+ | 4b-qat | 4.28 s | 3376 MB | 119 ms |
+ | 4b-q8_0 | 5.46 s | 4305 MB | 145 ms |
+ | 4b-fp16 | 8.20 s | 7774 MB | 243 ms |
+ | 12b-q4_K_M | 8.21 s | 7670 MB | 247 ms |
+ | 12b-q8_0 | 11.93 s | 12642 MB | 391 ms |
+
+ The table above shows cold load ranges 2.15-11.93 s and scales, unload scales with resident VRAM, and nine loads plus nine unloads total ~51 s. unload_polls was 0 on every row, so each unload figure is the latency of a single blocking /api/ps call rather than a polled interval - probably teardown given the clean scaling on VRAM but not proven, and doesn't affect the conclusion that model loading is negligible against the multi-hour sweep. The line "nine model loads at ~2.3s each" below was the 1b's figure generalized to the roster and is wrong for eight of nine models.
 
 Templates
 - A: [Question] Answer with only the answer, no explanation, in 10 words or fewer. If unsure, give your single best guess.
@@ -200,7 +224,7 @@ Throughput Measurements:
 
  Log the (item ID, model tag, elicitation method) triple on every row. On startup, read the existing log, collect completed triples, skip them. JSONL keeps the log valid under interruption but it won't make a run continuable. On resume, the log reader tolerates a malformed final line and discards it. An interrupted run can leave a partial JSON object at the end of the file. Because every completed row is a self contained line, only the incomplete line is lost. Re run that call.
 
- Log 'load_duration' per call. Lets me verify no cell silently cold started mid run.
+ Log 'load_duration' per call. Lets me verify no cell silently cold started mid run. Checkable threshold: warm = ~215ms, cold = 2.15-11.93s, per call. (Based on probe data, see section 5's runtime block)
 
  Parser tolerates an absent bytes field.
 
