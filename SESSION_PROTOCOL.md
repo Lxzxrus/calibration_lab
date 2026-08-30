@@ -32,6 +32,7 @@ had already moved past it.
 ## B. Opening block (paste into chat alongside the uploads)
 
 ```
+cd C:\Users\legen\projects\calibration_lab
 git log -1 --format="%h %ad %s"
 git status --short
 git diff --stat <last-verified-hash> HEAD
