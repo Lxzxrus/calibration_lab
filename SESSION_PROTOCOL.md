@@ -46,7 +46,7 @@ Upload: the prereg **and** the handoff, both current, both committed.
 
 ## C. Opening a session (Claude, before any work)
 
-1. **Header hash vs `HEAD`.** Mismatch means the handoff describes a version that no
+1. **Header hash + exactly one handoff-only commit vs `HEAD`.** Mismatch means the handoff describes a version that no
    longer exists. Stop and reconcile before touching anything.
 2. **`git status` clean?** Anything uncommitted means the uploaded file is not the
    committed file, and no claim about repo state can be trusted.
