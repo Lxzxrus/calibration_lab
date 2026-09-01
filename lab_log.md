@@ -2,6 +2,7 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
+ ## 2026-08-31 — entry deferred to 09-01, session ran late. Code committed; see handoff §0 and §5e for the re-plan and measurements.
 
 ## 2026-08-29 - §5 runtime reconstruction, §6 number-home consistency sweep, §10 rework begun, Kadavath scale correction
 
