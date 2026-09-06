@@ -22,3 +22,18 @@ shuffled = kept.shuffle(seed=DRAW_SEED)
 pilot_items = shuffled.select(range(PILOT_N))
 print(len(pilot_items))
 assert len(pilot_items) == PILOT_N
+
+# pulling needed values nested under the answer field
+row = pilot_items[0]
+items = []
+for row in pilot_items:
+    item = {
+        'question_id': row['question_id'],
+        'question': row['question'],
+        'normalized_value': row['answer']['normalized_value'],
+        'normalized_aliases': row['answer']['normalized_aliases'],
+        'value': row['answer']['value']
+    }
+    items.append(item)
+print(len(items))
+assert len(items) == PILOT_N
