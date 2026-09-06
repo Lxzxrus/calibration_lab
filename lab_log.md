@@ -2,7 +2,26 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
- ## 2026-08-31 — Re-plan: prereg paused for harness. Environment built, Slice 1 steps 1–2.
+## 2026-09-05 - Harness Slice 1 finished and deferred lab log entry resolved.
+To begin, I fixed the deferred lab log entry - see entry "2026-08-31 - Re-plan" for more.
+
+I shuffled the questions out of the dataset from seed = 8, took 50 of them, and sorted through them with a for loop - pulling the 5 values needed from all 50 items, verifying there is actually 50 via assert function, then recording them to items_pilot.jsonl and also recording timestamp, dataset, config, split, draw, draw_seed, source_rows, skipped, and items_drawn into items_manifest.json. I did a once-over of the two generated files and found ASCII escaping standing in for UTF-8 characters. 
+
+I ran the script three times and got odql_4374 as item 0 every time. That's the seed verified rather than assumed - supports my replication claims. A replicator using DRAW_SEED = 8 gets the exact same items I did.
+
+\uXXXX escapes throughout the alias lists. Not corruption - json.dumps defaults to ensure_ascii=True, so non-ASCII gets escaped. \u0430\u043b\u044f\u0441\u043a\u0430 is аляска, Alaska in Cyrillic. Kept the default deliberately: pure-ASCII output can't be misread by anyone regardless of their editor's encoding.
+
+qw_402 carries CSV escaping that was never stripped - the question is wrapped in quotes with "" doubled around The Gold Cup. One of 50. Reaches the model as prompt noise, uniform across cells, not fixed because a de-escaping rule is the unjustifiable-free-parameter knob again.
+
+TriviaQA's construction artifacts now appear in three distinct fields: the answer wiring (qf_1637), the value field ('(a', "A: Basketball" on tc_543), and the question field (qw_402). Three independent instances is a dataset-quality limitation, not three coincidences. This needs to be a section 10 entry.
+
+Slice 1 done in 2 sessions, 12-19 sessions estimate for completed harness is holding accurate. 
+
+One hazard worth logging: draw_pilot.py opens in 'w' mode, so re-running it overwrites both committed artifacts. Harmless while the seed is fixed; a live risk if DRAW_SEED or PILOT_N ever changes.
+
+I discovered that .select() returns a dataset while example[0:50] returns a column dictionary - I need rows, not columns, so I used .select()
+
+ ## 2026-08-31 - Re-plan: prereg paused for harness. Environment built, Slice 1 steps 1–2.
 
 *Entry written 2026-09-05. Deferred at session close on 08-31 (session ran late), then
 deferred four days beyond the stated 09-01. Measurements recovered from the session
