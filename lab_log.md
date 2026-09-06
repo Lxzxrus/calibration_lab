@@ -2,7 +2,38 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
- ## 2026-08-31 — entry deferred to 09-01, session ran late. Code committed; see handoff §0 and §5e for the re-plan and measurements.
+ ## 2026-08-31 — Re-plan: prereg paused for harness. Environment built, Slice 1 steps 1–2.
+
+*Entry written 2026-09-05. Deferred at session close on 08-31 (session ran late), then
+deferred four days beyond the stated 09-01. Measurements recovered from the session
+transcript, not from disk, the reason the deferral was a risk.*
+
+ A few handoff claims failed the verification:
+ - "~2.3s is gone from the document entirely" is false. section 5 line 122 carries "~2.3 seconds (prompt_eval, eval and server_slack summed across the nine cells)." Different quantity from the dead one (the 1b cold-load figure generalized to the roster), same digits. The 08-29 lab log entry states it wrong too — this entry corrects it.
+ - Section 5c item 1 was mis-scoped. Section 1's research question has no "uncharted" claim. The only stale text is the header Study: line - "frontier-scale," when Kadavath topped out at 52B. One-line fix. The overlap framing belongs in Section 2, which is empty.
+ - No [others] placeholder exists in section 10 (Section 5c item 5 says to delete it). Separately: section 10 line 331 reads "qwen3 has almost certainly seen MMLU and TriviaQA" but the roster is gemma3 and MMLU was dropped. Wrong on the page, not scaffolding.
+
+The re-plan: the pilot requires a harness, and up to this point I had done nothing at all to build the harness. Section 5's p_weak, p_strong, and N blanks and H2a/H2b's noise floor thresholds all require pilot data. The harness is a hard roadblock to the freeze. I decided that September 21st was not a hard deadline, but more so a "capacity cliff" - my life gets considerably busy after Sep 21st and I will no longer have the hours to dedicate to this lab that it deserves. i.e: I should get as much done as possible before Sep 21st, and after the 21st I tidy things up and prepare for freeze. My rough new target is slices 1-3 and the pilot completed before the 21st, slice 4 and freeze in October. This re-plan mainly revolves around my personal life. I am logging it to show the change in direction of work and effort. 
+
+Design Decisions: items.jsonl will have 5 fields: question_id, question, normalized_value, normalized_aliases, value. Dropped answer.type and a draw index. Sidecar manifest, not a JSONL header line. Pilot exclusion by subtraction. Pilot is one draw of 50 on both extremes. Two scripts, duplication hazard (Row shape lives in two seperate files, changing one and missing the other produces mismatched shapes that won't crash) accepted.
+
+The Measurements: 
+- Validation split: 11,313 rows - Train: 87,622 (from verifying the split argument).
+- question_id is unique across all 11,313 so it is usable as a key.
+- entity_pages and search_results fields are empty - this is the nocontext config verified.
+- Alias set size (normalized_value and normalized_aliases): min 1, max 214, mean 11.7.
+- I found exactly one row with an empty normalized_value.
+- Pool math: N = 200 / min(p_weak, 1 - p_strong) +10%: p_weak 0.10 → ~2,200 · 0.05 → ~4,400 · 0.03 → ~7,330 · 0.02 → ~11,000. Pool after pilot withdrawal 11,262. Comfortable unless the 1b lands near 2% accuracy.
+
+The two items I found:
+- qf_1637: Question: "In the cartoon, what kind of bird is the roadrunner?" Answer entity: static libraries, .lib, .a, static linking, static compilation. value is the fragment '(a', which normalizes to nothing - that's why normalized_value is blank. The answer entity is internally coherent, just attached to the wrong question, which is why there's nothing to scan for. Dropped by id at draw time, before any model runs, so it's a source defect and not a section 9 exclusion. Open and unquantifiable: rows mis-wired without blanking a field are mechanically undetectable.
+- sfq_9993: The 214 max. Question: "In computing, what started life at Stanford University as 'backrub'?" Answer is Google; aliases are every country code domain (google.ae, google.am, google.at, etc.) and scraped typos (gogole com, giigke cin). This is the remnants of a Wikipedia redirect table. I did not cap it though, I would have to invent an unjustifiable number - which I have already rejected doing twice before.
+
+Pre-Pilot Exceptions: Section 11's interpretation rule and section 8's noise floor procedure must be written before the pilot or else they are post-hoc.
+
+Environment Setup: Python 3.12.8, .venv, requirements.txt, .gitignore, execution policy. 3.12 was chosen over the newest Python because the scientific stack may not have wheels built for the newest version yet, and the study's own principle is that this repo pins its own environment rather than inheriting one.
+
+Code: draw_pilot.py steps 1–2 of 5: loads split, prints count, filters qf_1637 by id, asserts len(kept) == len(dataset) - 1. Verified 11,313 → 11,312.
 
 ## 2026-08-29 - §5 runtime reconstruction, §6 number-home consistency sweep, §10 rework begun, Kadavath scale correction
 
