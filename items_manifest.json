@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-09-05T21:10:50.315940",
+  "dataset": "mandarjoshi/trivia_qa",
+  "config": "unfiltered.nocontext",
+  "split": "validation",
+  "draw": "pilot",
+  "draw_seed": 8,
+  "source_rows": 11313,
+  "skipped": [
+    "qf_1637"
+  ],
+  "items_drawn": 50
+}
