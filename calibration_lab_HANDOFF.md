@@ -2,7 +2,7 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-08-31 · **Synthesized against commit:** `cb92a94` · **Status:** Prereg paused mid-draft. Harness construction begun — Slice 1, steps 1–2 of 5.
+**Last updated:** 2026-09-05 · **Synthesized against commit:** `2d73604` · **Status:** Prereg paused mid-draft. **Slice 1 COMPLETE.** Slice 2 next.
 
 *Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
@@ -37,9 +37,9 @@ fragments where it will still work.
   in `ece_test.py`.
 - **Diagrams by end of October.** Treat November and December as near-zero work months;
   the mid-December REU application should read from a finished thing.
-- **Harness estimate: ~12–19 sessions.** Slice 1 is the calibration probe — 1–2 sessions
-  means the estimate holds, 4+ means re-plan. As of 08-31 it is tracking: steps 1–2 of 5
-  done in part of one session.
+- **Harness estimate: ~12–19 sessions.** Slice 1 was the calibration probe — 1–2 sessions
+  holds the estimate, 4+ triggers a re-plan. **It came in at two.** See the estimate check
+  in §0.
 
 ### The two pre-pilot exceptions — mandatory
 
@@ -52,21 +52,32 @@ fragments where it will still work.
 
 ### Next actions, in order
 
-1. **Slice 1, steps 3–5** — pick `draw_seed`, shuffle, take 50, write `items_pilot.jsonl`
-   and `items_manifest.json`. See §5e.
-2. **Slice 2** — runner, then grader. Biggest new-concept load in the project.
-3. **§11 rule and §8 procedure**, in whatever gaps the code leaves.
-4. **Slice 3** — roster loop.
+1. **Slice 2 — runner.** One model, one method, append-only JSONL. Biggest new-concept
+   load in the project: HTTP to Ollama, logprob extraction, digest hard-stop, per-run and
+   per-row logging (§6 specifies 11 fields and 5 categories).
+2. **Slice 2 — grader.** Boundary matching over the union of `normalized_value` and
+   `normalized_aliases`, negation detection, two parsers. §6's spec is complete, so this
+   is transcription plus debugging.
+3. **§11 rule and §8 procedure**, in whatever gaps the code leaves. Both pre-pilot
+   mandatory.
+4. **Slice 3** — second elicitation method, loop the roster.
 5. **Pilot**, then the remaining §5c prose, then freeze.
+
+### Estimate check — 2026-09-05
+
+Slice 1 was the calibration probe: **1–2 sessions holds the estimate, 4+ triggers a
+re-plan.** It came in at **two sessions.** The ~12–19 session harness estimate survives its
+first test and remains the working number. Next checkpoint is Slice 2, budgeted at 6–10
+sessions across runner and grader.
 
 ### Standing
 
-**No study data has been run.** Harness code is `draw_pilot.py` (steps 1–2). The three
+**No study data has been run.** Harness code is `draw_pilot.py`, complete. The three
 `probe*.ps1` scripts and `ece_test.py` remain environment characterization and learning
 artifacts. All Ollama calls so far are environment characterization.
 
-**Division of labor on code (2026-08-31, explicit).** Laz writes every line. Claude
-explains constructs, reviews, and says where it will break — and does **not** supply
+**Division of labor on code (2026-08-31, held through Slice 1).** Laz writes every line.
+Claude explains constructs, reviews, and says where it will break — and does **not** supply
 code. Writing ownership across the project: code — Laz · prereg — Laz · lab log — mostly
 Laz, Claude adds and edits · handoff — Claude. Reading is both.
 
@@ -341,6 +352,19 @@ Order: **environment → findings → templates → parsing rules → parameters
     country-code domain plus scraped typos (`gogole com`, `giigke cin`). No cap applied:
     an alias-count threshold is the same unjustifiable free parameter already rejected for
     minimum alias length and minimum retained mass.
+19. **§10: TriviaQA construction artifacts are a pattern, not three coincidences.**
+    Three distinct fields carry leftover machinery from dataset construction: the
+    **answer wiring** (`qf_1637` — a valid answer entity attached to the wrong question),
+    the **`value` field** (`'(a'` on qf_1637, `"A: Basketball"` on tc_543), and the
+    **`question` field** (`qw_402` — CSV escaping never stripped: the whole question
+    wrapped in quotes with `""` doubled around an internal title). Written as one
+    dataset-quality entry with three instances, alongside the off-label alias entry
+    (item 18). All uniform across cells, so none can produce a differential.
+20. **§5: `draw_pilot.py`'s output is destructive on re-run.** The script opens
+    `items_pilot.jsonl` and `items_manifest.json` in `'w'` mode. Harmless while
+    `DRAW_SEED` and `PILOT_N` are fixed — same inputs, same output — but a live risk if
+    either changes. Git catches it; the hazard is worth one line where §5 describes the
+    frozen item set.
 
 ---
 
@@ -419,31 +443,96 @@ manifest so no one later thinks one number did both jobs. **Value not yet chosen
 Note: at temperature 0 decoding is greedy, so seed 42 does approximately nothing —
 it is pinned under "inherit nothing," not because it is load-bearing.
 
-### `draw_pilot.py` — steps 1–2 of 5 complete
+### `draw_pilot.py` — COMPLETE 2026-09-05
 
-Loads the validation split, prints the count, filters `qf_1637` by id, asserts
-`len(kept) == len(dataset) - 1`. Verified 11,313 → 11,312. The `split` argument was
-verified by pointing it at train (87,622) and back — copied code converted to understood
-code.
+Runs end to end: loads the split, filters `qf_1637` by id, shuffles with `DRAW_SEED`,
+selects `PILOT_N`, reshapes each row to five fields, writes `items_pilot.jsonl` and
+`items_manifest.json`. Constants at top (`DRAW_SEED = 8`, `PILOT_N = 50`, `DATASET`,
+`CONFIG`, `SPLIT`, `DRAW`), an `assert` after each stage, and comments carrying reasoning
+rather than mechanics.
+
+**`DRAW_SEED = 8`**, chosen before any item was seen. **Reproducibility verified:** three
+consecutive runs returned `odql_4374` at index 0. That is the evidence behind every
+replication claim about this file — a replicator running seed 8 gets the same 50 items,
+not a similar sample.
+
+**Order is load → filter → shuffle → select.** Shuffling before selection is what makes the
+draw a random sample rather than TriviaQA's storage order; filtering before shuffling is
+what makes `qf_1637` unselectable.
 
 **Filtered by id, not by blank `normalized_value`:** the blank is a symptom. If the source
 is ever revised, a symptom-based filter silently changes what it removes.
 
-**Remaining:** pick `draw_seed`, shuffle, take 50, write both files.
+**`.select(range(PILOT_N))` over `shuffled[0:50]`.** `.select()` returns a Dataset;
+bracket-slicing returns a **dictionary of columns** — five parallel lists, not 50 rows.
+The write step walks rows, so rows are the shape to keep. Re-zipping parallel lists by
+index is where off-by-one misalignment between questions and answers would come from.
+Third encounter with the row/column split (also `dataset[0]` vs `dataset['question_id']`,
+and `row['answer']['normalized_value']` vs the column form).
 
-### Concepts landed 2026-08-31 (don't re-explain; do check for regression)
+**Committed artifacts:** `items_pilot.jsonl` (50 lines, verified on disk) and
+`items_manifest.json`. The manifest's nine fields are all **derived from the run**, never
+typed — a hand-entered seed that disagrees with `DRAW_SEED` is worse than no manifest.
+`items_pilot.jsonl` is what `draw_main.py` will read to build its exclusion list.
 
-`import` brings in code, function calls fetch data · variables and `=` as a command that
-stores vs `==` as a question that compares · `len()` · dictionary access `row['key']` ·
-dataset row access `d[0]` vs column access `d['col']` · `lambda` · `.filter()` returns a
-new dataset and does not mutate · `assert` as a hard stop, written as a *relationship*
-(`len(dataset) - 1`) rather than a hardcoded 11312 · `#` comments · comments carry *why*,
-code carries *what*.
+**Manifest as written 2026-09-05:** timestamp `2026-09-05T21:10:50`, dataset
+`mandarjoshi/trivia_qa`, config `unfiltered.nocontext`, split `validation`, draw `pilot`,
+`draw_seed` 8, `source_rows` 11313, `skipped` `["qf_1637"]`, `items_drawn` 50.
 
-**Error messages met:** `NameError` (name never created) · `'X' object is not callable`
-(parentheses after something that isn't a function). Worth knowing the silent class too:
-`['question_id']` without `row` builds a one-item list, compares unequal to every string,
-filters nothing, and does not crash.
+### Two artifacts found in the written file (2026-09-05)
+
+**`\uXXXX` escapes throughout the alias lists — not corruption.** `json.dumps` defaults to
+`ensure_ascii=True`, rewriting non-ASCII as escapes. `\u0430\u043b\u044f\u0441\u043a\u0430`
+is *аляска*, Alaska in Cyrillic; Arabic and emoji also appear. Valid JSON, round-trips
+exactly through `json.loads`. **Default kept deliberately:** pure-ASCII output cannot be
+misread regardless of a reader's encoding settings — same self-containment argument that
+kept the `value` field.
+
+**`qw_402` carries unstripped CSV escaping.** The question text is wrapped in quotes with
+`""` doubled around an internal title. One of 50. Reaches the model as mild prompt noise,
+identical across all nine cells. Not repaired — a de-escaping rule would need to
+distinguish artifact quotes from legitimate quoted titles, which is the unjustifiable free
+parameter rejected for minimum alias length, minimum retained mass, and alias caps.
+
+Together with `qf_1637` and tc_543, these make **three distinct fields** carrying
+construction artifacts. See §5c item 19.
+
+### Remaining in Slice 1's family
+
+`draw_main.py` — not written, and cannot be until the pilot reports `p_weak` and
+`p_strong`. Reads `items_pilot.jsonl`, subtracts those ids from the pool, draws N with a
+**different seed**. Duplication hazard stands: the five-field row shape will exist in two
+files.
+
+### Concepts landed (don't re-explain; do check for regression)
+
+**2026-08-31:** `import` brings in code, function calls fetch data · variables and `=` as a
+command that stores vs `==` as a question that compares · `len()` · dictionary access
+`row['key']` · dataset row access `d[0]` vs column access `d['col']` · `lambda` ·
+`.filter()` returns a new dataset and does not mutate · `assert` as a hard stop, written as
+a *relationship* (`len(dataset) - 1`) rather than a hardcoded 11312 · `#` comments ·
+comments carry *why*, code carries *what*.
+
+**2026-09-05:** `.shuffle(seed=)` and why a seed is fixed-and-recorded rather than
+unpredictable · `.select()` vs bracket-slicing · `for` loops, and indentation as block
+structure rather than decoration · building dictionaries with `{}` · empty list `[]` and
+`.append()` (mutates in place, returns nothing — never `items = items.append(x)`) ·
+`with open(...) as f` and automatic close · `json.dumps` (returns a string, needs
+`+ '\n'`) vs `json.dump` (writes to a file, takes `indent=`) · explicit `encoding='utf-8'`
+as "inherit nothing" applied to file I/O · constants in ALL_CAPS so one fact has one home ·
+chained method calls use `.`, not `,`.
+
+**Error classes met:** `NameError` (name never created) · `KeyError` (asked a dictionary
+for a label it lacks) · `'X' object is not callable` (parentheses after something that
+isn't a function) · `IndentationError`. And the silent class, which is the dangerous one:
+`['question_id']` without `row` builds a one-item list that compares unequal to every
+string, filters nothing, and does not crash; a wrong key on the *left* of a colon writes a
+wrongly-named field into all 50 lines without error (caught as `'question_'`).
+
+**Failure modes demonstrated rather than explained:** a comment left stale when the code
+under it moved · a fix that existed in conversation but not in the file that was run ·
+adapting a working block into a context with a different shape (the JSONL write loop
+reached for when the manifest needed a single object, written once).
 
 **Autocomplete disabled in VS Code** (`quickSuggestions`, `parameterHints`,
 `inlineSuggest`, `acceptSuggestionOnEnter`) at Laz's request — a parameter hint had
@@ -547,8 +636,8 @@ Dropping `num_ctx` 131072 → 2048 cost the 12b throughput (35.9 → ~20 tok/s a
 - **Slice 0** — pre-registration. **PAUSED mid-draft 2026-08-31.** §3, §4, §6, §7 done.
   Blockers now split: §11's rule and §8's noise floor are **pre-pilot mandatory**;
   §10's transcription and §2 are post-pilot, pre-freeze.
-- **Slice 1** — dataset loader. ← *here.* Steps 1–2 of 5 done.
-- **Slice 2** — runner (one model, one method) + grader. Append-only JSONL.
+- **Slice 1** — dataset loader. **COMPLETE 2026-09-05**, two sessions.
+- **Slice 2** — runner (one model, one method) + grader. ← *here.* Append-only JSONL.
 - **Slice 3** — second elicitation method; loop the roster.
 - **Slice 4** — analysis. **Deferred to October by design**, as the most fragment-tolerant
   work in the project.
@@ -611,6 +700,9 @@ Repo holds the pre-registration and data. Vault holds interpretation. **Canonica
 ## 11. Git state
 
 ```
+2d73604  2026-09-05  Slice 1 finished and deferred lab log entry resolved
+207f989  2026-09-01  Handoff: re-plan to harness-first, §5e harness state, three §5c corrections
+cb92a94  2026-08-31  Slice 1: TriviaQA loader with corrupted-row filter; log entry deferred
 99a126d  2026-08-29  08-29-2026 another small post-session fix
 101b7db  2026-08-29  08-29-2026 quick fix post-session
 a213298  2026-08-28  (last verified hash of the 08-28 session)
@@ -621,14 +713,22 @@ f8a12b4  2026-08-01  Section 3 completed
 3496554  2026-06-24  pre-registration template WIP
 ```
 
-Verified 2026-08-31:
+Verified 2026-09-05:
 
-- `SESSION_PROTOCOL.md` — committed with Laz's `cd` line added to §B. **Whether the §C.1
-  false-alarm fix also landed is unverified.**
-- `.gitignore` — created this session. First one in the repo.
-- `requirements.txt` — committed, pinned from `pip freeze`.
-- `draw_pilot.py` — committed, steps 1–2 of Slice 1.
+- `draw_pilot.py` — complete, committed.
+- `items_pilot.jsonl` — committed, 50 lines verified on disk with PowerShell, not just in
+  memory.
+- `items_manifest.json` — committed.
+- `lab_log.md` — both entries committed: 08-31 (written 09-05, five days after the stated
+  deferral) and 09-05.
+- `.gitignore` — `tempCodeRunnerFile.py` added. It is Code Runner's scratch file for
+  running a selection, not script output.
 - `.venv/` — correctly ignored.
+- **`SESSION_PROTOCOL.md` §C.1 false-alarm fix: still unverified.** The check as written
+  fires on every normal session open. See §0b.
+
+Carried from 2026-08-31: `SESSION_PROTOCOL.md` committed with Laz's `cd` line in §B;
+`.gitignore` created (first in the repo); `requirements.txt` pinned from `pip freeze`.
 
 Commit messages are now descriptive with reasoning in the body where the diff doesn't
 carry it. Adopted after `quick fix post-session` proved unfindable.
