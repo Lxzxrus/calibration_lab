@@ -84,9 +84,11 @@ gets written as one.
 
 ## E. Standing rules (carried forward, unchanged)
 
-- **One chat = one session = one handoff update = one commit.**
-- **A WORK session requires a committed artifact.** OPEN sessions are capped and only
-  permitted after the day's work session.
+- One session = lab log + commit, daily. Handoff = per chat. 
+- Explained: The session is the work day. Every work day gets a lab log entry written from the file and a commit. A chat window no longer dictates a work session. 
+- Reasoning: Even if one chat stays open for several days, a log and commit must happen every work session to prevent what's on disk falling behind what's in chat, and at the end of a long chat, the log gets written from the conversation instead of from the page - the 2026-08-26 failure in different clothing. I'm adopting this after my three day session with no daily log or commit, only after (see lab log ## 2026-09-06 - 2026-09-09). 
+- A work day only counts as a session when it produces a commit.
+- The 12-19 session harness estimate remains, and I consider the 3 day lot of time as 3 sessions. The session is no longer based on the chat window, but the work schedule itself remains unaltered. The unit changed name, not duration.
 - **The prereg governs** where prereg and handoff disagree.
 - **The handoff stays descriptive.** Reasoning that belongs in the prereg gets written
   by Laz, into the prereg, in his words.
