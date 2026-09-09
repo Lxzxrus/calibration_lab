@@ -1,0 +1,137 @@
+{
+  "model": "gemma3:1b-it-q4_k_m",
+  "created_at": "2026-09-09T22:54:33.1834671Z",
+  "message": {
+    "role": "assistant",
+    "content": "Pencils create a line, while pens leave a mark."
+  },
+  "done": true,
+  "done_reason": "stop",
+  "logprobs": [
+    {
+      "token": "P",
+      "logprob": -0.7716658115386963,
+      "bytes": [
+        80
+      ]
+    },
+    {
+      "token": "encils",
+      "logprob": -0.1589827537536621,
+      "bytes": [
+        101,
+        110,
+        99,
+        105,
+        108,
+        115
+      ]
+    },
+    {
+      "token": " create",
+      "logprob": -0.8571869730949402,
+      "bytes": [
+        32,
+        99,
+        114,
+        101,
+        97,
+        116,
+        101
+      ]
+    },
+    {
+      "token": " a",
+      "logprob": -1.443604588508606,
+      "bytes": [
+        32,
+        97
+      ]
+    },
+    {
+      "token": " line",
+      "logprob": -1.4522981643676758,
+      "bytes": [
+        32,
+        108,
+        105,
+        110,
+        101
+      ]
+    },
+    {
+      "token": ",",
+      "logprob": -0.9755531549453735,
+      "bytes": [
+        44
+      ]
+    },
+    {
+      "token": " while",
+      "logprob": -0.701050341129303,
+      "bytes": [
+        32,
+        119,
+        104,
+        105,
+        108,
+        101
+      ]
+    },
+    {
+      "token": " pens",
+      "logprob": -0.133548766374588,
+      "bytes": [
+        32,
+        112,
+        101,
+        110,
+        115
+      ]
+    },
+    {
+      "token": " leave",
+      "logprob": -1.893746018409729,
+      "bytes": [
+        32,
+        108,
+        101,
+        97,
+        118,
+        101
+      ]
+    },
+    {
+      "token": " a",
+      "logprob": -0.34114810824394226,
+      "bytes": [
+        32,
+        97
+      ]
+    },
+    {
+      "token": " mark",
+      "logprob": -0.6236262917518616,
+      "bytes": [
+        32,
+        109,
+        97,
+        114,
+        107
+      ]
+    },
+    {
+      "token": ".",
+      "logprob": -1.3062387704849243,
+      "bytes": [
+        46
+      ]
+    }
+  ],
+  "total_duration": 337981100,
+  "load_duration": 227637100,
+  "prompt_eval_count": 30,
+  "prompt_eval_duration": 24996000,
+  "eval_count": 13,
+  "eval_duration": 81931000
+}
