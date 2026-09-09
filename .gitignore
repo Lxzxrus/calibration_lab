@@ -2,6 +2,4 @@
 __pycache__/
 *.pyc
 .env
-data/
-!data/items.jsonl
 tempCodeRunnerFile.py

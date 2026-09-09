@@ -2,6 +2,31 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
+## 2026-09-06 - 2026-09-09 run_pilot.py creation and work.
+
+A forenote: I neglected this log for a couple days. I am making amends by combining three days of work into this entry - all work is done inside run_pilot.py
+
+- Step 1:
+draw_pilot.py is finished. it produced items_pilot.jsonl which I used here. Since run_pilot.py runs as its own separate program, none of draw_pilot.py's in-memory variables survive; the only thing that persisted across that script's exit was the file it wrote. So run_pilot.py opens items_pilot.jsonl in read mode, loops line by line, and uses json.loads() to turn each raw text line back into a real dictionary  Only question and question_id are kept per item - the answer fields (normalized_value/normalized_aliases/value) are deliberately dropped here, since the grader will re-open the frozen items_pilot.jsonl later and rejoin on question_id rather than carrying answer data through this pipeline. Asserts exactly 50 items came through.
+
+- Step 2:
+Ollama tags are mutable pointers, and the project had already been silently moved once before (Ollama 0.32.6 moved to 0.32.14),  so this step exists to refuse to generate any data if the environment has drifted, hard stopping rather than just warning. Used requests library (already a listed dependency, no fresh install needed) to make HTTP calls against Ollama's local server at 127.0.0.1:11434, not localhost. GET /api/version returns the running Ollama version; compared against a frozen OLLAMA_VERSION constant and hard-stops via sys.exit() with a message stating expected vs. received.
+GET /api/tags returns metadata for every locally installed model as a list under a 'models' key. Built two frozen constants, MODEL_1B_Q4 and MODEL_12B_Q8 - the pilot's weak/strong model pair from the prereg's section 4 roster - each pairing an expected model name with its expected digest, combined into a MODELS list. Built a nested loop: outer loop over the two expected models, inner loop searching all installed models for a name match, then comparing digests on match (hard stop on mismatch). Used break to stop the inner search early once found, and a "found" flag (reset fresh per outer-loop pass) to catch the case where an expected model isn't installed at all. Found that ollama list's CLI digest column is truncated (12-character prefix, not the full SHA256). Retrieved the full digests and verified against full digests - machine accuracy, a human can tell the difference by reading the first few characters of the hash. Tested code thoroughly and did a full pass of comments - step 2 functionally complete and verified.
+
+hand-edited .gitignore to add tempCodeRunnerFile.py (an artifact of my VScode extension "Code Runner") and found that data/ was structurally dead - git can't re-include a file inside an excluded directory - so I deleted both rules.
+
+Some findings: 
+- /api/tags casing investigation: a bug tripped me up here - 'model_name' 's value inside the two model constants at the top of run_pilot.py caused a "missing model" crash. Curious, I was certain I had the model. I printed the api tags and found that the name field was lowercase: "gemma3:1b-it-q4_k_m" and the quantization level field was uppercase: "q4_K_M"
+- The digest length bug fired on a healthy model because I trusted the windows powershell command "ollama list" to give me the digest hash, but ollama truncated the full hash in that CLI environment. I pulled the full hashes from the tags and updated the constants. But it did prove that the hard stop works - the check refused to proceed on a mismatch.
+
+An honest confusion: I was planning to write run_pilot.py inside of draw_pilot.py because I was confused on my next steps after having completed draw_pilot.py - Slice 2 had no step breakdown before starting the work like slice 1 did. A confusion caught before amending a finished draw_pilot.py, thankfully.
+
+A good lesson from debugging: inspect a structure you didn't build before reaching into it. Both came from writing the reach before printing the shape.
+
+## 2026-09-06
+
+hand-edited .gitignore to add tempCodeRunnerFile.py, discovered the data/ exception was structurally dead, removed both data/ rules because the pipeline writes to root.
+
 ## 2026-09-05 - Harness Slice 1 finished and deferred lab log entry resolved.
 To begin, I fixed the deferred lab log entry - see entry "2026-08-31 - Re-plan" for more.
 
