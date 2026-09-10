@@ -2,7 +2,7 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-09-05 · **Synthesized against commit:** `2d73604` · **Status:** Prereg paused mid-draft. **Slice 1 COMPLETE.** Slice 2 next.
+**Last updated:** 2026-09-10 · **Synthesized against commit:** `ff7df62` · **Status:** Prereg paused mid-draft, two pre-pilot amendments landed. **Slice 1 COMPLETE.** Slice 2 in progress — run_pilot.py steps 1–4 of 7.
 
 *Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
@@ -37,11 +37,17 @@ fragments where it will still work.
   in `ece_test.py`.
 - **Diagrams by end of October.** Treat November and December as near-zero work months;
   the mid-December REU application should read from a finished thing.
-- **Harness estimate: ~12–19 sessions.** Slice 1 was the calibration probe — 1–2 sessions
-  holds the estimate, 4+ triggers a re-plan. **It came in at two.** See the estimate check
-  in §0.
+- **Harness estimate: ~12–19 sessions, now counted in work-days (see §0b). Slice 1 came in at two. Slice 2 is budgeted 6–10 and is four sessions in with 4 of 7 runner steps done. Watch, not re-plan.
 
 ### The two pre-pilot exceptions — mandatory
+
+Template B dropped from pre-21st scope — 2026-09-10
+
+A completion threshold was set at the start of the 09-09/10 session: runner steps 3–6 done and step 7 started, or Template B leaves the pre-21st build. The session reached step 4. The pilot runs Template C only. Template B lands in October.
+
+The cost, stated rather than discovered later: B's parser is the hard one — position 0 fixed, affirmative/negative mass summed and renormalized, retained mass logged, the empty-token-with-absent-bytes edge case — and it now gets built in fragmented time alongside coursework and a newborn.
+
+What survives intact: a C-only pilot still yields p_weak, p_strong, an AUROC floor, and a debugged harness, which is what §8 says the pilot is for. The spread floor and H2b are unaffected — they need the roster, not the second method.
 
 1. **§11's interpretation rule** (the AUROC-flat-while-ECE-degrades case). Written after
    the pilot, it is post-hoc even though pilot data is discarded.
@@ -52,12 +58,8 @@ fragments where it will still work.
 
 ### Next actions, in order
 
-1. **Slice 2 — runner.** One model, one method, append-only JSONL. Biggest new-concept
-   load in the project: HTTP to Ollama, logprob extraction, digest hard-stop, per-run and
-   per-row logging (§6 specifies 11 fields and 5 categories).
-2. **Slice 2 — grader.** Boundary matching over the union of `normalized_value` and
-   `normalized_aliases`, negation detection, two parsers. §6's spec is complete, so this
-   is transcription plus debugging.
+1. Slice 2 — runner, steps 5–7. Step 5 writes one row; step 6 loops to 50 and carries the warm-up call as a hard completion gate; step 7 adds per-run metadata and keep_alive: 0 on the final call. Open before step 5: the row structure — keys, nesting, provenance per-row vs. run-header, and where the run id and harness commit hash come from. Both calls' done / done_reason must be captured; §9's exclusion rules read them and the current code discards them.
+2. Slice 2 — grader. Boundary matching over the union of normalized_value and normalized_aliases, negation detection, Template C's parser only for now. §6's spec is complete, so this is transcription plus debugging. Rejoins to items_pilot.jsonl on question_id — the runner does not carry the answer key.
 3. **§11 rule and §8 procedure**, in whatever gaps the code leaves. Both pre-pilot
    mandatory.
 4. **Slice 3** — second elicitation method, loop the roster.
@@ -72,9 +74,7 @@ sessions across runner and grader.
 
 ### Standing
 
-**No study data has been run.** Harness code is `draw_pilot.py`, complete. The three
-`probe*.ps1` scripts and `ece_test.py` remain environment characterization and learning
-artifacts. All Ollama calls so far are environment characterization.
+No study data has been run. Harness code is draw_pilot.py (complete) and run_pilot.py (steps 1–4 of 7). Probe scripts — three probe*.ps1 plus probe4_endpoint_logprob_diff.py — and ece_test.py remain environment characterization and learning artifacts. All Ollama calls so far are environment characterization.
 
 **Division of labor on code (2026-08-31, held through Slice 1).** Laz writes every line.
 Claude explains constructs, reviews, and says where it will break — and does **not** supply
@@ -97,12 +97,11 @@ governs on process; the prereg governs on content.
 they were only *decided*. §5c is the list that catches it. Verification is against the
 page, in both directions.
 
-**Protocol defect found 2026-08-31, status unverified.** §C.1 says a header-hash/`HEAD`
-mismatch means "stop and reconcile." But §A stamps the header with the work commit and
-*then* commits the handoff, so `HEAD` is always one handoff-commit ahead. The check will
-fire every session on a normal condition, and a check that always fires stops being read.
-Correct condition: header hash **plus exactly one handoff-only commit** is clean; anything
-else stops. Unknown whether this was fixed in the 08-31 protocol commit — verify.
+Protocol defect found 2026-08-31 — VERIFIED FIXED 2026-09-07. §C.1 now reads "header hash plus exactly one handoff-only commit vs HEAD," which is the corrected condition. The 08-31 protocol commit did land it. Item closed.
+
+§E amended 2026-09-09 — the session is the work-day, not the chat. One session = one lab-log entry + one commit, daily. The handoff stays chat-scoped and is rewritten when the chat closes, which may cover several days. A work-day counts as a session only if it produces a commit; the OPEN/WORK split was retired but the committed-artifact requirement was kept. The 12–19 estimate carries over unchanged — the unit changed name, not duration.
+
+Reasoning on the page: §F's two failures were conversation and disk drifting apart, not chats running long. The new hazard the amendment names is specific — at the end of a long chat the lab log gets written from the conversation instead of from the page, which is the 2026-08-26 failure in different clothing, and it will not feel like it, because the whole discussion is sitting right there reading like fresh recall. Same-day entries are the guard. Adopted three days late and in practice before it was written down; recorded as such.
 
 ---
 
@@ -261,6 +260,8 @@ The accuracy control reads out the mixture:
 
 *Verified against commit `99a126d`, 2026-08-29. §4, §5, §6, §10 read directly from the file this session; §1–3 and §7–13 carried forward from the 2026-08-27 pass — re-verify next session.*
 
+§9 re-verified against the file 2026-09-07. Two entries in this table were stale in the "logged as pending but already landed" direction and are corrected below.
+
 | § | Status | What's left |
 |---|---|---|
 | Header | ⚠️ stale | "Study:" line still uses the old Kadavath framing — **and that framing is now known to be factually wrong**, not merely dated. `Drafted: [7-15-2026]` is a filled value inside brackets; a pre-freeze bracket scan will false-positive on it. |
@@ -269,10 +270,10 @@ The accuracy control reads out the mixture:
 | 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. Δ verified 2026-08-29 as the `q8_0 → q4_K_M` pair, present at all three sizes — H2b is testable. **E1 missing entirely.** Check H1's rationale for the old "uncharted" framing. |
 | 4. Models | ✅ COMPLETE | Locked 2026-08-08. Amended 2026-08-29: the one-family line now states the recipe is fixed across all nine with QAT carrying an additional training stage. |
 | 5. Datasets | ✅ COMPLETE | Runtime block rebuilt from probe data 2026-08-28, probe date corrected and load/unload figures de-duplicated 2026-08-29. Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. |
-| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. |
+| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. templates moved into fenced code blocks 2026-09-10, prompt text byte-identical before and after.|
 | 7. Metrics | 🟡 partial | No throughput or memory-footprint metric, so nothing feeds E1. |
 | 8. Analysis plan | 🟡 partial | Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure**. |
-| 9. Exclusion rules | 🟡 near-done | Timeout filled at 90s. `no_valid_response` still carries a leftover "within N seconds" clause duplicating the timeout rule — should be `done: false` only. **Exclusion table has no `no_valid_response` column.** Consider adding mean-retained-mass and truncation-rate columns; it's the only per-cell reporting structure in the document. |
+| 9. Exclusion rules | 🟡 near-done | Timeout filled at 90s. no_valid_response is already done: false only — the "within N seconds" clause is gone from the file and the claim that it remained was stale. Mean-retained-mass and truncation-rate columns already exist. Still missing: the exclusion table has no no_valid_response column. |
 | 10. Confounds | 🟡 partial | qat clause and roster-asymmetry entry landed 2026-08-29. **Still open:** contamination rewrite, extrapolation split, differential-exclusion line, and deletion of the four scaffold bullets + orphan fragment. ECE resolved as *not* §10 — it is §11's unwritten rule. |
 | 11. Null result | ❌ **placeholder** | Records the ECE decision but not the rule — it announces a rule for the AUROC-flat-while-calibration-degrades case and never states it. Needs full redesign — three hypotheses can null independently, and H2b can come back *not evaluable*. Option-four interpretation rule lands here. |
 | 12. Deviations | ✅ ready | Empty by design until freeze. |
@@ -306,6 +307,11 @@ Order: **environment → findings → templates → parsing rules → parameters
 
 **Closed 2026-08-31:** none. Prereg untouched — the session was environment and harness.
 
+Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D intentional amendments same session):
+
+§6 templates fenced. A/B/C moved into fenced code blocks with labels and list bullets outside the fence. The two-space continuation indentation on B and C was markdown list-continuation, not prompt content, and is gone. Prompt text is byte-identical before and after, verified by repr() on the raw file lines — a formatting change, not a §12 candidate. Motivation: the document could not previously prove which reading was intended, so the frozen prompt was not unambiguously specified.
+§6 whitespace-strip rule. Raw Template A output is stripped of leading and trailing whitespace only — no punctuation removal, no case folding, no article stripping — before entering the [Answer] slot in Templates B and C. Reasoning on the page: whitespace behavior correlates with model size, so a whitespace-sensitive prompt would put a size effect inside the instrument on a size hypothesis; and .strip() is total and unambiguous, no threshold to pick and no stopping-point problem — the same test that permitted leading-zero stripping and rejected the alias-length knob.
+
 **Corrections to this list, 2026-08-31 (verified against the file):**
 
 - **Item 1 was mis-scoped.** §1's research question (line 19) contains no "uncharted"
@@ -330,7 +336,7 @@ Order: **environment → findings → templates → parsing rules → parameters
 6. **§11: the option-four interpretation rule** — currently a placeholder that announces a rule and never states it. Must be written before the pilot or it's post-hoc.
 7. **§10 or §2: the instruct-tuning limitation, correctly stated.** Not "recipes differ from each other" — one family fixed that. Relative to Kadavath, *four* things change at once: instruct-tuning, quantization, scale, and lineage. Within-roster comparisons are clean; the cross-study framing sentence is what's limited.
 8. **§3: E1**, and **§7: throughput + memory footprint metrics** to feed it.
-9. **§9: delete the "within N seconds" clause** from `no_valid_response`; add its column to the exclusion table.
+9. Item 9 shrinks (verified 2026-09-07). The "within N seconds" clause does not exist in the file and the mean-retained-mass and truncation-rate columns already do. What remains is one thing: the exclusion table has no no_valid_response column.
 10. **§8: noise-floor measurement procedure.** Two floors. Plus the direction-of-bias clause from item 4.
 11. **`items.jsonl` committed** — §5 promises it.
 12. **Re-enable AMD driver auto-update and Ollama auto-update post-study.** Disabled 2026-08-26.
@@ -478,6 +484,30 @@ typed — a hand-entered seed that disagrees with `DRAW_SEED` is worse than no m
 **Manifest as written 2026-09-05:** timestamp `2026-09-05T21:10:50`, dataset
 `mandarjoshi/trivia_qa`, config `unfiltered.nocontext`, split `validation`, draw `pilot`,
 `draw_seed` 8, `source_rows` 11313, `skipped` `["qf_1637"]`, `items_drawn` 50.
+
+run_pilot.py — steps 1–4 of 7, 2026-09-10
+
+Separate script from draw_pilot.py by design: the draw produces a frozen artifact from fixed inputs and opens its outputs in 'w'; the runner reads that artifact and appends. Fusing them would re-run the draw on every debug cycle and rewrite the committed item set.
+
+Step 1 — read. Opens items_pilot.jsonl in 'r', json.loads per line, keeps question and question_id only. Answer fields dropped deliberately: the grader rejoins on question_id against the frozen file, so the answer key has one home. Asserts 50 against PILOT_N.
+
+Step 2 — version and digest hard stop. GET /api/version against a frozen OLLAMA_VERSION; GET /api/tags for the roster. Nested search — outer over required models, inner over installed — with a per-model flag and break. Distinct exits for wrong digest and model absent. Both stops tested live by breaking each value. Digests are the full 64-char SHA-256 from the API, not ollama list's 12-char display truncation. Both pilot models are verified though only the 1b is called; the 12b check is deliberate lookahead.
+
+Steps 3–4 — the A→C chain. Template A call (num_predict 25), answer extracted from message.content, stripped into a separate variable so the raw response survives for logging. Template C built as a triple-quoted f-string with \n\n between blocks, verified by repr(), second call at num_predict 10. First real result: "What is, or was, a barouche?" → A low, upholstered seat. (wrong) → confidence 10.
+
+Not yet in the file: row writing, the loop, the discarded warm-up call, per-run metadata, keep_alive: 0. Scaffolding marked for deletion: the step-1 test print, the repr() debug print, and the chosen_question_id block.
+
+Dedup rule for the append-only output: keep-first. First occurrence wins; a re-run never replaces an observation already made, which closes the "re-run until it looks better" degree of freedom. Precondition: only valid within an unchanged harness, so the row must carry enough to prove that — digest, Ollama version, generation parameters, and the harness's own git commit hash. Rows from two harness versions are a discard-and-re-run question, not a dedup question. Append order is itself arrival order, so the rule is executable without a timestamp.
+
+Endpoint: /api/chat — settled with evidence 2026-09-10
+
+/api/chat, not /api/generate. Two reasons, neither numerical: every §6 logprob finding was measured on /api/chat, and the roster is entirely -it, so chat templating is what the models were tuned on. /api/generate also returns a context field of raw token ids that /api/chat does not.
+
+The probe that settled it, and its correction. A first comparison showed every logprob diverging between endpoints on identical text and was written up as a finding. It was cold-load contamination: load_duration 2.52 s on the generate call against 0.24 s on chat — a cold load against the ~215.5 ms warm constant. Re-run warm-vs-warm, logprobs were bit-identical at all 12 positions. So the endpoints agree numerically on a warm model, and the endpoint choice rests entirely on the two arguments above.
+
+Two things this bought. §6's finding #3 (cold ≠ warm) reproduced independently on a different model, a different prompt and a different quantity — the original was n=1 on the cold side. And the discarded warm-up call gained a second justification, which matters because it costs 100 calls across the pilot.
+
+Third instance of cold-load producing clean-looking wrong numbers, after the first-in-loop throughput reading and the keep-alive stacking case. Pattern, not coincidence. Script committed as probe4_endpoint_logprob_diff.py; outputs renamed *_warm.json after the first run's identical filenames destroyed the cold-run evidence by 'w'-mode overwrite.
 
 ### Two artifacts found in the written file (2026-09-05)
 
@@ -637,7 +667,7 @@ Dropping `num_ctx` 131072 → 2048 cost the 12b throughput (35.9 → ~20 tok/s a
   Blockers now split: §11's rule and §8's noise floor are **pre-pilot mandatory**;
   §10's transcription and §2 are post-pilot, pre-freeze.
 - **Slice 1** — dataset loader. **COMPLETE 2026-09-05**, two sessions.
-- **Slice 2** — runner (one model, one method) + grader. ← *here.* Append-only JSONL.
+- Slice 2 — runner (one model, one method) + grader. ← here. Runner steps 1–4 of 7 done. Append-only JSONL. Template C only; Template B deferred to October (§0).
 - **Slice 3** — second elicitation method; loop the roster.
 - **Slice 4** — analysis. **Deferred to October by design**, as the most fragment-tolerant
   work in the project.
@@ -700,6 +730,7 @@ Repo holds the pre-registration and data. Vault holds interpretation. **Canonica
 ## 11. Git state
 
 ```
+ff7df62  2026-09-10 runner steps 2-4 completed and updated 2 things in the prereg.
 2d73604  2026-09-05  Slice 1 finished and deferred lab log entry resolved
 207f989  2026-09-01  Handoff: re-plan to harness-first, §5e harness state, three §5c corrections
 cb92a94  2026-08-31  Slice 1: TriviaQA loader with corrupted-row filter; log entry deferred
@@ -713,19 +744,14 @@ f8a12b4  2026-08-01  Section 3 completed
 3496554  2026-06-24  pre-registration template WIP
 ```
 
-Verified 2026-09-05:
+Verified 2026-09-10:
 
-- `draw_pilot.py` — complete, committed.
-- `items_pilot.jsonl` — committed, 50 lines verified on disk with PowerShell, not just in
-  memory.
-- `items_manifest.json` — committed.
-- `lab_log.md` — both entries committed: 08-31 (written 09-05, five days after the stated
-  deferral) and 09-05.
-- `.gitignore` — `tempCodeRunnerFile.py` added. It is Code Runner's scratch file for
-  running a selection, not script output.
-- `.venv/` — correctly ignored.
-- **`SESSION_PROTOCOL.md` §C.1 false-alarm fix: still unverified.** The check as written
-  fires on every normal session open. See §0b.
+run_pilot.py — steps 1–4 of 7, committed.
+probe4_endpoint_logprob_diff.py and its two *_warm.json outputs — committed.
+.gitignore — data/ and !data/items.jsonl removed. The exception was structurally dead: git cannot re-include a file inside an excluded directory, confirmed by git check-ignore -v. Both pilot artifacts live at repo root, so the rules were speculative and never applied. A stray CR left by a hand-edit went with them.
+lab_log.md — two entries, 09-06/09-09 and 09-09/09-10.
+Prereg moved during a harness session, twice, both §D-intentional and both recorded in lab_log.md the same session: templates fenced, strip rule added. Expect this in next session's --stat; it is not an anomaly.
+SESSION_PROTOCOL.md — §E amended (see §0b).
 
 Carried from 2026-08-31: `SESSION_PROTOCOL.md` committed with Laz's `cd` line in §B;
 `.gitignore` created (first in the repo); `requirements.txt` pinned from `pip freeze`.
