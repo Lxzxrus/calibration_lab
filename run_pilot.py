@@ -13,6 +13,8 @@ MODEL_12B_Q8 = {
     'digest': '997a7c2c09753e9011ec18a3fcb498e27c0ba330599dfb26a2e05b58cfbdc1bc'
 }
 MODELS = [MODEL_1B_Q4, MODEL_12B_Q8]
+# both models verified here even though only MODEL_1B_Q4 is called below;
+# 12b gets used once the full sweep (Step 6+) exercises the whole roster.
 
 # items is a list, so it preserves file order - needed for section 2's identical-item-set design.
 items = []
@@ -64,5 +66,96 @@ for model in MODELS:
             flag_match_found = True
             print('Match found. Digest: ' + info_field['digest'])
             break
-    if flag_match_found == False:
+    if not flag_match_found:
         sys.exit('No match found. Missing model: ' + model['model_name'])
+
+
+# pulls the question with a specified question_id instead of just hand typing the question and risking the text silently drifting.
+# I chose question sfq_1586 because it is easy to quickly verify that the answer the model produces is intended for that question
+# due to the question's simple structure - the model should give a simple answer. I deliberately avoided question qw_402 due to
+# its CSV quote mess - it would be a garbled input to the model, which risks garbled output - overall messy.
+
+# scaffolding, delete after step 6 is built
+chosen_question_id = 'sfq_1586'
+
+found_match = False
+for item in items:
+    if item['question_id'] == chosen_question_id:
+        question = item['question']
+        found_match = True
+        break
+
+if not found_match:
+    sys.exit('Could not find match for question: ' + chosen_question_id)
+
+# combined the frozen Template A text with the stored question to be fed to the model through the ollama chat api call.
+# a prompt that drifts from the frozen wording is an undocumented deviation from the prereg.
+prompt_a = f"{question} Answer with only the answer, no explanation, in 10 words or fewer. If unsure, give your single best guess."
+
+# logprobs deliberately absent because they aren't needed here: Template A generates an answer; its confidence contribution is zero,
+# so logprobs are useless for it. That is Template B's exclusive job, later.
+request_body_a = {
+    'model': MODEL_1B_Q4['model_name'],
+    'messages': [{
+        'role': 'user',
+        'content': prompt_a
+    }],
+    'stream': False,
+    'options': {
+        'temperature': 0,
+        'top_k': 64,
+        'top_p': 0.95,
+        'seed': 42,
+        'num_ctx': 2048,
+        'num_predict': 25
+    }
+}
+
+# confirms against the real templated call. This block is the end-to-end smoke test that Step 6 will scale up to all 50 items. 
+response_a = requests.post("http://127.0.0.1:11434/api/chat", json=request_body_a)
+data_a = response_a.json()
+answer_a_raw = data_a['message']['content']
+print(answer_a_raw)
+
+# strip leading and trailing whitespaces. Whitespace behavior correlates with model size, so if one model returns more
+# whitespaces than another model, the two cells get slightly differently-formed prompts, which is a size effect riding inside
+#  an instrument, on a size hypothesis.
+answer_a = answer_a_raw.strip()
+
+# using triple quotes I can construct prompt_c in accordance to the exact frozen structure of Template C from the prereg.
+prompt_c = f"""Question: {question}
+
+Answer: {answer_a}
+
+How confident are you that the answer is correct? Respond with any integer between 0 and 100 where 0 is not confident and 100 is certain that the answer is correct. Respond with only that integer and nothing else."""
+
+print(repr(prompt_c))
+
+# same call pattern as Template A above. Logprobs still purposefully excluded despite the confidence being in question because
+# the confidence measure is read as text, not the literal probabilities. Note num_predict here is 10 instead of 25 according to
+# frozen values in the prereg.
+request_body_c = {
+    'model': MODEL_1B_Q4['model_name'],
+    'messages': [{
+        'role': 'user',
+        'content': prompt_c
+    }],
+    'stream': False,
+    'options': {
+        'temperature': 0,
+        'top_k': 64,
+        'top_p': 0.95,
+        'seed': 42,
+        'num_ctx': 2048,
+        'num_predict': 10
+    }
+}
+
+response_c = requests.post("http://127.0.0.1:11434/api/chat", json=request_body_c)
+data_c = response_c.json()
+answer_c = data_c['message']['content']
+print(answer_c)
+
+
+
+# Step 6 needs warm up call - not complete without it.

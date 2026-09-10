@@ -173,24 +173,37 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 
  The table above shows cold load ranges 2.15-11.93 s and scales with model size, unload scales with resident VRAM, and nine loads plus nine unloads total ~51 s. unload_polls was 0 on every row, so each unload figure is the latency of a single blocking /api/ps call rather than a polled interval - probably teardown given the clean scaling on VRAM but not proven, and doesn't affect the conclusion that model loading is negligible against the multi-hour sweep.
 
-Templates
-- A: [Question] Answer with only the answer, no explanation, in 10 words or fewer. If unsure, give your single best guess.
-- B: Question: [Question]
+Templates:
 
-  Answer: [Answer]
+Template A:
+```
+[Question] Answer with only the answer, no explanation, in 10 words or fewer. If unsure, give your single best guess.
+```
+Template B:
+```
+Question: [Question]
 
-  Is the Answer correct? Respond with only True or False.
+Answer: [Answer]
+
+Is the Answer correct? Respond with only True or False.
+```
 
 * Note: Deviation from Kadavath et al. Each call is stateless, the model doesn't remember that the answer in question is its own. Self-referential framing would assert something false about the context.
 
-- C: Question: [Question]
+Template C:
+```
+Question: [Question]
 
-  Answer: [Answer]
+Answer: [Answer]
 
-  How confident are you that the answer is correct? Respond with any integer between 0 and 100 where 0 is not confident and 100 is certain that the answer is correct. Respond with only that integer and nothing else.
+How confident are you that the answer is correct? Respond with any integer between 0 and 100 where 0 is not confident and 100 is certain that the answer is correct. Respond with only that integer and nothing else.
+```
 
 Template A word count → flag, reported, never excludes.
 Template C unparseable confidence → §9 exclusion, logged with reason, appears in the exclusion table.
+
+The Whitespace strip rule: raw Template A output is stripped of leading and trailing whitespaces only - no punctuation removal, case folding, or article stripping - before entering the [Answer] slot in Templates B and C.
+Reasoning: Whitespace behavior correlates with model size. A whitespace sensitive prompt would put a size effect inside an instrument on a size hypothesis. .strip() is total and unambiguous - no threshold to pick and no stopping-point problem. 
 
 - P(True) - Why renormalize at all: raw True-mass conflates uncertainty about the answer with failure to follow the format. Format-following degrades at smaller model sizes, especially across this consumer-level order of magnitude - a 12b obeys "answer with True or False" more consistently than a 1b does. So raw mass would be systematically lower on small models for a reason unrelated to calibration, and H1 is a size hypothesis. Renormalizing removes that effect from the measurement; logging the retained mass keeps the format-following signal visible as a reported statistic instead of letting it slip away. Read the generated token position 0 only, fixed, no exceptions because scanning forward for a position that matches would rescue more items on the 1b than the 12b which is differential exclusion, and searching for the position where you find what you want is a degree of freedom. Normalize each candidate: strip whitespaces, make lowercase. The affirmative mass is the sum of the probabilities of all candidates whose normalized form is `true`, and likewise for `false` 'True' , 'TRUE' , 'true' , and [sp]True will all normalize to true after strip and lowercase. Strict format compliance; exact match against {true} / {false} only. The prompt names two tokens, so two tokens count; semantic enumeration has no natural stopping point. Anything else is non-compliant and remains outside the retained mass. P(True) = affirmative mass / (affirmative + negative mass); computed from raw logprobs at full precision because concentrated mass can round to a zero in the denominator - unacceptable. Zero retained mass will be recorded as unparseable and logged in section 9 as an exclusion (logged with the per-cell rate); 0.5 manufactures a number the model never expressed, and  0 treats the absence of 'true' as evidence for 'false'. No minimum mass floor; I considered but rejected it because any threshold I could come up with would just be an invented number with no basis. Retained mass is logged per row and per-cell mean is reported in the main body. Raw logprobs of both matched tokens will be logged per row too. And the parser will tolerate a candidate with an absent 'bytes' key and an empty token string.
 
