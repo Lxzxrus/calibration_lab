@@ -2,6 +2,47 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
+## 2026-09-12 - 2026-09-14 Scope and Step 5 decisions, prereg defects, and Claude's errors (No code)
+
+Scope decision. Pilot execution deferred past the 21st; the harness itself becomes the pre-21st target. Reasoning: the pilot run is largely autonomous once triggered - so it doesn't need a protected uninterrupted block the way finishing the runner and grader do. Consequence: section 11's rule and section 8's procedure, both previously scoped as pre-21st, become pre-pilot instead, which happens to land them exactly where the re-plan already wanted prose written. This dissolved a scheduling collision rather than correcting a reasoning error.
+
+Row structure - one row per call, not per item. Grounds: every field named at line 286 and in the timing block is a property of a single call, not of an item. Line 238's resume triple only resolves usefully at call granularity. My first framing of this as a potential-vs-confirmed-issue distinction was revised under challenge: the duplication failures seen elsewhere in this project were prose failures - a human editing one place and forgetting another - which a JSONL file written in a single loop pass structurally can't reproduce. The misalignment I was worried about is positional matching; joining on question_id (verified unique across all 11,313 rows) is the fix for that, not an instance of it.
+
+Retry. One row per call regardless of retry count: a retry is the same measurement attempted a second time (line 322: "same call with no change"), not a new measurement. Attempt count recorded as its own field. Stated cost of this design: the first attempt's timing metadata is lost when the retry's row overwrites it.
+
+Failure rows. Every call that concludes gets exactly one row. Consequence: a missing row means interrupted, never means failed - "failed" is always represented by a written row with done: false, not by absence.
+
+Terminal A failure writes no C row. My first instinct was to write a C row with done: false. Corrected: C was never runnable - it had no input - which is different from C running and failing. done: false already carries a measured meaning that line 322's retry rule keys off; using it here would produce a row instructing a retry of a call whose input doesn't exist. Second ground: section 9 excludes an item from a cell on a terminal A failure, so that's one exclusion: one row reports the rate directly; two rows would double-count a single event.
+
+Resume reads row presence, not the triple set. A well-formed row means concluded: skip it. No row means interrupted: run it. Section 6 already tolerates and discards a malformed trailing line on resume, so the mechanism was already there. I had claimed triple-matching was broken and needed a new field; it wasn't broken, and that pushback was correct.
+
+Division of labor: runner records, grader decides. The runner writes raw text only - no parsing, no derived values. Grounds: section 6 says the pilot exists precisely so a grader bug costs a re-read of stored output, not a re-run of 100 model calls. Corollary: since output is append-only, the grader has to write its own second file: meaning section 6's "parsed integer, mapped confidence" describes graded output, not runner output, and the two were previously conflated.
+
+Prompt template ID dropped from line 286. Its only job was versioning prompt text, and the harness's own git commit hash already pins repo state; since the prereg lives in the same repo, the commit hash identifies which template text was in force at least as precisely as a dedicated field would. This is the same test that eliminated the draw index in section 5e. Confirmed line 286 is the field's only occurrence in either document, so removal is clean. Recording it here explicitly because a field silently disappearing from a spec reads as an accident to anyone diffing later, not a decision.
+
+elicitation_method keeps its name and carries the exception. Principle agreed on: name the act, not its absence. The value itself was never in question — it gates whether the row gets written at all.
+
+Prereg defects found this session:
+
+Line 282 vs. line 250 — 282 lists model digest as a per-run field; 250 requires it logged per row so a replicator can confirm which weights produced each measurement. Opposite instructions in the same document.
+Line 282's parenthetical "(Constant for the process or the cell)" never actually picks one. Model tag, digest, and quantization vary per cell; the other eight fields in that block are constant for the whole process. The pilot runs two models, so this ambiguity becomes load-bearing at step 6.
+Line 324's exclusion table carries three reason-code columns where section 9 defines four: no_valid_response has no column. This is section 5c item 9, and it's now confirmed as a narrow, specific gap rather than a vague concern.
+Section 6 has no run_id field and no harness commit-hash field anywhere.
+No dirty-tree check exists anywhere in section 6. Line 250 is the shape a fix should follow.
+
+Claude errors, for the record (As stated by Claude): 
+
+Claimed §9 had no no_valid_response category when line 322 defines exactly that. Cause: read lines 304–320, where §9's fourth rule actually sits at 322, then asserted the gap two turns later without reopening the file.
+Repeated the handoff's characterization of row structure as open design work when line 286 had already specified it — caught only because you asked how I'd concluded that.
+Claimed resume logic had broken and needed a new field, when it hadn't.
+Claimed the method field discriminates at the runner level, when the fields at line 265 are grader outputs, not runner outputs.
+Common mechanism behind all four: reasoning from a summary of the file instead of the file itself.
+Process change adopted. Any file review from here forward cites a line number plus verbatim text, or explicitly states the file hasn't been checked yet — no more claims from memory of what a section says.
+
+Open going into next session: Template A's method value · digest scope (process vs. cell) · run_id + commit hash fields · dirty-tree stop · line 324's missing column  · whether A's cascade needs a fifth reason code · per-run vs. per-cell split for the sidecar.
+
+Gate. Next session is the review of these decisions against the prereg text, not new work. This needs to carry into the handoff as next-action #1, not just live in this entry.
+
 ## 2026-09-09 - 2026-09-10 run_pilot.py steps 2-4 completed
 
 Step 2 finished and tested. Both hard stops (Ollama version mismatch, model digest mismatch) verified live by deliberately breaking each value and confirming the crash fires with a correct, informative message; both restored afterward.

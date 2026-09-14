@@ -283,7 +283,7 @@ Logging:
 
 - Per row (varies per call) - grading fields and flags are specified above in the Grader Spec.
 
- Identity: item ID, elicitation method, prompt template ID, num_predict
+ Identity: item ID, elicitation method, num_predict
  Response: done, done_reason
  Timing: load_duration, eval_count, eval_duration, prompt_eval_count, prompt_eval_duration
  P(True) rows: renormalized P(True), retained mass, raw logprobs of both matched tokens, full top-10 candidate list (recompute insurance if the parsing rule needs re-deriving)
