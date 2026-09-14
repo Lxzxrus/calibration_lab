@@ -2,7 +2,7 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-09-10 · **Synthesized against commit:** `ff7df62` · **Status:** Prereg paused mid-draft, two pre-pilot amendments landed. **Slice 1 COMPLETE.** Slice 2 in progress — run_pilot.py steps 1–4 of 7.
+**Last updated:** 2026-09-14 · **Synthesized against commit:** `9f87f53` · **Status:** Row schema decided; five §6 amendments pending on the page. **Slice 1 COMPLETE.** Slice 2 — run_pilot.py steps 1–4 of 7; step 5 blocked on those amendments. **Next session is the review session, not work (§0).**
 
 *Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
@@ -30,7 +30,11 @@ fragments where it will still work.
 
 ### Revised timeline
 
-- **Sept 21 target: Slices 1–3 running end-to-end, plus the pilot.** Not freeze.
+- **Sept 21 target: harness complete and debugged. Pilot deferred past the 21st — 2026-09-12.**
+  Reasoning: the pilot is largely autonomous — start it, attend a school day, return to
+  results — so it does not need the uninterrupted block. The runner and grader do.
+  Consequence: §11's rule and §8's procedure stop being pre-21st and become pre-*pilot*,
+  landing in the fragments exactly where this re-plan wanted the prose. Not freeze.
 - **Freeze mid-October**, with measured numbers in §5's blanks.
 - **Slice 4 deferred to October by design** — offline analysis against saved JSONL, no
   live state, the most fragment-tolerant work in the project. Half of it already exists
@@ -58,12 +62,20 @@ What survives intact: a C-only pilot still yields p_weak, p_strong, an AUROC flo
 
 ### Next actions, in order
 
-1. Slice 2 — runner, steps 5–7. Step 5 writes one row; step 6 loops to 50 and carries the warm-up call as a hard completion gate; step 7 adds per-run metadata and keep_alive: 0 on the final call. Open before step 5: the row structure — keys, nesting, provenance per-row vs. run-header, and where the run id and harness commit hash come from. Both calls' done / done_reason must be captured; §9's exclusion rules read them and the current code discards them.
-2. Slice 2 — grader. Boundary matching over the union of normalized_value and normalized_aliases, negation detection, Template C's parser only for now. §6's spec is complete, so this is transcription plus debugging. Rejoins to items_pilot.jsonl on question_id — the runner does not carry the answer key.
-3. **§11 rule and §8 procedure**, in whatever gaps the code leaves. Both pre-pilot
-   mandatory.
-4. **Slice 3** — second elicitation method, loop the roster.
-5. **Pilot**, then the remaining §5c prose, then freeze.
+1. **REVIEW SESSION — not work. Gate, decided 2026-09-12.** Field-by-field verification of
+   §6 against the pilot files, plus handoff/lab-log consistency. Adopted after four Claude
+   errors and several handoff/prereg mismatches surfaced in one session. Its failure mode is
+   *looks correct, isn't* — so it does not get done tired, and it does not get folded into a
+   work session. Do not open step 5 before this is done.
+2. Slice 2 — runner, steps 5–7. Step 5 writes one row; step 6 loops to 50 and carries the warm-up call as a hard completion gate; step 7 adds per-run metadata and keep_alive: 0 on the final call.
+   **Row schema — decided 2026-09-12, not open:** one row per **call**, never per item (every field in §6 line 286 and the timing block is a call property, and line 238's resume triple only resolves at call granularity). One row per call regardless of retry — the retry is the same measurement attempted twice (line 322, "same call with no change") — with an attempt count as a field; the first attempt's timing metadata is the stated price. Failure rows are written, so absence means *interrupted* and never means *failed*. **A terminal Template A failure writes no C row at all**: C was unrunnable rather than failed, and `done: false` would overload a field carrying a measured meaning that line 322's retry rule keys on, producing a row that instructs a retry of a call whose input does not exist — and §9 excludes an *item from a cell*, so one terminal A failure is one exclusion and one row, where two rows would double-count one event. Resume therefore reads **row presence**, not the triple set: well-formed row = concluded, skip; no row = interrupted, run it (§6 already tolerates and discards a malformed final line). **Runner records, grader decides** — raw text only, no parsing, no derived values, because §8 says the pilot exists so grader bugs are fixed against pilot outputs, and a parser bug should cost a re-read rather than 100 model calls; the corollary is that append-only forces the grader to write a *second* file, so §6's "parsed integer, mapped confidence" describes graded output, not runner output. `prompt template ID` **dropped** from line 286 — its only unique job is versioning, and the harness commit hash pins repo state with the prereg in the same repo, so it identifies template text as precisely as a version field would (same test that retired the draw index in §5e). Verified line 286 is its sole occurrence in either document.
+   **Blocked on five §D amendments, none of which have reached the page:** (a) Template A's `elicitation_method` value — name the act, not the absence; principle agreed, word unpicked, and it gates the row write. (b) Digest scope — line 282 files model digest per-run, line 250 says log it per row so a replicator can confirm which weights produced each measurement; opposite instructions in one document, and line 282's "(Constant for the process or the cell)" never picked either. (c) `run_id` and harness commit hash — neither appears anywhere in §6. (d) Dirty-tree hard stop; line 250 is the precedent shape, since `git rev-parse HEAD` reports what is committed, not what is running. (e) Line 324's exclusion table carries three reason-code columns where §9 defines four — `no_valid_response` has none (§5c item 9, confirmed narrow).
+   Both calls' done / done_reason must be captured; §9's exclusion rules read them and the current code discards them.
+3. Slice 2 — grader. Boundary matching over the union of normalized_value and normalized_aliases, negation detection, Template C's parser only for now. §6's spec is complete, so this is transcription plus debugging. Rejoins to items_pilot.jsonl on question_id — the runner does not carry the answer key.
+4. **§11 rule and §8 procedure**, in whatever gaps the code leaves. Both pre-pilot
+   mandatory — and, since the pilot moved past the 21st, no longer pre-21st.
+5. **Slice 3** — second elicitation method (Template B, October per §0); loop the roster.
+6. **Pilot**, then the remaining §5c prose, then freeze.
 
 ### Estimate check — 2026-09-05
 
@@ -388,9 +400,9 @@ Python **3.12.8** (`AppData\Local\Programs\Python\Python312`), `.venv` in repo r
 ARIA's Python deliberately not used — §2 already frees this repo to pin its own. All
 packages installed as **prebuilt wheels, no source builds**: requests, datasets, pandas
 3.0.5, pyarrow, numpy 2.5.2, scikit-learn, matplotlib. `requirements.txt` frozen.
-`.gitignore` covers `.venv/`, `__pycache__/`, `*.pyc`, `.env`, and `data/` with an
-exception for `data/items.jsonl`. PowerShell execution policy `RemoteSigned`,
-`CurrentUser` scope.
+`.gitignore` covers `.venv/`, `__pycache__/`, `*.pyc`, `.env`, and `tempCodeRunnerFile.py`.
+The `data/` rules were removed 2026-09-06 as structurally dead — see §11. PowerShell
+execution policy `RemoteSigned`, `CurrentUser` scope.
 
 **pandas 3.0 is a major release** — most examples online are written for 2.x. Unexpected
 errors from copied tutorial code have this as a likely cause.
@@ -668,7 +680,7 @@ Dropping `num_ctx` 131072 → 2048 cost the 12b throughput (35.9 → ~20 tok/s a
   §10's transcription and §2 are post-pilot, pre-freeze.
 - **Slice 1** — dataset loader. **COMPLETE 2026-09-05**, two sessions.
 - Slice 2 — runner (one model, one method) + grader. ← here. Runner steps 1–4 of 7 done. Append-only JSONL. Template C only; Template B deferred to October (§0).
-- **Slice 3** — second elicitation method; loop the roster.
+- **Slice 3** — second elicitation method; loop the roster. The second method is Template B, deferred to October (§0), so this slice is not pre-21st work.
 - **Slice 4** — analysis. **Deferred to October by design**, as the most fragment-tolerant
   work in the project.
 
@@ -698,7 +710,7 @@ timeline depends on.
 
 **Concepts explained and confirmed landed** (don't re-explain from scratch; do check they haven't regressed): threshold = k × floor is multiplicative · bootstrapping is resampling *with replacement* · more resamples don't reduce uncertainty, only N does · *not evaluable* vs *not supported* · `num_ctx` vs `num_predict` · raw vs renormalized mass · **digest = cryptographic hash, same thing as a git commit hash** · **a priori vs a posteriori** · **AUROC = P(random correct ranks above random incorrect), ties count 0.5, which is why saturation degrades it**.
 
-**Manual mile.** ARIA is ~5% Laz / 95% Claude by his own assessment. `calibration_lab` is the corrective — small enough to write alone, the artifact he can put his name on without an asterisk. The bar: rebuild the harness solo from a blank editor by OSU arrival.
+**Manual mile.** ARIA is ~5% Laz / 95% Claude by his own assessment. `calibration_lab` is the corrective — small enough to write alone, the artifact he can put his name on without an asterisk. The bar: rebuild the harness solo from a blank editor by OSU arrival. **Deprecated — in need of review.** The bar itself still holds; its deadline is anchored to a transfer plan no longer being pursued. Noted rather than ignored, and it needs re-anchoring to a date that still exists.
 
 **Progress note, 2026-08-26.** Longest session yet. Four things worth recording as evidence. (1) **He caught the stale handoff himself** at the top of the session — noticed the date was wrong and stopped the session rather than working from it. That prevented hours of work built on false premises. (2) **The P(True) probe reopened a decision he'd already made**, and he took the reversal on evidence rather than defending the earlier call. (3) **He questioned whether the driver mattered**, which surfaced that the throughput table predated it — and chose re-measurement over disclosure, which turned out to invalidate a mechanism he'd have otherwise frozen into the document. (4) He asked "should we hold the number accountable to both value and format?" on leading zeros — the right frame, and he reached the correct answer via his own precedent rather than by being told.
 
@@ -707,6 +719,22 @@ timeline depends on.
 **Register.** Trend is real and improving: the throughput block took three passes, P(True) took five, `num_predict` took three, and he caught more himself each time. Two months from precalculus to a pre-registered study with locked hypotheses and empirically-grounded parameters.
 
 **Tone that works:** direct pushback with reasoning; flagging the crack rather than smoothing it; handing back the rows that must be his. He asks to be graded honestly and uses it well. He'll say "unpack that" when vocabulary outruns him — and does, reliably.
+
+**Claude's failure mode — 2026-09-12/14.** Four false claims shipped in one session, all one
+mechanism: reasoning against a *summary* of the file instead of the file. §9 line 322 defines
+`no_valid_response` — claimed absent after reading lines 304–320 and stopping two lines short,
+then repeated two turns later without reopening. §6 line 286 had already specified the row
+schema — repeated the handoff's claim that it was open design work, which would have cost a
+session designing something already written down. Claimed the resume mechanism had broken under
+the no-C-row design when it had not. Claimed `elicitation_method` discriminates at runner level
+when line 265's fields are grader outputs. Three of the four surfaced because Laz asked a
+question, not from review.
+
+**Standing rule — adopted 2026-09-14.** Any claim about what a file says arrives as a line
+number plus verbatim text — "check prereg line 322" — or it arrives as "I haven't checked
+that." Never "your prereg says X." Partial reads are the specific hazard: a `sed` range chosen
+for convenience is not the section, and a range ending on a round number is not a boundary the
+document agreed to.
 
 ---
 
