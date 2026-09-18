@@ -240,7 +240,11 @@ Runner and grader split: for every section 9 rule that both retries and excludes
 
  Check 'done' before reading any other field. If false, apply section 9's no_valid_response rule. The check exists because of the degenerate-generation finding above (section 6 Findings).
 
- Log the (item ID, model tag, elicitation method) triple on every row. On startup, read the existing log, collect completed triples, skip them. JSONL keeps the log valid under interruption but it won't make a run continuable. On resume, the log reader tolerates a malformed final line and discards it. An interrupted run can leave a partial JSON object at the end of the file. Because every completed row is a self contained line, only the incomplete line is lost. Re run that call.
+ Log the (item ID, model tag, elicitation method) triple on every row. On startup, read the existing log, collect the triples from every well-formed row - success or failure - and skip them. JSONL keeps the log valid under interruption but it won't make a run continuable. On resume, the log reader tolerates a malformed final line and discards it. An interrupted run can leave a partial JSON object at the end of the file. Because every completed row is a self contained line, only the incomplete line is lost. Re run that call.
+
+ A terminal Template A failure ends resume for that item's C call too: if the A row is present and shows done: false or timed_out: true, it's terminal by construction (the runner/grader split rule above: retries happen before any row is written, so every A row that exists is already the final outcome) - the item's C triple is treated as already accounted for, not as interrupted-and-needing-a-run, since C's input doesn't exist and there's nothing valid to retry. Row presence at resume therefore isn't just "missing → run it": it's "missing, and not already accounted for by an upstream terminal A failure → run it."
+
+ Keep-first dedup, no run_id: the (item ID, model tag, elicitation method) triple is the whole key. The first well-formed row for a given triple is authoritative; resume's skip-on-presence check is what enforces this. A run_id was considered and declined - its only proposed job was tying a row back to a separate per-run record, and every field that record would have held (harness commit hash, Ollama version, and the rest of Per run) is already written on the row itself. Same reasoning that retired the draw index: a field isn't needed when it would only be a second, weaker version of a guarantee the row already carries. On startup, if the output file already has rows, compare their commit hash and Ollama version to the current process's values. On a mismatch, hard stop - otherwise keep-first would let rows from an already-fixed runner bug stand simply because they were written first.
 
  Log 'load_duration' per call. Lets me verify no cell silently cold started mid run. The warm value is a fixed per-call constant (section 5, runtime block); cold load is model-dependent (findings table above). A row whose load_duration sits near its own model's cold figure rather than near the constant means that cell reloaded mid-run.
 
@@ -252,7 +256,7 @@ Runner and grader split: for every section 9 rule that both retries and excludes
 
  keep_alive generous within a cell, keep_alive: 0 on the final call to each model, replacing the ollama stop subprocess. ollama ps as verification.
 
- Verify the model digest at the point of load, once per model, against the digests frozen in section 4. On mismatch, hard stop - the weights have changed, and a cell computed across two different sets of weights is uninterpretable. Log the digest per row so a replicator can confirm which weights produced each measurement. Same rule for the runtime: read the Ollama version at process start and hard stop if it differs from the frozen value. Tags and installs both drift without intervention - this was observed once already, when Ollama auto-updated from 0.32.6 to 0.32.14 between sessions.
+Verify the model digest at the point of load, once per model, against the digests frozen in section 4. On mismatch, hard stop - the weights have changed, and a cell computed across two different sets of weights is uninterpretable. Log the digest per row so a replicator can confirm which weights produced each measurement. Same rule for the runtime: read the Ollama version at process start and hard stop if it differs from the frozen value. Tags and installs both drift without intervention - this was observed once already, when Ollama auto-updated from 0.32.6 to 0.32.14 between sessions. Same rule for the working tree: check the whole tree is clean via git status at process start and hard stop if it is not. git rev-parse HEAD reports what's committed, not what's running - uncommitted edits to the harness would execute under a commit hash that doesn't describe them, the same mutable-identity hazard as a model tag one level up. Checked once, at start; editing lab_log.md or anything else afterward doesn't retrigger it. Output files: the runner's and grader's per-row JSONL logs are gitignored, unlike items.jsonl (see section 5), which is a frozen input committed to the repo. A live, growing output file would otherwise dirty the tree on every row written, permanently blocking this check on every resume.
 
 The three contamination sources and procedural protections above apply equally here: contamination doesn't affect the probabilities, but it does corrupt the throughput measurements E1 depends on.
 
@@ -267,7 +271,7 @@ Grader Spec:
 - Match: normalized_value plus all of normalized_aliases , checked as complete words/phrases (word boundary regex) against the normalized response.
 - Any match = correct. No match = incorrect.
 - No article stripping, no prefix stripping. Boundary matching absorbs leading scaffolding.
-- Per-row logging: raw response, matched (bool), which alias matched, negation flag (bool), compliance flag (bool), truncation flag (bool), exclusion reason (one of section 9's codes, or blank if not excluded).
+- Per-row logging: matched (bool), which alias matched, negation flag (bool), compliance flag (bool), truncation flag (bool), exclusion reason (one of section 9's codes, or blank if not excluded).
 - Compliance detector: raw word count ≤ 10, measured on the raw response rather than the normalized one — normalization only ever splits words apart, so raw is what the model actually emitted. Purely observational, never changes the score, per-cell rate reported.
 - Truncation detector: set when done_reason is "length". Purely observational, never changes the score, per-cell rate reported.
 - Negation detector: marker list frozen, 4-word window preceding the matched alias, purely observational — never changes the score.
@@ -283,16 +287,23 @@ Grader Rule Declaration:
 
 - The pilot: the pilot is run pre-freeze - fixing grader bugs post-freeze means fixing them against real study data which is worse than fixing against pilot data. The pre-freeze pilot should eliminate any post-freeze grader changes. the pilot is genuinely safe to look at because it is run with a separate seed, excluded from the draw pool, discarded, and never enters the study's results. Any fix made against the pilot's outputs is recorded pre-freeze.
 
-Logging:
-- Per run (Constant for the process or the cell): model tag, model digest, quantization, Ollama version, KV cache type, temperature, seed, num_ctx, top_k, top_p, and timestamp.
+- Logging: two files, not one - the runner writes raw text and raw numbers live, one row per call; the grader writes derived values afterward, reading the runner's file rather than the live model. Every field below belongs to exactly one of the two.
 
-- Per row (varies per call) - grading fields and flags are specified above in the Grader Spec.
+Runner file (written live, one row per call):
 
- Identity: item ID, elicitation method, num_predict, top_logprobs, attempt_count
- Response: done, done_reason
- Timing: load_duration, eval_count, eval_duration, prompt_eval_count, prompt_eval_duration
- P(True) rows: renormalized P(True), retained mass, raw logprobs of both matched tokens, full top-10 candidate list (recompute insurance if the parsing rule needs re-deriving)
- Template C rows: parsed integer, mapped confidence
+Per run (constant for the process, written on every row): Ollama version, KV cache type, temperature, seed, num_ctx, top_k, top_p, timestamp, and harness commit hash.
+
+Identity: item ID, model tag, model digest, quantization, elicitation method (one of 'answer', 'p_true', 'verbalized' - Template A, B, C respectively), num_predict, top_logprobs, attempt_count
+
+Response: done, done_reason, timed_out (true if no response was returned within 90 seconds; done, done_reason, Timing, and Raw response are then all absent).
+Timing: load_duration, eval_count, eval_duration, prompt_eval_count, prompt_eval_duration
+Raw response: the unparsed text returned for that call.
+P(True) calls only: full top-10 candidate list (recompute insurance if the parsing rule needs re-deriving).
+
+Grader file (written afterward, reading the runner's file, never the live model):
+Per row - the (item ID, model tag, elicitation method) triple, plus the fields specified in the Grader Spec above.
+P(True) rows: renormalized P(True), retained mass, logprobs of all matched tokens.
+Template C rows: parsed integer, mapped confidence.
 
 ## 7. Metrics
 
