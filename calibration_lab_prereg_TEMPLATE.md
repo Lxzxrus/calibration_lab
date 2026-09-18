@@ -1,6 +1,6 @@
 # Pre-Registration — `calibration_lab` (Slice 0)
 
-**Study:** Does frontier-scale calibration behavior survive instruct-tuning, quantization, and small scale?
+**Study:** Does frontier-scale calibration behavior survive quantization and small scale?
 **Author:** Laz
 **Drafted:** [7-15-2026]
 **FROZEN:** [date] · commit `[hash]`
@@ -70,13 +70,13 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 
 | Ollama tag | ID | Params | Quant | Ctx | Vision | Role |
 |---|---|---|---|---|---|---|
-| `gemma3:1b-it-q4_K_M` | `8648f39daa8f` | 999.89M | Q4_K_M | 32768 | no | H1, H2a, H2b |
+| `gemma3:1b-it-q4_k_m` | `8648f39daa8f` | 999.89M | Q4_K_M | 32768 | no | H1, H2a, H2b |
 | `gemma3:1b-it-q8_0` | `0fdb9c7fefee` | 999.89M | Q8_0 | 32768 | no | H1, H2a, H2b |
 | `gemma3:1b-it-fp16` | `16d00907691b` | 999.89M | FP16 | 32768 | no | H2a (3rd rung) |
-| `gemma3:4b` (= q4_K_M) | `a2af6cc3eb7f` | 4.3B | Q4_K_M | 131072 | yes | H1, H2a, H2b |
+| `gemma3:4b` (= q4_k_m) | `a2af6cc3eb7f` | 4.3B | Q4_K_M | 131072 | yes | H1, H2a, H2b |
 | `gemma3:4b-it-q8_0` | `2376388dec16` | 4.3B | Q8_0 | 131072 | yes | H1, H2a, H2b |
 | `gemma3:4b-it-fp16` | `c4da438ae756` | 4.3B | FP16 | 131072 | yes | H2a (3rd rung) |
-| `gemma3:12b` (= q4_K_M) | `f4031aab637d` | 12.2B | Q4_K_M | 131072 | yes | H1, H2a, H2b |
+| `gemma3:12b` (= q4_k_m) | `f4031aab637d` | 12.2B | Q4_K_M | 131072 | yes | H1, H2a, H2b |
 | `gemma3:12b-it-q8_0` | `997a7c2c0975` | 12.2B | Q8_0 | 131072 | yes | H1, H2a, H2b |
 | `gemma3:4b-it-qat` | `d01ad0579247` | 4.3B | Q4_0 (QAT) | 131072 | yes | exploratory |
 
@@ -109,9 +109,9 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 
 - Consequence: dropping MMLU dropped MC logprobs, which leaves just two elicitation methods: P(True) and verbalized confidence.
 
-- Selection Rule: Using a recorded seed, I'll pull N questions from the dataset: uniform random sample without replacement, then I'll record the question text, answer aliases, and the source TriviaQA question ID to items.jsonl (sampled once, frozen, and read by every cell). I will apply those questions in fixed order, identical across all nine cells in section 4's roster.
+- Selection Rule: Using a recorded draw_seed, I'll pull N questions from the dataset: uniform random sample without replacement, then I'll record the question text, answer aliases, and the source TriviaQA question ID to items.jsonl (sampled once, frozen, and read by every cell). I will apply those questions in fixed order, identical across all nine cells in section 4's roster.
 
-- Reasoning: the seed offers provenance and the frozen file offers reproducibility to whoever wishes to carry out this experiment for themselves. As for the item set, per-cell sampling would confound model differences with question difficulty differences. If each cell drew its own sample, one cell might get an easier or harder draw, and its AUROC would partly reflect that rather than the model. Fixed items make the model the only thing varying.
+- Reasoning: the draw_seed offers provenance and the frozen file offers reproducibility to whoever wishes to carry out this experiment for themselves. As for the item set, per-cell sampling would confound model differences with question difficulty differences. If each cell drew its own sample, one cell might get an easier or harder draw, and its AUROC would partly reflect that rather than the model. Fixed items make the model the only thing varying.
 
 - items.jsonl will be committed in the repo alongside the preregistration.
 
@@ -123,7 +123,9 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 
  The runtime probe (run 2026-08-28, complete) yielded that the load_duration was nearly identical between 12b-q8_0 and 1b-q4_K_M - 215.73 ms and 215.39 ms respectively. This accounts for ~72% of projected runtime and it is invariant across model size, quantization, template, prompt length, and logprobs, therefore it is a constant. The remaining ~28% is made up of prompt_eval, eval, and server_slack measurements. When accounted for, the 12b-q8_0 has a wall-clock time of 317.86 ms per call, and the 1b-q4_K_M 251.52 ms per call. Model load and unload across all nine cells is negligible against the sweep; per-model figures and total are in section 6's findings block.
 
- The pilot is specified below, not yet run. p_weak = the accuracy of the weakest cell, and p_strong is the accuracy of the strongest cell. The formula: N = 200 / min(p_weak, 1 - p_strong) plus 10% exclusion margin. The pilot spec: 50 items each on gemma3:1b-it-q4_K_M and gemma3:12b-it-q8_0, different seed, and pilot items excluded from the main draw pool and data discarded. 50 pilot items on both extremes to ensure no thin cells in the case of extreme high/low accuracy. So, the pilot has four outputs: p_weak, p_strong, the AUROC noise floor, and the spread noise floor.
+ The pilot is specified below, not yet run. p_weak = the accuracy of the weakest cell, and p_strong is the accuracy of the strongest cell. The formula: N = 200 / min(p_weak, 1 - p_strong) plus 10% exclusion margin. The pilot spec: 50 items each on gemma3:1b-it-q4_k_m and gemma3:12b-it-q8_0, different draw_seed, and pilot items excluded from the main draw pool and data discarded. 50 pilot items on both extremes to ensure no thin cells in the case of extreme high/low accuracy. So, the pilot has four outputs: p_weak, p_strong, the AUROC noise floor, and the spread noise floor.
+
+ - draw_seed is fixed before draw_main.py is first executed, recorded in items_manifest.json, and the draw is not repeated - the first draw at that seed is the draw.
 
 - p_weak = [ ] , p_strong = [ ] , N = [ ]
 
@@ -199,7 +201,7 @@ Answer: [Answer]
 How confident are you that the answer is correct? Respond with any integer between 0 and 100 where 0 is not confident and 100 is certain that the answer is correct. Respond with only that integer and nothing else.
 ```
 
-Template A word count → flag, reported, never excludes.
+Template A word count → follows the Grader Spec's Compliance detector.
 Template C unparseable confidence → §9 exclusion, logged with reason, appears in the exclusion table.
 
 The Whitespace strip rule: raw Template A output is stripped of leading and trailing whitespaces only - no punctuation removal, case folding, or article stripping - before entering the [Answer] slot in Templates B and C.
@@ -207,16 +209,17 @@ Reasoning: Whitespace behavior correlates with model size. A whitespace sensitiv
 
 - P(True) - Why renormalize at all: raw True-mass conflates uncertainty about the answer with failure to follow the format. Format-following degrades at smaller model sizes, especially across this consumer-level order of magnitude - a 12b obeys "answer with True or False" more consistently than a 1b does. So raw mass would be systematically lower on small models for a reason unrelated to calibration, and H1 is a size hypothesis. Renormalizing removes that effect from the measurement; logging the retained mass keeps the format-following signal visible as a reported statistic instead of letting it slip away. Read the generated token position 0 only, fixed, no exceptions because scanning forward for a position that matches would rescue more items on the 1b than the 12b which is differential exclusion, and searching for the position where you find what you want is a degree of freedom. Normalize each candidate: strip whitespaces, make lowercase. The affirmative mass is the sum of the probabilities of all candidates whose normalized form is `true`, and likewise for `false` 'True' , 'TRUE' , 'true' , and [sp]True will all normalize to true after strip and lowercase. Strict format compliance; exact match against {true} / {false} only. The prompt names two tokens, so two tokens count; semantic enumeration has no natural stopping point. Anything else is non-compliant and remains outside the retained mass. P(True) = affirmative mass / (affirmative + negative mass); computed from raw logprobs at full precision because concentrated mass can round to a zero in the denominator - unacceptable. Zero retained mass will be recorded as unparseable and logged in section 9 as an exclusion (logged with the per-cell rate); 0.5 manufactures a number the model never expressed, and  0 treats the absence of 'true' as evidence for 'false'. No minimum mass floor; I considered but rejected it because any threshold I could come up with would just be an invented number with no basis. Retained mass is logged per row and per-cell mean is reported in the main body. Raw logprobs of both matched tokens will be logged per row too. And the parser will tolerate a candidate with an absent 'bytes' key and an empty token string.
 
-- Verbalized confidence parsing rule: The entire response, after stripping whitespaces, stripping a trailing % (since 85% is the same as 85/100), and stripping any leading zeros, must parse as an integer. The integer is then divided by 100 to put it on a scale [0,1] so the two elicitation methods end up on the same scale, since AUROC needs them comparable. When a response returns done_reason: "length" flag, log, and report the per-cell rate but never exclude. Reasoning: A truncated response that is long enough to be cut off is almost certainly a response that failed the entire-response-is-an-integer rule so it's already excluded on those grounds. The only case that could survive to corrupt a value is a bare integer that was clipped midway through the digits, which needs a digits-only response longer than num_predict. The [0,100] scale makes that impossible. So the flag is simply a check that the hazard didn't show up. Anything else is unparseable → §9 exclusion, logged. Leading zeros are stripped. 085 parses as 85 - the transformation is unambiguous and adds no degree of freedom, and excluding it would put a formatting artifact in the same bucket as refusals and genuine non-answers, inflating a rate the exclusion table reports as a finding.
+- Verbalized confidence parsing rule: The entire response, after stripping whitespaces, stripping a trailing % (since 85% is the same as 85/100), and stripping any leading zeros, must parse as an integer. The integer is then divided by 100 to put it on a scale [0,1] so the two elicitation methods end up on the same scale, since AUROC needs them comparable. When a response returns done_reason: "length", follow the Grader Spec's Truncation detector. Reasoning: A truncated response that is long enough to be cut off is almost certainly a response that failed the entire-response-is-an-integer rule so it's already excluded on those grounds. The only case that could survive to corrupt a value is a bare integer that was clipped midway through the digits, which needs a digits-only response longer than num_predict. The [0,100] scale makes that impossible. So the flag is simply a check that the hazard didn't show up. Anything else is unparseable → §9 exclusion, logged. Leading zeros are stripped. 085 parses as 85 - the transformation is unambiguous and adds no degree of freedom, and excluding it would put a formatting artifact in the same bucket as refusals and genuine non-answers, inflating a rate the exclusion table reports as a finding.
 
 Parameters
 - num_predict = Template A: 25 tokens; generous headroom well beyond a ten-words-or-fewer answer, including hedging. Template B: 5 tokens; one token for True/False plus a stop token, with margin. Template C: 10 tokens; worst case is three digit tokens for 100 plus a stop token, four total, plus headroom.
-All three sit below 32. On gemma3:1b-it-q8_0, one TriviaQA item producing degenerate repeating output returned done: false with no metadata fields at num_predict ≥ 32, and returned normally with done_reason: "length" at ≤ 31 - confirmed on Ollama 0.32.6 and 0.32.14, same digest. Observed on a single item, so the boundary is stable rather than general. Staying below it means degenerate items return cleanly with usable metadata instead of malformed responses I cannot grade or log.
+All three sit below the degenerate-generation boundary measured in this section's Findings block above. Staying below it means degenerate items return cleanly with usable metadata instead of malformed responses I cannot grade or log.
 - num_ctx = 2048 tokens. num_ctx is an allocation, not a limit, so oversizing costs VRAM for nothing. 2048 is chosen as a round number well above the measured worst case.
 - temperature = 0
 - top_k = 64 (inert at temperature = 0)
 - top_p = 0.95 (inert at temperature = 0)
 - seed = 42
+- top_logprobs = 10, Template B only: the candidate distribution P(True) reads at position 0 requires it; unset on Templates A and C.
 
 Throughput Measurements:
 
@@ -225,7 +228,7 @@ Throughput Measurements:
 * Readings - The two 1b cells are within run to run noise - two runs put the ordering in opposite directions, ~6% swing either way. A 22 token generation is too short of a window, so don't read the ordering between them. - QAT at 134.4 beside the standard 4b at 132.5 is near identical bit budgets, consistency check passes. 
 - Re-measured after finding the original table predated the current driver. On the old driver, 12b-q8_0 spilled into system RAM and yielded 15.4 tok/s, ~31% of the 644 GB/s ceiling. On driver version 26.8.1 it is fully resident and yields 43.9 tok/s, ~89%. Old value in the lab log. 
 - 12b q8_0 -> q4_K_M is 1.49x against a ~1.6x file size ratio: ordinary bandwidth scaling, no spill. Separately, that cell is the slowest in the roster and accounts for ~25% of sweep runtime.
-* Contamination Sources - 1: cold-load/first-in-loop. the 1b read 57.9 tok/s when it led the loop, ~239 in isolation. 2: Keep-alive stacking: OLLAMA_KEEP_ALIVE defaults to 5m, so nine models called within five minutes all stay resident - stacking exhausts VRAM and the later cells spill; degradation scaling with model size is the tell. And 3: Other GPU consumers: a game running in the background cost 4b-q8_0 31.5 against 105.2. None of the three showed up in load_duration, so every contaminated run looked healthy with a report of ~0.23s. There's no automatic check, so the protection is procedural: warm models before run, unload models in between runs, and ensure GPU resources are free.
+* Contamination Sources - 1: first-in-loop (not model cold-load - the warm-up call already discards that; this is a separate GPU/driver-state effect load_duration doesn't measure) the 1b read 57.9 tok/s when it led the loop, ~239 in isolation. 2: Keep-alive stacking: OLLAMA_KEEP_ALIVE defaults to 5m, so nine models called within five minutes all stay resident - stacking exhausts VRAM and the later cells spill; degradation scaling with model size is the tell. And 3: Other GPU consumers: a game running in the background cost 4b-q8_0 31.5 against 105.2. None of the three showed up in load_duration, so every contaminated run looked healthy with a report of ~0.23s. There's no automatic check, so the protection is procedural: warm models before run, unload models in between runs, and ensure GPU resources are free.
 
 - Harness Requirements:
 
@@ -233,7 +236,9 @@ Throughput Measurements:
 
  Warm up call before the measurement, whose output is discarded. Done on every cold start and resume. Without this warm up, the first item of every cell is measured on a different instrument than the rest.
 
- Check 'done' before reading any other field. If 'done' is false, no valid response was obtained. Retry once, same call with no change. On a second failure, exclude and log in section 9's no_valid_response category. Ollama can return an incomplete response with no metadata at all, observed under degenerate generation. 
+Runner and grader split: for every section 9 rule that both retries and excludes, retry is a runner action, made before any row is written; exclusion is a grader decision, made afterward from stored output.
+
+ Check 'done' before reading any other field. If false, apply section 9's no_valid_response rule. The check exists because of the degenerate-generation finding above (section 6 Findings).
 
  Log the (item ID, model tag, elicitation method) triple on every row. On startup, read the existing log, collect completed triples, skip them. JSONL keeps the log valid under interruption but it won't make a run continuable. On resume, the log reader tolerates a malformed final line and discards it. An interrupted run can leave a partial JSON object at the end of the file. Because every completed row is a self contained line, only the incomplete line is lost. Re run that call.
 
@@ -249,7 +254,7 @@ Throughput Measurements:
 
  Verify the model digest at the point of load, once per model, against the digests frozen in section 4. On mismatch, hard stop - the weights have changed, and a cell computed across two different sets of weights is uninterpretable. Log the digest per row so a replicator can confirm which weights produced each measurement. Same rule for the runtime: read the Ollama version at process start and hard stop if it differs from the frozen value. Tags and installs both drift without intervention - this was observed once already, when Ollama auto-updated from 0.32.6 to 0.32.14 between sessions.
 
- The sweep runs with no other GPU consumers and with the previous model unloaded before the next loads; contamination doesn't affect the probabilities, but it does corrupt the throughput measurements E1 depends on, and none of the three contamination sources is detectable from load_duration.
+The three contamination sources and procedural protections above apply equally here: contamination doesn't affect the probabilities, but it does corrupt the throughput measurements E1 depends on.
 
 - Negation Marker List: not, no, never, isn t, won t, wasn t, doesn t, aren t, couldn t, can t, wouldn t, shouldn t, cannot, don t, didn t, hasn t, haven t
 
@@ -262,7 +267,7 @@ Grader Spec:
 - Match: normalized_value plus all of normalized_aliases , checked as complete words/phrases (word boundary regex) against the normalized response.
 - Any match = correct. No match = incorrect.
 - No article stripping, no prefix stripping. Boundary matching absorbs leading scaffolding.
-- Per-row logging: raw response, matched (bool), which alias matched, negation flag (bool), compliance flag (bool), truncation flag (bool).
+- Per-row logging: raw response, matched (bool), which alias matched, negation flag (bool), compliance flag (bool), truncation flag (bool), exclusion reason (one of section 9's codes, or blank if not excluded).
 - Compliance detector: raw word count ≤ 10, measured on the raw response rather than the normalized one — normalization only ever splits words apart, so raw is what the model actually emitted. Purely observational, never changes the score, per-cell rate reported.
 - Truncation detector: set when done_reason is "length". Purely observational, never changes the score, per-cell rate reported.
 - Negation detector: marker list frozen, 4-word window preceding the matched alias, purely observational — never changes the score.
@@ -276,14 +281,14 @@ Grader Rule Declaration:
 
 - What if a rule genuinely needs changing? If pre-freeze: amend and record the reasoning. If post-freeze: record in section 12 as a deviation.
 
-- The pilot: the pilot is run pre-freeze - fixing grader bugs post-freeze means fixing them against real study data which is worse than fixing against pilot data. The pre-freeze pilot should eliminate any post-freeze grader changes. the pilot is genuinely safe to look at because it is run with a separate seed, excluded from the draw pool, discarded, and never analyzed. Any fix made against the pilot's outputs is recorded pre-freeze.
+- The pilot: the pilot is run pre-freeze - fixing grader bugs post-freeze means fixing them against real study data which is worse than fixing against pilot data. The pre-freeze pilot should eliminate any post-freeze grader changes. the pilot is genuinely safe to look at because it is run with a separate seed, excluded from the draw pool, discarded, and never enters the study's results. Any fix made against the pilot's outputs is recorded pre-freeze.
 
 Logging:
 - Per run (Constant for the process or the cell): model tag, model digest, quantization, Ollama version, KV cache type, temperature, seed, num_ctx, top_k, top_p, and timestamp.
 
 - Per row (varies per call) - grading fields and flags are specified above in the Grader Spec.
 
- Identity: item ID, elicitation method, num_predict
+ Identity: item ID, elicitation method, num_predict, top_logprobs, attempt_count
  Response: done, done_reason
  Timing: load_duration, eval_count, eval_duration, prompt_eval_count, prompt_eval_duration
  P(True) rows: renormalized P(True), retained mass, raw logprobs of both matched tokens, full top-10 candidate list (recompute insurance if the parsing rule needs re-deriving)
@@ -307,9 +312,11 @@ Accuracy — per cell, bin-independent. Control distinguishing knowledge decay f
 
 if exclusion rates differ substantially across cells, H1 and H2b results are interpreted in light of that, since selective removal of a small model's worst outputs inflates its apparent AUROC.
 
+If the pilot-measured noise floor is high enough that 2x the floor meets or exceeds H1's threshold, H1's verdict is still read against that fixed value (section 3), but reported alongside a note that the same gap would not clear H2a/H2b's own evidentiary bar: the two verdicts would not share a comparable standard of evidence in that case.
+
 ⚠ **Stopping rule.** The full sweep runs to completion. No looking at partial results and deciding you have enough.
 
-⚠ **Pilot exemption.** A 50-item end-to-end pilot is mandatory (graders always have bugs) — state explicitly that **pilot data is discarded and never enters the analysis.** The pilot tests the harness, not the hypotheses.
+⚠ **Pilot exemption.** A 50-item end-to-end pilot is mandatory (graders always have bugs) — state explicitly that **pilot data is discarded and never enters the study's results.** The pilot tests the harness, not the hypotheses.
 
 ## 9. Exclusion rules
 
@@ -321,13 +328,13 @@ Timeout → IF no response within 90 seconds (well above worst measured call so 
 
 No valid response → IF a response is returned with done: false (incomplete, no metadata), THEN retry once with the identical call; if it fails again, exclude that item from that cell and log reason='no_valid_response'
 
-Required output. An exclusion table reported in the results, one row per cell (model × quantization × elicitation method), with columns: total items attempted, excluded-unparseable, excluded-refusal, excluded-timeout, N retained, and exclusion rate. Reported in the main body, not an appendix. Per-cell exclusion rates are treated as a reported finding, not bookkeeping - differential exclusion across model sizes is a known threat to H1 and H2b and must be visible. One column for mean retained mass (P(True) cells). One column for truncation flag rate.
+Required output. An exclusion table reported in the results, one row per cell (model × quantization × elicitation method), with columns: total items attempted, excluded-unparseable, excluded-refusal, excluded-timeout, excluded-no_valid_response, N retained, and exclusion rate. Reported in the main body, not an appendix. Per-cell exclusion rates are treated as a reported finding, not bookkeeping - differential exclusion across model sizes is a known threat to H1 and H2b and must be visible. One column for mean retained mass (P(True) cells). One column for truncation flag rate.
 
 - Template C's unparseable cases: 
 
  Multiple integers
 
- Ranges (80-90) — not averaged, because averaging constructs a value the model never expressed. Same objection that killed 0.5 for zero retained mass, and worth naming as the same principle rather than restating it fresh
+ Ranges (80-90) — not averaged, because averaging constructs a value the model never expressed. Same objection that killed 0.5 for zero retained mass.
 
  Spelled-out numbers (eighty-five)
 
@@ -339,12 +346,15 @@ Required output. An exclusion table reported in the results, one row per cell (m
 
 *State them now, not after a reviewer finds them. Honesty declared in advance reads as rigor; the same admission afterward reads as damage control.*
 
-differential exclusion named as a limitation.
+Differential exclusion across cells is a limitation - section 8 covers the mechanism and interpretation; the bias runs toward the null, against H1.
 
-- **Benchmark contamination.** qwen3 has almost certainly seen MMLU and TriviaQA in training. What does this do to your claims, and what can you still say despite it?
-- **Quantization as confound.** Your q4 weights are not the full-precision model. You cannot cleanly separate "small" from "quantized" — say so.
-- **Instruct-tuning is not RLHF.** Your models' post-training recipes differ from each other and from Kadavath's. Family effects and tuning effects are entangled.
-- **Single hardware/runtime.** One GPU, one Ollama version.
+- Benchmark contamination. Gemma3 has almost certainly seen TriviaQA in training. Contamination magnitude plausibly scales with model size: larger models memorize more of what they were trained on. A memorized item is answered correctly and confidently, which is exactly a correctly-discriminated item, so memorization plausibly inflates AUROC more in larger models than smaller ones. That threatens H1 specifically: an AUROC increase with size could arrive from memorization rather than from the capacity-for-reliability mechanism H1 is actually about. H2a and H2b compare quantizations within a fixed size, sharing the same memorization baseline, so this particular confound largely cancels there. The unfiltered config (section 5) avoids compounding the problem by not selecting for well-documented facts, though it does not remove the underlying contamination.
+
+Quantization confounded with scale. H1's headline comparison (AUROC across 1B → 4B → 12B) is measured entirely at q4_K_M - there is no full-precision size comparison in this study. A pure scale effect and a scale-by-quantization interaction cannot be fully separated from H1 alone; H2a and H2b's within-size quantization checks are what bound how large that interaction plausibly is.
+
+Instruct-tuning is a cross-study limitation, not a within-roster one. Every model in the roster shares the same gemma3 instruct recipe, so H1, H2a, and H2b all hold it constant. Relative to Kadavath, four things change at once: instruct-tuning, quantization, scale, and model lineage, so a difference between this study's findings and Kadavath's cannot be cleanly attributed to any one of them.
+
+Extrapolation limit. Every throughput and memory-footprint figure in this document is bound to this exact hardware, driver, and context configuration and does not transfer to other setups - this limits E1 (the throughput-vs-memory-footprint sweet-spot map) directly, since E1 is built from those figures. The calibration results (H1, H2a, H2b) do transfer: AUROC is computed from the model's output probabilities, and a model that spills out of VRAM runs slower, not differently confident. Evidence this is a regime change and not incremental noise: a single AMD driver update alone moved the largest cell's throughput from 15.4 to 43.9 tok/s, crossing from VRAM-spilling to resident: no fixed scaling factor recovers this study's throughput table on different hardware, since different hardware or drivers can land on either side of that same threshold. Silicon-lottery variation between individual GPU units is real but secondary next to that. For replicators: re-measure your own throughput and memory constants rather than reusing this study's numbers; the measurement scripts are committed (probe*.ps1 at the repo root, raw CSVs in probe_out/). Two caveats for that re-measurement: section 6 documents Flash Attention as not bit-identical to standard attention, so claiming the same output distribution on different hardware overclaims by one clause; and the only run-to-run spread actually measured in this study is the ~6% swing on the 1b cells (section 6, Throughput Measurements) - treat that as a lower bound on expected variance, not a general figure. VRAM context: peak usage of 15,474 MB against 16,304 MB available, a 2,256 MB desktop baseline from four 1440p displays, under 1 GB of margin on the largest cell.
 
 - degenerate output means some of the 1b's incorrect answers may be non-answers rather than wrong facts, which affects how the accuracy control reads.
 
@@ -375,7 +385,7 @@ If every hypothesis fails and calibration is not noticably different, I've learn
 | | | | |
 
 
-* Post-Study note: re-enable Ollama auto-update and AMD Adrenalin driver auto-update.
+
 ---
 
 ## 13. Freeze declaration
