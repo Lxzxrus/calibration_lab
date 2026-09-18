@@ -2,7 +2,7 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-09-14 · **Synthesized against commit:** `9f87f53` · **Status:** Row schema decided; five §6 amendments pending on the page. **Slice 1 COMPLETE.** Slice 2 — run_pilot.py steps 1–4 of 7; step 5 blocked on those amendments. **Next session is the review session, not work (§0).**
+**Last updated:** 2026-09-18 · **Synthesized against commit:** `e4f28e4` · **Status:** Review gate discharged — full prereg pass, sixteen findings, ~20 amendments landed. **Slice 1 COMPLETE.** Slice 2 — run_pilot.py steps 1–4 of 7. **Step 5 is still blocked on four §D amendments** (see §0 next actions); the row schema is decided but four of its fields have no home on the page yet.
 
 *Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
@@ -35,13 +35,21 @@ fragments where it will still work.
   results — so it does not need the uninterrupted block. The runner and grader do.
   Consequence: §11's rule and §8's procedure stop being pre-21st and become pre-*pilot*,
   landing in the fragments exactly where this re-plan wanted the prose. Not freeze.
+- **Where that stands as of 2026-09-18: three work days remain** — the 18th, 19th, 20th.
+  Runner steps 5–7 and the grader both sit inside "harness complete and debugged," and
+  Slice 2's own budget puts 2–6 sessions of work there. **A cut line exists and has not
+  been decided:** the grader is transcription from a complete §6 spec, which is
+  fragment-tolerant; the runner is construction, which is not. So "runner complete" is the
+  narrower target available if the wider one won't hold. That decision is Laz's and belongs
+  in the lab log with reasoning — set before the 20th, not discovered on it.
 - **Freeze mid-October**, with measured numbers in §5's blanks.
 - **Slice 4 deferred to October by design** — offline analysis against saved JSONL, no
   live state, the most fragment-tolerant work in the project. Half of it already exists
   in `ece_test.py`.
 - **Diagrams by end of October.** Treat November and December as near-zero work months;
   the mid-December REU application should read from a finished thing.
-- **Harness estimate: ~12–19 sessions, now counted in work-days (see §0b). Slice 1 came in at two. Slice 2 is budgeted 6–10 and is four sessions in with 4 of 7 runner steps done. Watch, not re-plan.
+- **Harness estimate: ~12–19 sessions, now counted in work-days (see §0b). Slice 1 came in at two. Slice 2 is budgeted 6–10 and remains at 4 of 7 runner steps.** Two sessions since (09-12/14 and 09-17/18) went to row-schema decisions and the prereg review, not to runner code. Watch, not re-plan.
+- **The estimate is not what broke.** Roughly seven sessions are spent against a 12–19 budget, so 5–12 remain — the harness number is holding. What has been mis-estimated the whole time is **sessions per week**, and that variable gets materially worse on the 21st. Re-planning a date teaches nothing; naming which variable the estimate got wrong is the thing that makes the next estimate better.
 
 ### The two pre-pilot exceptions — mandatory
 
@@ -62,14 +70,19 @@ What survives intact: a C-only pilot still yields p_weak, p_strong, an AUROC flo
 
 ### Next actions, in order
 
-1. **REVIEW SESSION — not work. Gate, decided 2026-09-12.** Field-by-field verification of
-   §6 against the pilot files, plus handoff/lab-log consistency. Adopted after four Claude
-   errors and several handoff/prereg mismatches surfaced in one session. Its failure mode is
-   *looks correct, isn't* — so it does not get done tired, and it does not get folded into a
-   work session. Do not open step 5 before this is done.
-2. Slice 2 — runner, steps 5–7. Step 5 writes one row; step 6 loops to 50 and carries the warm-up call as a hard completion gate; step 7 adds per-run metadata and keep_alive: 0 on the final call.
+*The 2026-09-12 review gate is **discharged** — executed 2026-09-17/18, sixteen findings,
+~20 amendments landed. It worked: two contradictions that would otherwise have reached
+freeze were caught. Do not re-add it; the next scheduled review is a judgment call, not a
+standing gate.*
+
+1. Slice 2 — runner, steps 5–7. Step 5 writes one row; step 6 loops to 50 and carries the warm-up call as a hard completion gate; step 7 adds per-run metadata and keep_alive: 0 on the final call.
    **Row schema — decided 2026-09-12, not open:** one row per **call**, never per item (every field in §6 line 286 and the timing block is a call property, and line 238's resume triple only resolves at call granularity). One row per call regardless of retry — the retry is the same measurement attempted twice (line 322, "same call with no change") — with an attempt count as a field; the first attempt's timing metadata is the stated price. Failure rows are written, so absence means *interrupted* and never means *failed*. **A terminal Template A failure writes no C row at all**: C was unrunnable rather than failed, and `done: false` would overload a field carrying a measured meaning that line 322's retry rule keys on, producing a row that instructs a retry of a call whose input does not exist — and §9 excludes an *item from a cell*, so one terminal A failure is one exclusion and one row, where two rows would double-count one event. Resume therefore reads **row presence**, not the triple set: well-formed row = concluded, skip; no row = interrupted, run it (§6 already tolerates and discards a malformed final line). **Runner records, grader decides** — raw text only, no parsing, no derived values, because §8 says the pilot exists so grader bugs are fixed against pilot outputs, and a parser bug should cost a re-read rather than 100 model calls; the corollary is that append-only forces the grader to write a *second* file, so §6's "parsed integer, mapped confidence" describes graded output, not runner output. `prompt template ID` **dropped** from line 286 — its only unique job is versioning, and the harness commit hash pins repo state with the prereg in the same repo, so it identifies template text as precisely as a version field would (same test that retired the draw index in §5e). Verified line 286 is its sole occurrence in either document.
-   **Blocked on five §D amendments, none of which have reached the page:** (a) Template A's `elicitation_method` value — name the act, not the absence; principle agreed, word unpicked, and it gates the row write. (b) Digest scope — line 282 files model digest per-run, line 250 says log it per row so a replicator can confirm which weights produced each measurement; opposite instructions in one document, and line 282's "(Constant for the process or the cell)" never picked either. (c) `run_id` and harness commit hash — neither appears anywhere in §6. (d) Dirty-tree hard stop; line 250 is the precedent shape, since `git rev-parse HEAD` reports what is committed, not what is running. (e) Line 324's exclusion table carries three reason-code columns where §9 defines four — `no_valid_response` has none (§5c item 9, confirmed narrow).
+   **Blocked on four §D amendments, verified still unlanded against `e4f28e4`.** Line numbers below are current as of that commit; the prereg moved tonight, so re-check before citing them elsewhere.
+   (a) **Template A's `elicitation_method` value.** Line 291 lists the field and line 243 makes it the third leg of the resume triple; nothing in §6 defines its permitted values. Principle agreed 2026-09-12 — *name the act, not the absence* — word still unpicked. This one gates the row write.
+   (b) **Digest scope.** Line 255 says log the digest *per row* so a replicator can confirm which weights produced each measurement; line 287 files it under *per run*. Opposite instructions, one document. Line 287's "(Constant for the process or the cell)" never picked either — model tag, digest and quantization vary per cell, the other eight are process-constant, and the pilot runs two models, so this bites at step 6.
+   (c) **`run_id` and harness commit hash.** Zero occurrences in the prereg, confirmed by grep. Both come from the dedup precondition, not from §6.
+   (d) **Dirty-tree hard stop.** Zero occurrences. Line 255 is the precedent shape: `git rev-parse HEAD` reports what is committed, not what is running, which is the digest problem one level up.
+   **Landed 2026-09-18, no longer blocking:** `attempt_count` (line 291) · exclusion reason, sited in the Grader Spec per-row list rather than Identity because line 239 makes exclusion a grader decision · `top_logprobs` (line 220, Template B only; line 291) · §9's fourth exclusion-table column (line 331) · the runner/grader split rule itself (line 239).
    Both calls' done / done_reason must be captured; §9's exclusion rules read them and the current code discards them.
 3. Slice 2 — grader. Boundary matching over the union of normalized_value and normalized_aliases, negation detection, Template C's parser only for now. §6's spec is complete, so this is transcription plus debugging. Rejoins to items_pilot.jsonl on question_id — the runner does not carry the answer key.
 4. **§11 rule and §8 procedure**, in whatever gaps the code leaves. Both pre-pilot
@@ -274,19 +287,21 @@ The accuracy control reads out the mixture:
 
 §9 re-verified against the file 2026-09-07. Two entries in this table were stale in the "logged as pending but already landed" direction and are corrected below.
 
+**Every row below re-verified against the file 2026-09-18**, during the full prereg review. That pass read §1–§13 directly; no row here is carried forward from an earlier session.
+
 | § | Status | What's left |
 |---|---|---|
-| Header | ⚠️ stale | "Study:" line still uses the old Kadavath framing — **and that framing is now known to be factually wrong**, not merely dated. `Drafted: [7-15-2026]` is a filled value inside brackets; a pre-freeze bracket scan will false-positive on it. |
+| Header | ⚠️ stale | **Half fixed 2026-09-18:** `instruct-tuning` removed from the "Study:" list — nothing tests it, every roster model is instruct-tuned, and §10 correctly calls it a confound. **Still stale:** the `frontier-scale` half, which is factually wrong rather than merely dated and needs the overlap-not-absence rework (§5c item 1). `Drafted: [7-15-2026]` is a filled value inside brackets; a pre-freeze bracket scan will false-positive on it. |
 | 1. Research question | ⚠️ **stale premise** | The question itself is fine — names AUROC, scoped to gemma3 + consumer hardware. The surrounding framing assumes Kadavath measured only ~120B+ models. He did not. **Rewrite before anything else.** |
 | 2. Background | ❌ unwritten | 3–5 sentences. Kadavath on base models, Tian 2023 on verbalized confidence, why small/quantized/instruct-tuned might differ, the community motivation. The stray 3×3-cell note belongs in §8 or §11. |
 | 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. Δ verified 2026-08-29 as the `q8_0 → q4_K_M` pair, present at all three sizes — H2b is testable. **E1 missing entirely.** Check H1's rationale for the old "uncharted" framing. |
 | 4. Models | ✅ COMPLETE | Locked 2026-08-08. Amended 2026-08-29: the one-family line now states the recipe is fixed across all nine with QAT carrying an additional training stage. |
-| 5. Datasets | ✅ COMPLETE | Runtime block rebuilt from probe data 2026-08-28, probe date corrected and load/unload figures de-duplicated 2026-08-29. Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. |
-| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. templates moved into fenced code blocks 2026-09-10, prompt text byte-identical before and after.|
+| 5. Datasets | ✅ COMPLETE | Runtime block rebuilt from probe data 2026-08-28; probe date corrected and load/unload figures de-duplicated 2026-08-29. **2026-09-18:** bare `seed` renamed `draw_seed` at all three draw-context mentions, ending the collision with §6's generation `seed = 42`; integrity rule added at line 128 — fixed before `draw_main.py` first runs, recorded in `items_manifest.json`, and the first draw at that seed is the draw. Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. **`draw_seed`'s value does not exist anywhere yet.** |
+| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. Templates fenced 2026-09-10, prompt text byte-identical. **2026-09-18:** `top_logprobs` pinned (line 220, Template B only) and logged per row · `attempt_count` added (line 291) · exclusion reason added to the Grader Spec per-row list · runner/grader split stated once, generally (line 239) · three more restate-vs-cite duplications killed (Truncation detector, Compliance detector, and the contamination/`load_duration` pair) · contamination source 1 relabelled `first-in-loop`, resolving an apparent contradiction with the mid-run-reload check · "never analyzed" → "never enters the study's results". **Four amendments still unlanded — see §0 next actions.** |
 | 7. Metrics | 🟡 partial | No throughput or memory-footprint metric, so nothing feeds E1. |
-| 8. Analysis plan | 🟡 partial | Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure**. |
-| 9. Exclusion rules | 🟡 near-done | Timeout filled at 90s. no_valid_response is already done: false only — the "within N seconds" clause is gone from the file and the claim that it remained was stale. Mean-retained-mass and truncation-rate columns already exist. Still missing: the exclusion table has no no_valid_response column. |
-| 10. Confounds | 🟡 partial | qat clause and roster-asymmetry entry landed 2026-08-29. **Still open:** contamination rewrite, extrapolation split, differential-exclusion line, and deletion of the four scaffold bullets + orphan fragment. ECE resolved as *not* §10 — it is §11's unwritten rule. |
+| 8. Analysis plan | 🟡 partial | Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure**. **Landed 2026-09-18:** the H1-versus-measured-floor collision is now disclosed rather than silent — if `2 × floor` meets or exceeds H1's fixed 0.1, H1 keeps its threshold (an intentional design choice, not an oversight) but the verdict is reported alongside a note that H1 and H2a/H2b no longer share a comparable standard of evidence. |
+| 9. Exclusion rules | ✅ **COMPLETE** | Timeout filled at 90s. no_valid_response is done: false only. Mean-retained-mass and truncation-rate columns exist. **2026-09-18:** `excluded-no_valid_response` column added at line 331 — the table had carried three reason-code columns against §9's four codes since a much earlier session, and survived two prior passes. |
+| 10. Confounds | ✅ near-complete | **Rewritten 2026-09-18.** All four template scaffold bullets replaced with real content; the orphan fragment became a real differential-exclusion entry citing §8's mechanism and bias direction; contamination bullet rewritten (concedes magnitude scales with size, follows it into AUROC, threatens H1 specifically, spares H2a/H2b on the shared-baseline argument); quantization-confounded-with-scale added; instruct-tuning reframed from a false within-roster claim to the real cross-study one; extrapolation limit split. `qwen3`/MMLU gone. **Two small things left:** the instruct-recipe fact is stated twice (lines 355 and 365), and bullet formatting is mixed. ECE resolved as *not* §10 — it is §11's unwritten rule. |
 | 11. Null result | ❌ **placeholder** | Records the ECE decision but not the rule — it announces a rule for the AUROC-flat-while-calibration-degrades case and never states it. Needs full redesign — three hypotheses can null independently, and H2b can come back *not evaluable*. Option-four interpretation rule lands here. |
 | 12. Deviations | ✅ ready | Empty by design until freeze. |
 | 13. Freeze | ⏳ blocked | Two threshold numbers bracketed until the pilot. `items.jsonl` not yet committed. |
@@ -324,6 +339,10 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
 §6 templates fenced. A/B/C moved into fenced code blocks with labels and list bullets outside the fence. The two-space continuation indentation on B and C was markdown list-continuation, not prompt content, and is gone. Prompt text is byte-identical before and after, verified by repr() on the raw file lines — a formatting change, not a §12 candidate. Motivation: the document could not previously prove which reading was intended, so the frozen prompt was not unambiguously specified.
 §6 whitespace-strip rule. Raw Template A output is stripped of leading and trailing whitespace only — no punctuation removal, no case folding, no article stripping — before entering the [Answer] slot in Templates B and C. Reasoning on the page: whitespace behavior correlates with model size, so a whitespace-sensitive prompt would put a size effect inside the instrument on a size hypothesis; and .strip() is total and unambiguous, no threshold to pick and no stopping-point problem — the same test that permitted leading-zero stripping and rejected the alias-length knob.
 
+**Closed 2026-09-18** — items 2, 3, 4, 5, 7, 9, 12 and 16, plus six findings that were never on this list. All §D intentional amendments, all recorded in `lab_log.md` the same session:
+
+§10 rewritten end to end — four scaffold bullets replaced with real content, the orphan fragment resolved into a differential-exclusion entry citing §8, contamination bullet rewritten, quantization-confounded-with-scale added, instruct-tuning reframed, extrapolation limit split. §9's exclusion table gained its fourth reason-code column. `top_logprobs` pinned and logged per row. `attempt_count` and exclusion reason added to the row schema. `draw_seed` named and given an integrity rule. The runner/grader split stated once, generally. Three restate-vs-cite duplications killed. Two contradictions resolved — `load_duration` and the pilot's "never analyzed". The post-study TODO moved out of §12 into `POST_STUDY_TODO.md`, committed.
+
 **Corrections to this list, 2026-08-31 (verified against the file):**
 
 - **Item 1 was mis-scoped.** §1's research question (line 19) contains no "uncharted"
@@ -340,22 +359,22 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
   from the dead one — the 1b cold-load figure generalized to the roster — same digits.
   The sweep killed the load figure; the runtime component is live and correct.
 
-1. **§1 framing sentence and header "Study:" line** — the Kadavath scale belief was wrong. Rewrite around overlap, not absence. Highest-visibility stale claim in the document.
-2. **§10: contamination bullet, rewritten.** Gemma3 has almost certainly seen TriviaQA. The version currently drafted in conversation still contains a contradiction — it argues uniform inflation cancels, then concedes magnitude scales with size. Resolve in favour of the concession, because larger models memorise more of their training data, so contamination is a gradient along H1's own axis. Follow it into AUROC: a memorised item is answered correctly *and* confidently, which is a correctly-discriminated item, so memorisation plausibly inflates AUROC more in larger models — H1's predicted result arriving by a non-calibration mechanism. Then restore the half that survives: H2a and H2b compare quantizations *within* a size, sharing a memorisation baseline, so uniform inflation genuinely does cancel there. Cite §5's `unfiltered` choice rather than re-arguing it.
-3. **§10: extrapolation limit, rewritten and split into three blocks, conclusion first.** (a) Scope and split — every performance figure is configuration-bound and E1 does not transfer; the calibration results *do*, because AUROC is computed from probabilities and a spilling model is slow, not differently confident. (b) Evidence — 15.4 → 43.9 tok/s on a driver update alone, framed as a regime change: the largest cell changed bottleneck, so **no scaling factor recovers the table from different hardware.** Silicon lottery as a subordinate clause only. (c) For replicators — re-measure your own constants, scripts committed (`probe*.ps1` at repo root, CSVs in `probe_out/`). Two things to check while writing: §6 documents flash attention as *not bit-identical*, so "same distribution" overclaims by one clause; and the ~6% run-to-run swing on the 1b cells is the only spread figure actually measured. Context: peak 15474 MB against 16304 MB available, 2256 MB desktop baseline, four 1440p displays, under 1 GB margin on the largest cell.
-4. **§10: one-line differential-exclusion entry** citing §8. §8 already carries the mechanism and the interpretation rule; the only thing missing is direction — the bias runs *toward the null*, against H1. Then delete the orphan `differential exclusion named as a limitation` fragment at the top of §10.
-5. **§10: delete the four scaffold bullets** (qwen3/MMLU contamination, quantization-as-confound, instruct-tuning-is-not-RLHF, single hardware/runtime) and the `[others]` placeholder. Fill from §5d.
+1. **§1 framing sentence and header "Study:" line** — the Kadavath scale belief was wrong. Rewrite around overlap, not absence. Highest-visibility stale claim in the document. **Half done 2026-09-18:** `instruct-tuning` is out of the "Study:" line; the `frontier-scale` half is untouched and still needs its own session, since that rework is entangled with authoring §2.
+2. ✅ **LANDED 2026-09-18.** **§10: contamination bullet, rewritten.** Gemma3 has almost certainly seen TriviaQA. The version currently drafted in conversation still contains a contradiction — it argues uniform inflation cancels, then concedes magnitude scales with size. Resolve in favour of the concession, because larger models memorise more of their training data, so contamination is a gradient along H1's own axis. Follow it into AUROC: a memorised item is answered correctly *and* confidently, which is a correctly-discriminated item, so memorisation plausibly inflates AUROC more in larger models — H1's predicted result arriving by a non-calibration mechanism. Then restore the half that survives: H2a and H2b compare quantizations *within* a size, sharing a memorisation baseline, so uniform inflation genuinely does cancel there. Cite §5's `unfiltered` choice rather than re-arguing it.
+3. ✅ **LANDED 2026-09-18.** **§10: extrapolation limit, rewritten and split into three blocks, conclusion first.** (a) Scope and split — every performance figure is configuration-bound and E1 does not transfer; the calibration results *do*, because AUROC is computed from probabilities and a spilling model is slow, not differently confident. (b) Evidence — 15.4 → 43.9 tok/s on a driver update alone, framed as a regime change: the largest cell changed bottleneck, so **no scaling factor recovers the table from different hardware.** Silicon lottery as a subordinate clause only. (c) For replicators — re-measure your own constants, scripts committed (`probe*.ps1` at repo root, CSVs in `probe_out/`). Two things to check while writing: §6 documents flash attention as *not bit-identical*, so "same distribution" overclaims by one clause; and the ~6% run-to-run swing on the 1b cells is the only spread figure actually measured. Context: peak 15474 MB against 16304 MB available, 2256 MB desktop baseline, four 1440p displays, under 1 GB margin on the largest cell.
+4. ✅ **LANDED 2026-09-18.** **§10: one-line differential-exclusion entry** citing §8. §8 already carries the mechanism and the interpretation rule; the only thing missing is direction — the bias runs *toward the null*, against H1. Then delete the orphan `differential exclusion named as a limitation` fragment at the top of §10.
+5. ✅ **LANDED 2026-09-18.** **§10: delete the four scaffold bullets** (qwen3/MMLU contamination, quantization-as-confound, instruct-tuning-is-not-RLHF, single hardware/runtime) and the `[others]` placeholder. Fill from §5d.
 6. **§11: the option-four interpretation rule** — currently a placeholder that announces a rule and never states it. Must be written before the pilot or it's post-hoc.
-7. **§10 or §2: the instruct-tuning limitation, correctly stated.** Not "recipes differ from each other" — one family fixed that. Relative to Kadavath, *four* things change at once: instruct-tuning, quantization, scale, and lineage. Within-roster comparisons are clean; the cross-study framing sentence is what's limited.
+7. ✅ **LANDED 2026-09-18.** **§10 or §2: the instruct-tuning limitation, correctly stated.** Not "recipes differ from each other" — one family fixed that. Relative to Kadavath, *four* things change at once: instruct-tuning, quantization, scale, and lineage. Within-roster comparisons are clean; the cross-study framing sentence is what's limited.
 8. **§3: E1**, and **§7: throughput + memory footprint metrics** to feed it.
-9. Item 9 shrinks (verified 2026-09-07). The "within N seconds" clause does not exist in the file and the mean-retained-mass and truncation-rate columns already do. What remains is one thing: the exclusion table has no no_valid_response column.
+9. ✅ **LANDED 2026-09-18.** Item 9 shrinks (verified 2026-09-07). The "within N seconds" clause does not exist in the file and the mean-retained-mass and truncation-rate columns already do. What remains is one thing: the exclusion table has no no_valid_response column.
 10. **§8: noise-floor measurement procedure.** Two floors. Plus the direction-of-bias clause from item 4.
 11. **`items.jsonl` committed** — §5 promises it.
-12. **Re-enable AMD driver auto-update and Ollama auto-update post-study.** Disabled 2026-08-26.
+12. ✅ **LANDED 2026-09-18.** **Re-enable AMD driver auto-update and Ollama auto-update post-study.** Disabled 2026-08-26.
 13. **Fix the 08-28 lab-log line** saying scripts and CSVs are both under `probe_out/`. The scripts are at repo root.
 14. *Optional:* §10's roster-asymmetry entry could be reworded — "the shape across the two steps on the 1b and across the two steps on the 4b" is clumsy. Content is correct.
 15. *Optional:* re-run the three 1b cells at higher `num_predict` for a longer timing window, so every row in the throughput table means something.
-16. **§10 line 331 is wrong on the page, not merely scaffolding.** It reads *"qwen3 has
+16. ✅ **LANDED 2026-09-18.** **§10 line 331 is wrong on the page, not merely scaffolding.** It reads *"qwen3 has
     almost certainly seen MMLU and TriviaQA."* The roster is gemma3 and MMLU was dropped.
     Two stale design decisions in one bullet.
 17. **`qf_1637` needs two entries.** (a) §5: one line stating the row is dropped at draw
@@ -383,6 +402,36 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
     `DRAW_SEED` and `PILOT_N` are fixed — same inputs, same output — but a live risk if
     either changes. Git catches it; the hazard is worth one line where §5 describes the
     frozen item set.
+21. **§6: KV cache has no verification path.** Line 142 pins f16 with a methodological
+    reason — quantizing the cache adds a second noise source on top of the weight
+    quantization H2a is about, and the probabilities are the dependent variable. Line 287
+    lists KV cache type as a per-run logged field. `run_pilot.py` contains **zero**
+    references to it: no check, no log. The Ollama version and the digest each get a hard
+    stop (line 255) for a weaker version of the same risk, and KV cache is a server-level
+    setting — the same class of thing that already drifted once. Whether the API reports
+    cache type is unchecked; line 144 solves the analogous problem for flash attention by
+    reading the server log at model load. **Finding 1 of the 2026-09-18 review, and the
+    only substantive item from that session with no home on any page.**
+22. **Runner-side timeout recording.** Three of §9's four codes are grader-derivable from
+    stored output. `timeout` is not — a call with no response in 90 seconds has no body to
+    parse, so only the runner can know it happened, and the row schema gives it nowhere to
+    record that. Not blocking (timeouts are step 6/7; step 5 writes rows from successful
+    calls), but it surfaces at implementation if it isn't written first.
+23. **Digest prefix equality check in `run_pilot.py`** — deferred deliberately 2026-09-18.
+    §4's table carries 12-character prefixes, the code carries full 64-character digests.
+    Optional hardening, not a live bug.
+24. **Template text is duplicated between §6 (lines 179–200) and `run_pilot.py`'s
+    `prompt_a` / `prompt_c`, with no automated equality check.** Code must hold the literal
+    string, so there is no citing out of this one. Byte-matched by hand 2026-09-12; the only
+    guard is a comment. Same shape as item 23 and strictly more load-bearing.
+25. **`draw_seed`'s value.** The integrity rule landed at line 128; the number exists
+    nowhere. Not blocking — `draw_main.py` can't be written until the pilot reports p_weak
+    and p_strong — but the value is arbitrary and could be chosen now, which would make the
+    line-128 commitment checkable rather than declared.
+26. **§10 states the instruct-recipe fact twice** (lines 355 and 365), introduced by the
+    2026-09-18 rewrite; bullet formatting in that section is now mixed.
+27. **§11's closing sentence trails off mid-thought**, no terminal punctuation. Separate
+    from item 6, which is the unwritten rule itself.
 
 ---
 
@@ -679,7 +728,7 @@ Dropping `num_ctx` 131072 → 2048 cost the 12b throughput (35.9 → ~20 tok/s a
   Blockers now split: §11's rule and §8's noise floor are **pre-pilot mandatory**;
   §10's transcription and §2 are post-pilot, pre-freeze.
 - **Slice 1** — dataset loader. **COMPLETE 2026-09-05**, two sessions.
-- Slice 2 — runner (one model, one method) + grader. ← here. Runner steps 1–4 of 7 done. Append-only JSONL. Template C only; Template B deferred to October (§0).
+- Slice 2 — runner (one model, one method) + grader. ← here. Runner steps 1–4 of 7 done; step 5 blocked on four §D amendments (§0). Append-only JSONL. Template C only; Template B deferred to October (§0).
 - **Slice 3** — second elicitation method; loop the roster. The second method is Template B, deferred to October (§0), so this slice is not pre-21st work.
 - **Slice 4** — analysis. **Deferred to October by design**, as the most fragment-tolerant
   work in the project.
@@ -736,6 +785,14 @@ that." Never "your prereg says X." Partial reads are the specific hazard: a `sed
 for convenience is not the section, and a range ending on a round number is not a boundary the
 document agreed to.
 
+**The rule held, 2026-09-18.** Full §1–§13 pass, sixteen findings, every one cited to a line
+and quoted — no false claims about the file that session, against four the session before.
+Two of the sixteen were contradictions that would otherwise have reached freeze. It also
+caught a defect in Claude's own draft header for *this* handoff, which claimed step 5 was
+unblocked when four amendments were verifiably still unlanded. **Apply the rule to your own
+drafts, not only to Laz's text** — that is where it failed twice this week and where it will
+fail next.
+
 ---
 
 ## 10. Living-doc gap — the reason this file exists
@@ -758,6 +815,10 @@ Repo holds the pre-registration and data. Vault holds interpretation. **Canonica
 ## 11. Git state
 
 ```
+e4f28e4  2026-09-18 Prereg review: ~20 amendments, lab log, POST_STUDY_TODO.md
+80287c6  2026-09-14 updated handoff
+9f87f53  2026-09-14 lab log 09-12/09-14
+ea5699f  2026-09-10 Updated handoff 09-10-2026
 ff7df62  2026-09-10 runner steps 2-4 completed and updated 2 things in the prereg.
 2d73604  2026-09-05  Slice 1 finished and deferred lab log entry resolved
 207f989  2026-09-01  Handoff: re-plan to harness-first, §5e harness state, three §5c corrections
@@ -772,7 +833,19 @@ f8a12b4  2026-08-01  Section 3 completed
 3496554  2026-06-24  pre-registration template WIP
 ```
 
-Verified 2026-09-10:
+Verified 2026-09-18:
+
+`e4f28e4` carries the prereg (~20 §D amendments), the 09-17/18 lab-log entry, and
+`POST_STUDY_TODO.md`. `run_pilot.py` **unchanged this session** — no code was written.
+Working tree clean at close. This handoff is the only file that moved after `e4f28e4`, so
+next session's §C.1 should find exactly one handoff-only commit against it.
+
+`POST_STUDY_TODO.md` is **committed, not ignored** — decided 2026-09-18 against gitignoring
+it. A gitignored reminder lives on one machine, reaches neither the laptop nor any backup,
+and the file is two lines. Holds re-enabling Ollama and AMD driver auto-update, and reverting
+KV cache to q8_0.
+
+Earlier, verified 2026-09-10:
 
 run_pilot.py — steps 1–4 of 7, committed.
 probe4_endpoint_logprob_diff.py and its two *_warm.json outputs — committed.
