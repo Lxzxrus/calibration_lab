@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .env
 tempCodeRunnerFile.py
+pilot_runner_log.jsonl

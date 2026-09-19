@@ -2,6 +2,16 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
+## 2026-09-18 Step 5: run_pilot.py writes and logs a verified row per call (Step 5 done except the forced-timeout test)
+
+Step 5 mostly done and verified on sfq_1586: run_pilot.py now writes one JSON row per call to pilot_runner_log.jsonl (gitignored), built from a per_run_fields dict (the nine section 6 "per run" fields) plus per-call Identity/Response/Timing fields, using observed values (Ollama version, model digest) rather than the frozen constants they're checked against. Built alongside: a 90s timeout, retry-once on both timeout and done: false per section 9, C gated on A's outcome, the options dict deduplicated into base_options, and a deliberate decision to crash loudly on an Ollama/model-error response rather than retry it.
+
+Raw measurements, sfq_1586, harness commit 6779746: A - raw response "A low, upholstered seat.", load_duration 3,516,066,500 ns (~3.52s, cold), eval_count 7, prompt_eval_count 46, attempt_count 1. C - raw response "10\n" (trailing newline preserved), load_duration 229,959,000 ns (~0.23s, warm), eval_count 4, prompt_eval_count 82, attempt_count 1. The cold/warm gap in load_duration is the measured reason step 6 needs its warm-up call.
+
+One real fix mid-build: the row was gating done_reason, the timing fields, and the raw response entirely behind done: true, on the assumption done: false meant none of them existed. Line 298 only promises that on a timeout, not on done: false. Fixed to check each response field's presence individually and log whichever ones actually came back, so a done: false row still gives the grader something to apply the no_valid_response rule against.
+
+Open going into next session: the forced-timeout failure path is untested - set a tiny timeout, confirm a timed_out row appears and C is skipped. Two minutes, blocks nothing, first item tomorrow. pilot_runner_log.jsonl held tonight's test rows and has been deleted ahead of the real pilot run - the keep-first/commit-hash hard stop would have caught stale rows post-commit anyway, but deletion doesn't rely on that.
+
 ## 2026-09-18 Prereg review finishing touches and fixes: Six blockers cleared, two review passes, Step 5 unblocked
 
 Session framing. Opened by refreshing context against the live repo rather than the prior conversation: confirmed the last session's ~20 amendments were committed (e4f28e4), found HANDOFF had already been updated separately (eb83167) to state Step 5 was blocked on four specific section D amendments not yet landed. Verified all four against the live prereg before starting — every citation held.
