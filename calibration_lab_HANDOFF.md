@@ -2,7 +2,7 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-09-18 · **Synthesized against commit:** `e4f28e4` · **Status:** Review gate discharged — full prereg pass, sixteen findings, ~20 amendments landed. **Slice 1 COMPLETE.** Slice 2 — run_pilot.py steps 1–4 of 7. **Step 5 is still blocked on four §D amendments** (see §0 next actions); the row schema is decided but four of its fields have no home on the page yet.
+**Last updated:** 2026-09-20 · **Synthesized against commit:** `09c815e` *(fill in: the lab-log-only commit made directly before this handoff's commit; HEAD before it was `4254e66`)* · **Status:** **Runner COMPLETE** — `run_pilot.py` steps 1–7 built and verified 2026-09-20, meeting the runner-completion hard deadline set 2026-09-18. Harness-validation run at `4254e66`: 300 rows, 0 failures, 0 cold reloads, every row's hash equal to HEAD. **That run is not the pilot.** The grader is unbuilt, so the wider Sept 21 target (harness complete) was not met; the narrower cut was. Next: grader, §11 rule, §8 procedure, then the pilot.
 
 *Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
@@ -35,25 +35,33 @@ fragments where it will still work.
   results — so it does not need the uninterrupted block. The runner and grader do.
   Consequence: §11's rule and §8's procedure stop being pre-21st and become pre-*pilot*,
   landing in the fragments exactly where this re-plan wanted the prose. Not freeze.
-- **Where that stands as of 2026-09-18: three work days remain** — the 18th, 19th, 20th.
-  Runner steps 5–7 and the grader both sit inside "harness complete and debugged," and
-  Slice 2's own budget puts 2–6 sessions of work there. **A cut line exists and has not
-  been decided:** the grader is transcription from a complete §6 spec, which is
-  fragment-tolerant; the runner is construction, which is not. So "runner complete" is the
-  narrower target available if the wider one won't hold. That decision is Laz's and belongs
-  in the lab log with reasoning — set before the 20th, not discovered on it.
+- **Cut line decided 2026-09-18, deadline met 2026-09-20.** Laz set runner completion as the
+  hard deadline, leaving the grader for the fragments — the grader is transcription from a
+  complete §6 spec and fragment-tolerant; the runner was construction and was not. He was
+  asked to record that decision in the 09-18 lab-log entry; Claude has not read that entry,
+  so check it. The 19th produced no session (house work). Step 5's last piece, step 6, and
+  step 7 all landed on the 20th, with the close starting at 8:30 pm rather than past midnight.
 - **Freeze mid-October**, with measured numbers in §5's blanks.
 - **Slice 4 deferred to October by design** — offline analysis against saved JSONL, no
   live state, the most fragment-tolerant work in the project. Half of it already exists
   in `ece_test.py`.
 - **Diagrams by end of October.** Treat November and December as near-zero work months;
   the mid-December REU application should read from a finished thing.
-- **Harness estimate: ~12–19 sessions, now counted in work-days (see §0b). Slice 1 came in at two. Slice 2 is budgeted 6–10 and remains at 4 of 7 runner steps.** Two sessions since (09-12/14 and 09-17/18) went to row-schema decisions and the prereg review, not to runner code. Watch, not re-plan.
+- **Harness estimate: ~12–19 sessions, now counted in work-days (see §0b). Slice 1 came in at two. Slice 2 is budgeted 6–10; its runner half is done.** Runner steps 5–7 took two work-days (09-18, 09-20) once the prereg blockers were cleared in the first half of 09-18. Roughly nine sessions spent against 12–19, with the grader the remaining Slice 2 work.
 - **The estimate is not what broke.** Roughly seven sessions are spent against a 12–19 budget, so 5–12 remain — the harness number is holding. What has been mis-estimated the whole time is **sessions per week**, and that variable gets materially worse on the 21st. Re-planning a date teaches nothing; naming which variable the estimate got wrong is the thing that makes the next estimate better.
 
 ### The two pre-pilot exceptions — mandatory
 
 Template B dropped from pre-21st scope — 2026-09-10
+
+**Partly reversed 2026-09-20, at the runner level only.** Step 6 was built with all three
+templates. B rows — each carrying the full top-10 candidate list for every generated token —
+are in the validation run, and one was checked against prereg lines 186–190 (template text,
+verbatim) and 222 (`top_logprobs = 10`): position 0 held `False` at −0.1057 and `True` at
+−3.1908, plus the `FALSE` and ` False` variants the parsing rule counts. What did **not**
+change: B's parser is grader work and is still unbuilt. Whether the pilot of record includes
+B is open (§5c item 29), and the reversal needs its reasoning in the lab log in Laz's words.
+The 09-10 reasoning below is kept as history.
 
 A completion threshold was set at the start of the 09-09/10 session: runner steps 3–6 done and step 7 started, or Template B leaves the pre-21st build. The session reached step 4. The pilot runs Template C only. Template B lands in October.
 
@@ -75,20 +83,14 @@ What survives intact: a C-only pilot still yields p_weak, p_strong, an AUROC flo
 freeze were caught. Do not re-add it; the next scheduled review is a judgment call, not a
 standing gate.*
 
-1. Slice 2 — runner, steps 5–7. Step 5 writes one row; step 6 loops to 50 and carries the warm-up call as a hard completion gate; step 7 adds per-run metadata and keep_alive: 0 on the final call.
-   **Row schema — decided 2026-09-12, not open:** one row per **call**, never per item (every field in §6 line 286 and the timing block is a call property, and line 238's resume triple only resolves at call granularity). One row per call regardless of retry — the retry is the same measurement attempted twice (line 322, "same call with no change") — with an attempt count as a field; the first attempt's timing metadata is the stated price. Failure rows are written, so absence means *interrupted* and never means *failed*. **A terminal Template A failure writes no C row at all**: C was unrunnable rather than failed, and `done: false` would overload a field carrying a measured meaning that line 322's retry rule keys on, producing a row that instructs a retry of a call whose input does not exist — and §9 excludes an *item from a cell*, so one terminal A failure is one exclusion and one row, where two rows would double-count one event. Resume therefore reads **row presence**, not the triple set: well-formed row = concluded, skip; no row = interrupted, run it (§6 already tolerates and discards a malformed final line). **Runner records, grader decides** — raw text only, no parsing, no derived values, because §8 says the pilot exists so grader bugs are fixed against pilot outputs, and a parser bug should cost a re-read rather than 100 model calls; the corollary is that append-only forces the grader to write a *second* file, so §6's "parsed integer, mapped confidence" describes graded output, not runner output. `prompt template ID` **dropped** from line 286 — its only unique job is versioning, and the harness commit hash pins repo state with the prereg in the same repo, so it identifies template text as precisely as a version field would (same test that retired the draw index in §5e). Verified line 286 is its sole occurrence in either document.
-   **Blocked on four §D amendments, verified still unlanded against `e4f28e4`.** Line numbers below are current as of that commit; the prereg moved tonight, so re-check before citing them elsewhere.
-   (a) **Template A's `elicitation_method` value.** Line 291 lists the field and line 243 makes it the third leg of the resume triple; nothing in §6 defines its permitted values. Principle agreed 2026-09-12 — *name the act, not the absence* — word still unpicked. This one gates the row write.
-   (b) **Digest scope.** Line 255 says log the digest *per row* so a replicator can confirm which weights produced each measurement; line 287 files it under *per run*. Opposite instructions, one document. Line 287's "(Constant for the process or the cell)" never picked either — model tag, digest and quantization vary per cell, the other eight are process-constant, and the pilot runs two models, so this bites at step 6.
-   (c) **`run_id` and harness commit hash.** Zero occurrences in the prereg, confirmed by grep. Both come from the dedup precondition, not from §6.
-   (d) **Dirty-tree hard stop.** Zero occurrences. Line 255 is the precedent shape: `git rev-parse HEAD` reports what is committed, not what is running, which is the digest problem one level up.
-   **Landed 2026-09-18, no longer blocking:** `attempt_count` (line 291) · exclusion reason, sited in the Grader Spec per-row list rather than Identity because line 239 makes exclusion a grader decision · `top_logprobs` (line 220, Template B only; line 291) · §9's fourth exclusion-table column (line 331) · the runner/grader split rule itself (line 239).
-   Both calls' done / done_reason must be captured; §9's exclusion rules read them and the current code discards them.
-3. Slice 2 — grader. Boundary matching over the union of normalized_value and normalized_aliases, negation detection, Template C's parser only for now. §6's spec is complete, so this is transcription plus debugging. Rejoins to items_pilot.jsonl on question_id — the runner does not carry the answer key.
-4. **§11 rule and §8 procedure**, in whatever gaps the code leaves. Both pre-pilot
+1. **Small runner close-outs, fragment-sized** — §5c items 30–31 (resume robustness,
+   whitespace-only answer) and the B-blind resume line on the page (§5c item 28, a §D
+   amendment). None block the grader.
+2. Slice 2 — grader. Boundary matching over the union of normalized_value and normalized_aliases, negation detection, Template C's parser — and B's, if §5c item 29 puts B in the pilot. It reads the runner file and writes the second file described at prereg lines 292–307. §6's spec is complete, so this is transcription plus debugging. Rejoins to items_pilot.jsonl on question_id — the runner does not carry the answer key.
+3. **§11 rule and §8 procedure**, in whatever gaps the code leaves. Both pre-pilot
    mandatory — and, since the pilot moved past the 21st, no longer pre-21st.
-5. **Slice 3** — second elicitation method (Template B, October per §0); loop the roster.
-6. **Pilot**, then the remaining §5c prose, then freeze.
+4. **Slice 3** — loop the full roster. The runner already loops models and runs B; what remains is the nine-model roster and B's grader side.
+5. **Pilot**, then the remaining §5c prose, then freeze. Delete `pilot_runner_log.jsonl` first — the validation rows must not become pilot rows, and keep-first would make them authoritative.
 
 ### Estimate check — 2026-09-05
 
@@ -99,12 +101,16 @@ sessions across runner and grader.
 
 ### Standing
 
-No study data has been run. Harness code is draw_pilot.py (complete) and run_pilot.py (steps 1–4 of 7). Probe scripts — three probe*.ps1 plus probe4_endpoint_logprob_diff.py — and ece_test.py remain environment characterization and learning artifacts. All Ollama calls so far are environment characterization.
+No study data has been run. Harness code is draw_pilot.py (complete) and run_pilot.py (complete, steps 1–7, verified 2026-09-20). The 300 rows in `pilot_runner_log.jsonl` (gitignored) are harness validation at `4254e66` — not study data, not the pilot. Probe scripts — three probe*.ps1 plus probe4_endpoint_logprob_diff.py — and ece_test.py remain environment characterization and learning artifacts. All Ollama calls so far are environment characterization.
 
 **Division of labor on code (2026-08-31, held through Slice 1).** Laz writes every line.
 Claude explains constructs, reviews, and says where it will break — and does **not** supply
 code. Writing ownership across the project: code — Laz · prereg — Laz · lab log — mostly
 Laz, Claude adds and edits · handoff — Claude. Reading is both.
+
+**Not recorded, 2026-09-20:** step 6 was built in a separate ~2-hour session with Sonnet,
+outside this chat. Whether the "Laz writes every line" rule held there is not known to
+Claude. Laz to state it in the lab log — it bears on §9's manual-mile bar.
 
 ---
 
@@ -297,10 +303,10 @@ The accuracy control reads out the mixture:
 | 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. Δ verified 2026-08-29 as the `q8_0 → q4_K_M` pair, present at all three sizes — H2b is testable. **E1 missing entirely.** Check H1's rationale for the old "uncharted" framing. |
 | 4. Models | ✅ COMPLETE | Locked 2026-08-08. Amended 2026-08-29: the one-family line now states the recipe is fixed across all nine with QAT carrying an additional training stage. |
 | 5. Datasets | ✅ COMPLETE | Runtime block rebuilt from probe data 2026-08-28; probe date corrected and load/unload figures de-duplicated 2026-08-29. **2026-09-18:** bare `seed` renamed `draw_seed` at all three draw-context mentions, ending the collision with §6's generation `seed = 42`; integrity rule added at line 128 — fixed before `draw_main.py` first runs, recorded in `items_manifest.json`, and the first draw at that seed is the draw. Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. **`draw_seed`'s value does not exist anywhere yet.** |
-| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. Templates fenced 2026-09-10, prompt text byte-identical. **2026-09-18:** `top_logprobs` pinned (line 220, Template B only) and logged per row · `attempt_count` added (line 291) · exclusion reason added to the Grader Spec per-row list · runner/grader split stated once, generally (line 239) · three more restate-vs-cite duplications killed (Truncation detector, Compliance detector, and the contamination/`load_duration` pair) · contamination source 1 relabelled `first-in-loop`, resolving an apparent contradiction with the mid-run-reload check · "never analyzed" → "never enters the study's results". **Four amendments still unlanded — see §0 next actions.** |
+| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. Templates fenced 2026-09-10, prompt text byte-identical. **2026-09-18:** `top_logprobs` pinned (now line 222, Template B only) and logged per row · `attempt_count` added (now line 296) · exclusion reason added to the Grader Spec per-row list · runner/grader split stated once, generally (line 239) · three more restate-vs-cite duplications killed (Truncation detector, Compliance detector, and the contamination/`load_duration` pair) · contamination source 1 relabelled `first-in-loop`, resolving an apparent contradiction with the mid-run-reload check · "never analyzed" → "never enters the study's results". **Landed 2026-09-18 evening (`6779746`):** the four §D blockers plus three issues the page surfaced — elicitation-method values `'answer'`/`'p_true'`/`'verbalized'` (line 296); model tag, digest and quantization per row; keep-first dedup with a commit-hash/Ollama-version hard stop, `run_id` considered and declined (line 247); dirty-tree hard stop with gitignored logs (line 259); runner file / grader file split (lines 292–307); `timed_out` (line 298); resume on any well-formed row, success or failure (line 243); terminal-A-failure resume clause (line 245). **New gap 2026-09-20:** line 245 names only the C call; B now runs too (§5c item 28). |
 | 7. Metrics | 🟡 partial | No throughput or memory-footprint metric, so nothing feeds E1. |
 | 8. Analysis plan | 🟡 partial | Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure**. **Landed 2026-09-18:** the H1-versus-measured-floor collision is now disclosed rather than silent — if `2 × floor` meets or exceeds H1's fixed 0.1, H1 keeps its threshold (an intentional design choice, not an oversight) but the verdict is reported alongside a note that H1 and H2a/H2b no longer share a comparable standard of evidence. |
-| 9. Exclusion rules | ✅ **COMPLETE** | Timeout filled at 90s. no_valid_response is done: false only. Mean-retained-mass and truncation-rate columns exist. **2026-09-18:** `excluded-no_valid_response` column added at line 331 — the table had carried three reason-code columns against §9's four codes since a much earlier session, and survived two prior passes. |
+| 9. Exclusion rules | ✅ **COMPLETE** | Timeout filled at 90s. no_valid_response is done: false only. Mean-retained-mass and truncation-rate columns exist. **2026-09-18:** `excluded-no_valid_response` column added (exclusion table now at line 342) — the table had carried three reason-code columns against §9's four codes since a much earlier session, and survived two prior passes. |
 | 10. Confounds | ✅ near-complete | **Rewritten 2026-09-18.** All four template scaffold bullets replaced with real content; the orphan fragment became a real differential-exclusion entry citing §8's mechanism and bias direction; contamination bullet rewritten (concedes magnitude scales with size, follows it into AUROC, threatens H1 specifically, spares H2a/H2b on the shared-baseline argument); quantization-confounded-with-scale added; instruct-tuning reframed from a false within-roster claim to the real cross-study one; extrapolation limit split. `qwen3`/MMLU gone. **Two small things left:** the instruct-recipe fact is stated twice (lines 355 and 365), and bullet formatting is mixed. ECE resolved as *not* §10 — it is §11's unwritten rule. |
 | 11. Null result | ❌ **placeholder** | Records the ECE decision but not the rule — it announces a rule for the AUROC-flat-while-calibration-degrades case and never states it. Needs full redesign — three hypotheses can null independently, and H2b can come back *not evaluable*. Option-four interpretation rule lands here. |
 | 12. Deviations | ✅ ready | Empty by design until freeze. |
@@ -342,6 +348,10 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
 **Closed 2026-09-18** — items 2, 3, 4, 5, 7, 9, 12 and 16, plus six findings that were never on this list. All §D intentional amendments, all recorded in `lab_log.md` the same session:
 
 §10 rewritten end to end — four scaffold bullets replaced with real content, the orphan fragment resolved into a differential-exclusion entry citing §8, contamination bullet rewritten, quantization-confounded-with-scale added, instruct-tuning reframed, extrapolation limit split. §9's exclusion table gained its fourth reason-code column. `top_logprobs` pinned and logged per row. `attempt_count` and exclusion reason added to the row schema. `draw_seed` named and given an integrity rule. The runner/grader split stated once, generally. Three restate-vs-cite duplications killed. Two contradictions resolved — `load_duration` and the pilot's "never analyzed". The post-study TODO moved out of §12 into `POST_STUDY_TODO.md`, committed.
+
+**Closed 2026-09-18 evening (`6779746`), all §D intentional amendments:** the four §D blockers (elicitation-method values, digest/model-tag/quantization scope, harness commit hash + keep-first with `run_id` declined, dirty-tree hard stop) and three found by reading the page instead of this file — runner/grader field split, the resume rule's re-roll hole ("completed" → "every well-formed row, success or failure"), and the A-failure resume clause. Plus item 22 below. Two internal line-number references removed from the prereg in favour of named references.
+
+**Closed 2026-09-20:** none on the page — code-only session. Items 22 (code side) and 21 (partially) moved in `run_pilot.py`.
 
 **Corrections to this list, 2026-08-31 (verified against the file):**
 
@@ -412,7 +422,10 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
     cache type is unchecked; line 144 solves the analogous problem for flash attention by
     reading the server log at model load. **Finding 1 of the 2026-09-18 review, and the
     only substantive item from that session with no home on any page.**
-22. **Runner-side timeout recording.** Three of §9's four codes are grader-derivable from
+    **Partly moved 2026-09-20:** `run_pilot.py` now declares `KV_CACHE_TYPE = 'f16'` and
+    writes it on every row. Still no verification path — the code comment says "verified via
+    server log," but nothing in the code reads the log. The row records what was *set*.
+22. ✅ **LANDED 2026-09-18 (page, line 298) and 2026-09-20 (code, tested by forced timeout).** **Runner-side timeout recording.** Three of §9's four codes are grader-derivable from
     stored output. `timeout` is not — a call with no response in 90 seconds has no body to
     parse, so only the runner can know it happened, and the row schema gives it nowhere to
     record that. Not blocking (timeouts are step 6/7; step 5 writes rows from successful
@@ -420,8 +433,9 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
 23. **Digest prefix equality check in `run_pilot.py`** — deferred deliberately 2026-09-18.
     §4's table carries 12-character prefixes, the code carries full 64-character digests.
     Optional hardening, not a live bug.
-24. **Template text is duplicated between §6 (lines 179–200) and `run_pilot.py`'s
-    `prompt_a` / `prompt_c`, with no automated equality check.** Code must hold the literal
+24. **Template text is duplicated between §6 (now lines 180–202) and `run_pilot.py`'s
+    `prompt_a` / `prompt_b` / `prompt_c`, with no automated equality check.** B joined the
+    duplication 2026-09-20; its text was checked by hand against lines 186–190. Code must hold the literal
     string, so there is no citing out of this one. Byte-matched by hand 2026-09-12; the only
     guard is a comment. Same shape as item 23 and strictly more load-bearing.
 25. **`draw_seed`'s value.** The integrity rule landed at line 128; the number exists
@@ -432,6 +446,33 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
     2026-09-18 rewrite; bullet formatting in that section is now mixed.
 27. **§11's closing sentence trails off mid-thought**, no terminal punctuation. Separate
     from item 6, which is the unwritten rule itself.
+28. **Line 245's resume clause names only the C call.** Since 2026-09-20 the runner also
+    makes a B call per item and skips it on a terminal A failure — code ahead of the page.
+    Line 235 already says the answer feeds "both Template B and C". §D amendment: make 245
+    say B and C, and check the page for other C-only phrasings written while B was deferred.
+29. **Is Template B in the pilot of record?** The 09-10 decision said C-only. The runner now
+    produces B at trivial cost (300 calls in about four minutes). Options: include B rows and
+    build B's parser before grading, or drop B from the pilot run. Decide before the pilot.
+30. **Resume robustness.** A line that parses as JSON but lacks a key (`question_id`,
+    `raw_response`, `harness_commit_hash`) raises a `KeyError` and stops resume, rather
+    than being discarded like a malformed line. Found 2026-09-20; not hit in any run.
+31. **Whitespace-only Template A answer.** `.strip()` gives `""`, which is not `None`, so B
+    and C run with an empty `[Answer]`. Arguably correct — the runner records, the grader's
+    compliance detector decides — but no text on the page has considered the case.
+32. **G: does a terminal Template A failure need a fifth §9 reason code?** Open in the
+    2026-09-12 lab log and dropped from this file until now. §9's codes all describe the
+    confidence call; an A failure removes the item from the B and C cells with no code
+    saying so. Grader-session decision.
+33. **Digest verified at startup, not "at the point of load, once per model"** (line 259).
+    `run_pilot.py` checks `/api/tags` for both models before any call. Defensible, since
+    nothing can change the weights mid-process without the hard stops firing on the next
+    run, but the code and the line disagree. Move one of them.
+34. **`keep_alive: '5m'` on measurement calls** equals Ollama's default. Line 257 says
+    "generous within a cell." The validation run had zero mid-cell reloads, so it held
+    at pilot size; whether 5m is the frozen value is undecided.
+35. **Warm-up and unload prompt text** (`'Hello'`, `num_predict` 1) is harness detail with
+    no home on the page. Line 237 says "output is discarded" and nothing more. Probably
+    fine as code-only, but that is a decision, not a default.
 
 ---
 
@@ -546,19 +587,33 @@ typed — a hand-entered seed that disagrees with `DRAW_SEED` is worse than no m
 `mandarjoshi/trivia_qa`, config `unfiltered.nocontext`, split `validation`, draw `pilot`,
 `draw_seed` 8, `source_rows` 11313, `skipped` `["qf_1637"]`, `items_drawn` 50.
 
-run_pilot.py — steps 1–4 of 7, 2026-09-10
+run_pilot.py — steps 1–7 COMPLETE, 2026-09-20
+
+*Described from the `run_pilot.py` uploaded mid-session on 2026-09-20, before the final test
+commits. Laz reports hitting roadblocks during testing; any code changes made to clear them
+were not seen by Claude. Verify with `git diff` at next open.*
 
 Separate script from draw_pilot.py by design: the draw produces a frozen artifact from fixed inputs and opens its outputs in 'w'; the runner reads that artifact and appends. Fusing them would re-run the draw on every debug cycle and rewrite the committed item set.
 
 Step 1 — read. Opens items_pilot.jsonl in 'r', json.loads per line, keeps question and question_id only. Answer fields dropped deliberately: the grader rejoins on question_id against the frozen file, so the answer key has one home. Asserts 50 against PILOT_N.
 
-Step 2 — version and digest hard stop. GET /api/version against a frozen OLLAMA_VERSION; GET /api/tags for the roster. Nested search — outer over required models, inner over installed — with a per-model flag and break. Distinct exits for wrong digest and model absent. Both stops tested live by breaking each value. Digests are the full 64-char SHA-256 from the API, not ollama list's 12-char display truncation. Both pilot models are verified though only the 1b is called; the 12b check is deliberate lookahead.
+Step 2 — version and digest hard stop. GET /api/version against a frozen OLLAMA_VERSION; GET /api/tags for the roster. Nested search with a per-model flag and break; distinct exits for wrong digest and model absent. Full 64-char digests. The *observed* digest is stored and logged, not the frozen constant — the runner records what it saw.
 
-Steps 3–4 — the A→C chain. Template A call (num_predict 25), answer extracted from message.content, stripped into a separate variable so the raw response survives for logging. Template C built as a triple-quoted f-string with \n\n between blocks, verified by repr(), second call at num_predict 10. First real result: "What is, or was, a barouche?" → A low, upholstered seat. (wrong) → confidence 10.
+Steps 3–4 — the A→B/C chain. Now inside `run_call` (below). The answer is stripped before entering `[Answer]`, in both the live path and the resume path. **The strip was lost once in the step-6 refactor** and 300 rows were generated with unstripped answers before it was caught in review; they were deleted and re-run.
 
-Not yet in the file: row writing, the loop, the discarded warm-up call, per-run metadata, keep_alive: 0. Scaffolding marked for deletion: the step-1 test print, the repr() debug print, and the chosen_question_id block.
+Step 5 — one row per call. `per_run_fields` (the nine per-run fields) is built once and copied into every row, then identity, response, timing and raw fields are added. `top_logprobs` is `None` on A and C, `10` on B. On a timeout, `done`, `done_reason`, timing and raw response are left out entirely rather than written as null (line 298). On `done: false`, each response field is logged if present — line 298 only promises absence on a timeout. One shared `base_options` object feeds both the request and the row, so the row cannot claim a value that wasn't sent. 90-second timeout, one retry, `attempt_count` recorded, `done` checked before anything else is read, Ollama error responses crash loudly as harness faults. Rows appended and the file closed per row.
 
-Dedup rule for the append-only output: keep-first. First occurrence wins; a re-run never replaces an observation already made, which closes the "re-run until it looks better" degree of freedom. Precondition: only valid within an unchanged harness, so the row must carry enough to prove that — digest, Ollama version, generation parameters, and the harness's own git commit hash. Rows from two harness versions are a discard-and-re-run question, not a dedup question. Append order is itself arrival order, so the rule is executable without a timestamp.
+Step 6 — the loop. Outer loop over models, inner over items (line 254). One warm-up per model on every start and resume, output discarded, checked for `done`. A → B → C per item; a terminal A failure skips B and C. Resume collects triples from every well-formed row and skips them; a malformed line is discarded. After each model's items, `unload()` sends `keep_alive: 0` and polls `/api/ps` up to five times until the model is gone, else hard stop. Measurement calls carry `keep_alive: '5m'` explicitly.
+
+Step 7 — startup checks. `git status --porcelain` must be empty or the run hard-stops (line 259); the gitignored log does not appear in it. If the output file already has rows, their commit hashes and Ollama versions must all equal this process's, or hard stop (line 247).
+
+**Tests, 2026-09-20, all passed per Laz.** Forced timeout (`timeout=0.001`): A row with `timed_out: true`, `attempt_count: 2`, no B or C row for the item. Dirty tree: stops on an edited tracked file, proceeds when reverted. Hash mismatch: refused to resume onto rows from an older commit.
+
+**Validation run at `4254e66`, verified 2026-09-20 by Laz's pasted output:** 300 rows · 100 each of `answer` / `p_true` / `verbalized` · 0 rows with `timed_out: true`, `done: false` or `attempt_count: 2` · 0 rows with a 10+-digit `load_duration` (no mid-cell reload, line 249) · row `harness_commit_hash` equal to HEAD. First row's `load_duration` 0.23 s against a 3.52 s cold load measured 2026-09-18 — the warm-up works. Position 1 of the first B row contains a candidate with an empty token string and no `bytes` key — the edge case line 252 says the parser must tolerate, now observed in real data.
+
+**False-provenance incident, 2026-09-20.** An earlier 300-row run at 17:20 was stamped `ffd3e78` (the 09-18 step-5 commit) while the whole step-6 loop was uncommitted. Every row claimed code that did not produce it. Found in review the same evening, before the dirty-tree check existed — line 259's reason, measured rather than argued. Those rows were deleted.
+
+Dedup rule for the append-only output: keep-first — on the page since 2026-09-18 (line 247), enforced in code since 2026-09-20. First occurrence wins; a re-run never replaces an observation already made, which closes the "re-run until it looks better" degree of freedom. Precondition: only valid within an unchanged harness, so the row must carry enough to prove that — digest, Ollama version, generation parameters, and the harness's own git commit hash. Rows from two harness versions are a discard-and-re-run question, not a dedup question. Append order is itself arrival order, so the rule is executable without a timestamp.
 
 Endpoint: /api/chat — settled with evidence 2026-09-10
 
@@ -728,8 +783,8 @@ Dropping `num_ctx` 131072 → 2048 cost the 12b throughput (35.9 → ~20 tok/s a
   Blockers now split: §11's rule and §8's noise floor are **pre-pilot mandatory**;
   §10's transcription and §2 are post-pilot, pre-freeze.
 - **Slice 1** — dataset loader. **COMPLETE 2026-09-05**, two sessions.
-- Slice 2 — runner (one model, one method) + grader. ← here. Runner steps 1–4 of 7 done; step 5 blocked on four §D amendments (§0). Append-only JSONL. Template C only; Template B deferred to October (§0).
-- **Slice 3** — second elicitation method; loop the roster. The second method is Template B, deferred to October (§0), so this slice is not pre-21st work.
+- Slice 2 — runner + grader. ← here. **Runner complete 2026-09-20** — both pilot models, all three templates, append-only JSONL, resume, warm-up, verified unload, startup hard stops. Grader not started. Template B's pilot status open (§5c item 29).
+- **Slice 3** — the full nine-model roster, and B's grader side. The runner half of "second method" landed early, in step 6.
 - **Slice 4** — analysis. **Deferred to October by design**, as the most fragment-tolerant
   work in the project.
 
@@ -793,6 +848,12 @@ unblocked when four amendments were verifiably still unlanded. **Apply the rule 
 drafts, not only to Laz's text** — that is where it failed twice this week and where it will
 fail next.
 
+**2026-09-18/20, two small misses, both caught.** Verified line 259's paragraph without
+flagging its internal "(line 116)" reference, the same defect fixed two lines up; caught on
+the next pass. And told Laz to park G "in §5c" without saying §5c lives in this file, not
+the prereg, so G went nowhere until this rewrite (§5c item 32). Reading the page instead of
+this file at session open found three blockers this file had missed.
+
 ---
 
 ## 10. Living-doc gap — the reason this file exists
@@ -815,6 +876,12 @@ Repo holds the pre-registration and data. Vault holds interpretation. **Canonica
 ## 11. Git state
 
 ```
+09c815e  2026-09-20 (lab log for 09-20 — fill in)
+4254e66  2026-09-20 TEST: reverted back to original state - timeout = 90
+<…>      2026-09-20 step 6 and step 7 / test commits — hashes not seen by Claude; fill from git log
+ffd3e78  2026-09-18 step 5 of runner mostly complete and usual log entry
+6779746  2026-09-18 finishing prereg fixes landed and step5 of the runner unblocked
+eb83167  2026-09-18 updated handoff
 e4f28e4  2026-09-18 Prereg review: ~20 amendments, lab log, POST_STUDY_TODO.md
 80287c6  2026-09-14 updated handoff
 9f87f53  2026-09-14 lab log 09-12/09-14
@@ -832,6 +899,14 @@ a37c996  2026-08-27  S6: parsing rules, throughput, logging, grader-rule declara
 f8a12b4  2026-08-01  Section 3 completed
 3496554  2026-06-24  pre-registration template WIP
 ```
+
+Verified 2026-09-20:
+
+`4254e66`: working tree clean, `pilot_runner_log.jsonl` 300 rows, every row stamped `4254e66`.
+`ffd3e78` against `6779746`: `.gitignore`, `lab_log.md`, `run_pilot.py` only — prereg untouched.
+`6779746`: prereg and lab log together, satisfying §D. The prereg has not moved since.
+`pilot_runner_log.jsonl` is gitignored (confirmed by a clean status with the file present).
+Line 259 requires the grader's log to be ignored too once it exists — not yet checked, since it doesn't. This handoff should be the only file past `09c815e`.
 
 Verified 2026-09-18:
 
