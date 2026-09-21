@@ -20,6 +20,10 @@ Open, not fixed tonight: a resumed row that's valid JSON but missing a key crash
 
 Tonight's clean run is harness validation, not the pilot of record - section 8's procedure and section 11's rule aren't written yet. Not to be treated as study data by a future session.
 
+Template B's reversal, and why: on 09-10 I set a bar for myself - complete through the start of step 7 in that session, or drop Template B from pre-21st scope - missed it, and deferred B to October. Tonight it went back into the runner. Reasoning: pushing to meet my own deadline, the runner's full completion before fall quarter classes begin on the 21st. I originally deferred B, but with how fast Sonnet and I were moving together tonight, I decided we could tackle it now instead of in fragmented time later.
+
+Who wrote step 6, stated plainly since it bears on this project's no-edits rule: I wrote it. Every line, every character in run_pilot.py is mine, typed in myself. Sonnet explained the solution and guided me through each piece whenever I got stuck, drafted proposed text for me to type, and verified what landed against the live file afterward - but never touched the file directly. Same rule that's held for the prereg and this log since the start of the project, unchanged for code.
+
 ## 2026-09-18 Step 5: run_pilot.py writes and logs a verified row per call (Step 5 done except the forced-timeout test)
 
 Step 5 mostly done and verified on sfq_1586: run_pilot.py now writes one JSON row per call to pilot_runner_log.jsonl (gitignored), built from a per_run_fields dict (the nine section 6 "per run" fields) plus per-call Identity/Response/Timing fields, using observed values (Ollama version, model digest) rather than the frozen constants they're checked against. Built alongside: a 90s timeout, retry-once on both timeout and done: false per section 9, C gated on A's outcome, the options dict deduplicated into base_options, and a deliberate decision to crash loudly on an Ollama/model-error response rather than retry it.
