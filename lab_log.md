@@ -2,6 +2,24 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
+## 2026-09-20 Steps 5-7 done: run_pilot.py hardened, resumed, and verified clean
+
+Claude's review of the step-5 smoke test found six real gaps - no timeout, reading the response before checking done, C running regardless of A's outcome, options typed twice, no retry, unhandled HTTP errors - all fixed. Step 6 refactored the whole thing into one run_call function (retry, row-build, write) shared by all three templates, added resume (triple-based skip, plus a stored-answer lookup so B/C can still build prompts after a resumed A), warm-up and unload per model, and included Template B tonight rather than deferring it. Step 7 added the two remaining startup hard stops: working-tree-clean, and keep-first agreement on commit hash and Ollama version across existing rows.
+
+False-provenance finding: the first strip-fixed, zero-duplicate 300-row set carried a false commit hash - written while step 6 was uncommitted, every row claimed Friday's step-5 commit as its origin. Line 259's exact hazard, caught as a measured event an hour before the dirty-tree check that would have prevented it existed. Deleted.
+
+Four tests, all passed:
+
+Forced timeout - one A row, timed_out true, attempt_count 2, no B/C row, run continues. Confirmed twice: pre-hardening and again against the final committed code.
+Dirty-tree trigger - edited a tracked file, confirmed the stop; reverted, confirmed it proceeded.
+Keep-first trigger - ran post-commit against the false-provenance rows, confirmed the stop on hash mismatch. Fired a second time, incidentally, when the stale file was still present for test 1's retry.
+Full clean run - 300 rows, 300 unique triples, zero duplicates, 100/100/100 across methods, 150/150 across models, all done, zero timeouts, correct provenance. First run to genuinely exercise unload() and the /api/ps poll on real model swaps, since nothing was skipped by resume.
+Roadblocks: the dirty-tree check blocked the timeout test itself, since testing it requires an edit - resolved by committing the test value, testing, then committing the revert, rather than bypassing the check. The keep-first check then blocked the same retry because the stale 300-row file was still sitting there - resolved by deleting it first. An earlier 303-row run showed one triple duplicated 4x; traced to pre-resume-era test attempts that predated run_call and were never cleaned up between them, confirmed by timestamp and commit hash, not a resume bug.
+
+Open, not fixed tonight: a resumed row that's valid JSON but missing a key crashes instead of being skipped. A whitespace-only answer isn't distinguished from a real one.
+
+Tonight's clean run is harness validation, not the pilot of record - section 8's procedure and section 11's rule aren't written yet. Not to be treated as study data by a future session.
+
 ## 2026-09-18 Step 5: run_pilot.py writes and logs a verified row per call (Step 5 done except the forced-timeout test)
 
 Step 5 mostly done and verified on sfq_1586: run_pilot.py now writes one JSON row per call to pilot_runner_log.jsonl (gitignored), built from a per_run_fields dict (the nine section 6 "per run" fields) plus per-call Identity/Response/Timing fields, using observed values (Ollama version, model digest) rather than the frozen constants they're checked against. Built alongside: a 90s timeout, retry-once on both timeout and done: false per section 9, C gated on A's outcome, the options dict deduplicated into base_options, and a deliberate decision to crash loudly on an Ollama/model-error response rather than retry it.
