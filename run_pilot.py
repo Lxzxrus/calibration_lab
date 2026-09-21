@@ -2,6 +2,7 @@ import json
 import requests
 import sys
 import subprocess
+import time
 from datetime import datetime
 
 OLLAMA_VERSION = "0.32.14"
@@ -82,6 +83,38 @@ for model in MODELS:
     if not flag_match_found:
         sys.exit('No match found. Missing model: ' + model['model_name'])
 
+# check the whole tree is clean via git status at process start - section 6, checked once, not retriggered by later edits.
+tree_status = subprocess.check_output(['git', 'status', '--porcelain']).decode()
+if tree_status:
+    sys.exit('Working tree is not clean:\n' + tree_status)
+
+resumed_triples = set()
+resumed_answers = {}
+resumed_commit_hashes = set()
+resumed_ollama_versions = set()
+
+try:
+    with open(RUNNER_OUTPUT_FILE, 'r', encoding='utf-8') as infile:
+        for line in infile:
+            try:
+                old_row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            triple = (old_row['question_id'], old_row['model_tag'], old_row['elicitation_method'])
+            resumed_triples.add(triple)
+            if old_row['elicitation_method'] == 'answer' and old_row.get('done'):
+                resumed_answers[(old_row['question_id'], old_row['model_tag'])] = old_row['raw_response'].strip()
+            resumed_commit_hashes.add(old_row['harness_commit_hash'])
+            resumed_ollama_versions.add(old_row['ollama_version'])
+except FileNotFoundError:
+    pass
+
+if resumed_commit_hashes and resumed_commit_hashes != {harness_commit_hash}:
+    sys.exit('Existing rows were written by a different harness commit: ' + str(resumed_commit_hashes) + ' vs current ' + harness_commit_hash)
+if resumed_ollama_versions and resumed_ollama_versions != {version_data['version']}:
+    sys.exit('Existing rows were written by a different Ollama version: ' + str(resumed_ollama_versions) + ' vs current ' + version_data['version'])
+
+
 # shared across every call this pilot makes - one home for these five values instead of retyping them per template.
 base_options = {
     'temperature': 0,
@@ -116,7 +149,8 @@ def run_call(model, item, method, prompt, num_predict, top_logprobs=None):
             'content': prompt
         }],
         'stream': False,
-        'options': options
+        'options': options,
+        'keep_alive': '5m'
     }
     if top_logprobs is not None:
         request_body['logprobs'] = True
@@ -171,23 +205,6 @@ def run_call(model, item, method, prompt, num_predict, top_logprobs=None):
 
     return row
 
-resumed_triples = set()
-resumed_answers = {}
-
-try:
-    with open(RUNNER_OUTPUT_FILE, 'r', encoding='utf-8') as infile:
-        for line in infile:
-            try:
-                old_row = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            triple = (old_row['question_id'], old_row['model_tag'], old_row['elicitation_method'])
-            resumed_triples.add(triple)
-            if old_row['elicitation_method'] == 'answer' and old_row.get('done'):
-                resumed_answers[(old_row['question_id'], old_row['model_tag'])] = old_row['raw_response'].strip()
-except FileNotFoundError:
-    pass
-
 def warm_up(model):
     options = dict(base_options)
     options['num_predict'] = 1
@@ -200,14 +217,20 @@ def warm_up(model):
         'stream': False,
         'options': options
     }
-    requests.post("http://127.0.0.1:11434/api/chat", json=request_body, timeout=90)
+    response = requests.post("http://127.0.0.1:11434/api/chat", json=request_body, timeout=90)
+    data = response.json()
+    if 'error' in data:
+        sys.exit('Warm-up call for ' + model['model_name'] + ' returned an error: ' + data['error'])
+    if not data.get('done'):
+        sys.exit('Warm-up call for ' + model['model_name'] + ' did not complete: ' + json.dumps(data))
+
 
 def unload(model):
     request_body = {
         'model': model['model_name'],
         'messages': [{
             'role': 'user',
-            'content': ''
+            'content': 'Hello'
         }],
         'stream': False,
         'keep_alive': 0,
@@ -215,7 +238,23 @@ def unload(model):
             'num_predict': 1
         }
     }
-    requests.post("http://127.0.0.1:11434/api/chat", json=request_body, timeout=90)
+    response = requests.post("http://127.0.0.1:11434/api/chat", json=request_body, timeout=90)
+    data = response.json()
+    if 'error' in data:
+        sys.exit('Unload call for ' + model['model_name'] + ' returned an error: ' + data['error'])
+    if not data.get('done'):
+        sys.exit('Unload call for ' + model['model_name'] + ' did not complete: ' + json.dumps(data))
+
+    for attempt in range(5):
+        ps_response = requests.get("http://127.0.0.1:11434/api/ps")
+        ps_data = ps_response.json()
+        loaded_names = [m['name'] for m in ps_data['models']]
+        if model['model_name'] not in loaded_names:
+            return
+        time.sleep(1)
+
+    sys.exit('Model ' + model['model_name'] + ' still resident after unload: ' + json.dumps(ps_data))
+
 
 
 for model in MODELS:
