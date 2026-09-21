@@ -20,8 +20,8 @@ MODEL_12B_Q8 = {
     'quantization': 'Q8_0'
 }
 MODELS = [MODEL_1B_Q4, MODEL_12B_Q8]
-# both models verified here even though only MODEL_1B_Q4 is called below;
-# 12b gets used once the full sweep (Step 6+) exercises the whole roster.
+# both models verified here;
+# 12b gets used when the full sweep (Step 6+) exercises the whole roster farther below.
 
 # API never reports this - server setting, declared here and verified via server log (environment section).
 KV_CACHE_TYPE = 'f16'
@@ -45,8 +45,6 @@ with open('items_pilot.jsonl', 'r', encoding='utf-8') as infile:
             'question': row['question'],
             'question_id': row['question_id']
         }
-        # testing print. remove before finalize.
-        print(item['question'], item['question_id'])
         items.append(item)
 assert len(items) == PILOT_N
 
@@ -84,33 +82,6 @@ for model in MODELS:
     if not flag_match_found:
         sys.exit('No match found. Missing model: ' + model['model_name'])
 
-
-
-# pulls the question with a specified question_id instead of just hand typing the question and risking the text silently drifting.
-# I chose question sfq_1586 because it is easy to quickly verify that the answer the model produces is intended for that question
-# due to the question's simple structure - the model should give a simple answer. I deliberately avoided question qw_402 due to
-# its CSV quote mess - it would be a garbled input to the model, which risks garbled output - overall messy.
-
-# scaffolding, delete after step 6 is built
-chosen_question_id = 'sfq_1586'
-
-found_match = False
-for item in items:
-    if item['question_id'] == chosen_question_id:
-        question = item['question']
-        found_match = True
-        break
-
-if not found_match:
-    sys.exit('Could not find match for question: ' + chosen_question_id)
-
-# combined the frozen Template A text with the stored question to be fed to the model through the ollama chat api call.
-# a prompt that drifts from the frozen wording is an undocumented deviation from the prereg.
-prompt_a = f"{question} Answer with only the answer, no explanation, in 10 words or fewer. If unsure, give your single best guess."
-
-# logprobs deliberately absent because they aren't needed here: Template A generates an answer; its confidence contribution is zero,
-# so logprobs are useless for it. That is Template B's exclusive job, later.
-
 # shared across every call this pilot makes - one home for these five values instead of retyping them per template.
 base_options = {
     'temperature': 0,
@@ -134,167 +105,156 @@ per_run_fields = {
 }
 
 
-options_a = dict(base_options)
-options_a['num_predict'] = 25
+def run_call(model, item, method, prompt, num_predict, top_logprobs=None):
+    options = dict(base_options)
+    options['num_predict'] = num_predict
 
-request_body_a = {
-    'model': MODEL_1B_Q4['model_name'],
-    'messages': [{
-        'role': 'user',
-        'content': prompt_a
-    }],
-    'stream': False,
-    'options': options_a
-}
-
-# confirms against the real templated call. This block is the end-to-end smoke test that Step 6 will scale up to all 50 items. 
-# one retry on failure, not retry-until-success - section 9's timeout and no_valid_response rules.
-for attempt_count_a in range(1, 3):
-    try:
-        response_a = requests.post("http://127.0.0.1:11434/api/chat", json=request_body_a, timeout=90)
-        data_a = response_a.json()
-        # model/server fault, not a data condition - crash loudly rather than retry or exclude.
-        if 'error' in data_a:
-            sys.exit('Ollama returned an error for the A call: ' + data_a['error'])
-        done_a = data_a['done']
-        timed_out_a = False
-        if done_a:
-            answer_a_raw = data_a['message']['content']
-            break
-    except requests.exceptions.Timeout:
-        timed_out_a = True
-        done_a = False
-
-
-# row_a: the runner-file schema from section 6, for the A call.
-row_a = dict(per_run_fields)
-row_a['question_id'] = chosen_question_id
-row_a['model_tag'] = MODEL_1B_Q4['model_name']
-row_a['model_digest'] = MODEL_1B_Q4['observed_digest']
-row_a['quantization'] = MODEL_1B_Q4['quantization']
-row_a['elicitation_method'] = 'answer'
-row_a['num_predict'] = options_a['num_predict']
-row_a['top_logprobs'] = None # unset on Templates A and C - only P(True) calls populate this (section 5 Parameters).
-row_a['attempt_count'] = attempt_count_a
-row_a['timed_out'] = timed_out_a
-
-# log whichever response fields are actually present - line 298 only guarantees absence on a timeout, not on done: false.
-if not timed_out_a:
-    row_a['done'] = done_a
-    if 'done_reason' in data_a:
-        row_a['done_reason'] = data_a['done_reason']
-    if 'load_duration' in data_a:
-        row_a['load_duration'] = data_a['load_duration']
-    if 'eval_count' in data_a:
-        row_a['eval_count'] = data_a['eval_count']
-    if 'eval_duration' in data_a:
-        row_a['eval_duration'] = data_a['eval_duration']
-    if 'prompt_eval_count' in data_a:
-        row_a['prompt_eval_count'] = data_a['prompt_eval_count']
-    if 'prompt_eval_duration' in data_a:
-        row_a['prompt_eval_duration'] = data_a['prompt_eval_duration']
-    if 'message' in data_a:
-        row_a['raw_response'] = data_a['message']['content']
-
-
-# append and close immediately - each row is durable on disk before the next call starts.
-with open(RUNNER_OUTPUT_FILE, 'a', encoding='utf-8') as outfile:
-    outfile.write(json.dumps(row_a) + '\n')
-
-
-if not timed_out_a and done_a:
-    print(answer_a_raw)
-
-    # strip leading and trailing whitespaces. Whitespace behavior correlates with model size, so if one model returns more
-    # whitespaces than another model, the two cells get slightly differently-formed prompts, which is a size effect riding inside
-    #  an instrument, on a size hypothesis.
-    answer_a = answer_a_raw.strip()
-
-    # using triple quotes I can construct prompt_c in accordance to the exact frozen structure of Template C from the prereg.
-    prompt_c = f"""Question: {question}
-
-Answer: {answer_a}
-
-How confident are you that the answer is correct? Respond with any integer between 0 and 100 where 0 is not confident and 100 is certain that the answer is correct. Respond with only that integer and nothing else."""
-
-    print(repr(prompt_c))
-
-    # same call pattern as Template A above. Logprobs still purposefully excluded despite the confidence being in question because
-    # the confidence measure is read as text, not the literal probabilities. Note num_predict here is 10 instead of 25 according to
-    # frozen values in the prereg.
-
-    options_c = dict(base_options)
-    options_c['num_predict'] = 10
-
-    request_body_c = {
-        'model': MODEL_1B_Q4['model_name'],
+    request_body = {
+        'model': model['model_name'],
         'messages': [{
             'role': 'user',
-            'content': prompt_c
+            'content': prompt
         }],
         'stream': False,
-        'options': options_c
+        'options': options
     }
+    if top_logprobs is not None:
+        request_body['logprobs'] = True
+        request_body['top_logprobs'] = top_logprobs
 
-    for attempt_count_c in range(1, 3):
+    for attempt_count in range(1, 3):
         try:
-            response_c = requests.post("http://127.0.0.1:11434/api/chat", json=request_body_c, timeout=90)
-            data_c = response_c.json()
-            if 'error' in data_c:
-                sys.exit('Ollama returned an error for the C call: ' + data_c['error'])
-            done_c = data_c['done']
-            timed_out_c = False
-            if done_c:
-                answer_c = data_c['message']['content']
+            response = requests.post("http://127.0.0.1:11434/api/chat", json=request_body, timeout=90)
+            data = response.json()
+            if 'error' in data:
+                sys.exit('Ollama returned an error for the ' + method + ' call: ' + data['error'])
+            done = data['done']
+            timed_out = False
+            if done:
                 break
         except requests.exceptions.Timeout:
-            timed_out_c = True
-            done_c = False
+            timed_out = True
+            done = False
 
+    row = dict(per_run_fields)
+    row['question_id'] = item['question_id']
+    row['model_tag'] = model['model_name']
+    row['model_digest'] = model['observed_digest']
+    row['quantization'] = model['quantization']
+    row['elicitation_method'] = method
+    row['num_predict'] = num_predict
+    row['top_logprobs'] = top_logprobs
+    row['attempt_count'] = attempt_count
+    row['timed_out'] = timed_out
 
-    # row_c: same schema as row_a - 'verbalized' is Template C's elicitation method (section 6 Identity).
-    row_c = dict(per_run_fields)
-    row_c['question_id'] = chosen_question_id
-    row_c['model_tag'] = MODEL_1B_Q4['model_name']
-    row_c['model_digest'] = MODEL_1B_Q4['observed_digest']
-    row_c['quantization'] = MODEL_1B_Q4['quantization']
-    row_c['elicitation_method'] = 'verbalized'
-    row_c['num_predict'] = options_c['num_predict']
-    row_c['top_logprobs'] = None
-    row_c['attempt_count'] = attempt_count_c
-    row_c['timed_out'] = timed_out_c
+    if not timed_out:
+        row['done'] = done
+        if 'done_reason' in data:
+            row['done_reason'] = data['done_reason']
+        if 'load_duration' in data:
+            row['load_duration'] = data['load_duration']
+        if 'eval_count' in data:
+            row['eval_count'] = data['eval_count']
+        if 'eval_duration' in data:
+            row['eval_duration'] = data['eval_duration']
+        if 'prompt_eval_count' in data:
+            row['prompt_eval_count'] = data['prompt_eval_count']
+        if 'prompt_eval_duration' in data:
+            row['prompt_eval_duration'] = data['prompt_eval_duration']
+        if 'message' in data:
+            row['raw_response'] = data['message']['content']
+        if 'logprobs' in data:
+            row['raw_logprobs'] = data['logprobs']
 
-    # same reasoning as row_a's conditional above.
-    if not timed_out_c:
-        row_c['done'] = done_c
-        if 'done_reason' in data_c:
-            row_c['done_reason'] = data_c['done_reason']
-        if 'load_duration' in data_c:
-            row_c['load_duration'] = data_c['load_duration']
-        if 'eval_count' in data_c:
-            row_c['eval_count'] = data_c['eval_count']
-        if 'eval_duration' in data_c:
-            row_c['eval_duration'] = data_c['eval_duration']
-        if 'prompt_eval_count' in data_c:
-            row_c['prompt_eval_count'] = data_c['prompt_eval_count']
-        if 'prompt_eval_duration' in data_c:
-            row_c['prompt_eval_duration'] = data_c['prompt_eval_duration']
-        if 'message' in data_c:
-            row_c['raw_response'] = data_c['message']['content']
-
-
-    # same durability reasoning as row_a's write above.
     with open(RUNNER_OUTPUT_FILE, 'a', encoding='utf-8') as outfile:
-        outfile.write(json.dumps(row_c) + '\n')
+        outfile.write(json.dumps(row) + '\n')
+
+    return row
+
+resumed_triples = set()
+resumed_answers = {}
+
+try:
+    with open(RUNNER_OUTPUT_FILE, 'r', encoding='utf-8') as infile:
+        for line in infile:
+            try:
+                old_row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            triple = (old_row['question_id'], old_row['model_tag'], old_row['elicitation_method'])
+            resumed_triples.add(triple)
+            if old_row['elicitation_method'] == 'answer' and old_row.get('done'):
+                resumed_answers[(old_row['question_id'], old_row['model_tag'])] = old_row['raw_response'].strip()
+except FileNotFoundError:
+    pass
+
+def warm_up(model):
+    options = dict(base_options)
+    options['num_predict'] = 1
+    request_body = {
+        'model': model['model_name'],
+        'messages': [{
+            'role': 'user',
+            'content': 'Hello'
+        }],
+        'stream': False,
+        'options': options
+    }
+    requests.post("http://127.0.0.1:11434/api/chat", json=request_body, timeout=90)
+
+def unload(model):
+    request_body = {
+        'model': model['model_name'],
+        'messages': [{
+            'role': 'user',
+            'content': ''
+        }],
+        'stream': False,
+        'keep_alive': 0,
+        'options': {
+            'num_predict': 1
+        }
+    }
+    requests.post("http://127.0.0.1:11434/api/chat", json=request_body, timeout=90)
 
 
-    if not timed_out_c and done_c:
-        print(answer_c)
+for model in MODELS:
+    warm_up(model)
 
-else: 
-    print('Request A did not produce a usable answer.')
+    for item in items:
+        question_id = item['question_id']
+        model_tag = model['model_name']
+        answer_pair = (question_id, model_tag)
 
+        a_triple = (question_id, model_tag, 'answer')
+        if a_triple in resumed_triples:
+            a_answer = resumed_answers.get(answer_pair)
+        else:
+            prompt_a = f"{item['question']} Answer with only the answer, no explanation, in 10 words or fewer. If unsure, give your single best guess."
+            row_a = run_call(model, item, 'answer', prompt_a, 25)
+            if not row_a['timed_out'] and row_a.get('done'):
+                a_answer = row_a['raw_response'].strip()
+            else:
+                a_answer = None
 
+        if a_answer is not None:
+            b_triple = (question_id, model_tag, 'p_true')
+            if b_triple not in resumed_triples:
+                prompt_b = f"""Question: {item['question']}
 
+Answer: {a_answer}
 
-# Step 6 needs warm up call - not complete without it.
+Is the Answer correct? Respond with only True or False."""
+                run_call(model, item, 'p_true', prompt_b, 5, top_logprobs=10)
+
+            c_triple = (question_id, model_tag, 'verbalized')
+            if c_triple not in resumed_triples:
+                prompt_c = f"""Question: {item['question']}
+
+Answer: {a_answer}
+
+How confident are you that the answer is correct? Respond with any integer between 0 and 100 where 0 is not confident and 100 is certain that the answer is correct. Respond with only that integer and nothing else."""
+                run_call(model, item, 'verbalized', prompt_c, 10)
+
+    unload(model)
+
