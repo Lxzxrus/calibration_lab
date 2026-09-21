@@ -158,7 +158,7 @@ def run_call(model, item, method, prompt, num_predict, top_logprobs=None):
 
     for attempt_count in range(1, 3):
         try:
-            response = requests.post("http://127.0.0.1:11434/api/chat", json=request_body, timeout=0.001)
+            response = requests.post("http://127.0.0.1:11434/api/chat", json=request_body, timeout=90)
             data = response.json()
             if 'error' in data:
                 sys.exit('Ollama returned an error for the ' + method + ' call: ' + data['error'])
