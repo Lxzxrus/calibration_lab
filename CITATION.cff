@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "Calibration Lab: Do small, quantized language models know what they know?"
+abstract: "A pre-registered conceptual replication of Kadavath et al. (2022), measuring whether the confidence of small-scale, quantized Gemma 3 models separates their correct answers from their incorrect ones (AUROC), at sizes and precisions that run on consumer hardware."
+authors:
+  - family-names: Campbell
+    given-names: Nathaniel
+repository-code: "https://github.com/Lxzxrus/calibration_lab"
+license:
+  - MIT
+  - CC-BY-4.0
+date-released: 2026-10-10
+keywords:
+  - calibration
+  - ai-safety
+  - quantization
+  - preregistration
+  - llm

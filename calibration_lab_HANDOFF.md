@@ -2,7 +2,7 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-09-20 · **Synthesized against commit:** `09c815e` *(fill in: the lab-log-only commit made directly before this handoff's commit; HEAD before it was `4254e66`)* · **Status:** **Runner COMPLETE** — `run_pilot.py` steps 1–7 built and verified 2026-09-20, meeting the runner-completion hard deadline set 2026-09-18. Harness-validation run at `4254e66`: 300 rows, 0 failures, 0 cold reloads, every row's hash equal to HEAD. **That run is not the pilot.** The grader is unbuilt, so the wider Sept 21 target (harness complete) was not met; the narrower cut was. Next: grader, §11 rule, §8 procedure, then the pilot.
+**Last updated:** 2026-09-20 · **Synthesized against commit:** `09c815e`. **Status:** **Runner COMPLETE** — `run_pilot.py` steps 1–7 built and verified 2026-09-20, meeting the runner-completion hard deadline set 2026-09-18. Harness-validation run at `4254e66`: 300 rows, 0 failures, 0 cold reloads, every row's hash equal to HEAD. **That run is not the pilot.** The grader is unbuilt, so the wider Sept 21 target (harness complete) was not met; the narrower cut was. Next: grader, §11 rule, §8 procedure, then the pilot.
 
 *Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
@@ -876,9 +876,13 @@ Repo holds the pre-registration and data. Vault holds interpretation. **Canonica
 ## 11. Git state
 
 ```
-09c815e  2026-09-20 (lab log for 09-20 — fill in)
+da50cea  2026-09-20 Updated handoff
+09c815e  2026-09-20 Appended lab log: 2026-09-20 Steps 5-7 done: run_pilot.py hardened, resumed, and verified clean
+b9a25be  2026-09-20 Lab log entry: 2026-09-20 Steps 5-7 done: run_pilot.py hardened, resumed, and verified clean
 4254e66  2026-09-20 TEST: reverted back to original state - timeout = 90
-<…>      2026-09-20 step 6 and step 7 / test commits — hashes not seen by Claude; fill from git log
+a2bf59a  2026-09-20 TEST: temporary timeout=0.001 for forced-timeout verification
+de90f21  2026-09-20 step 6 hardening: strip fix for B/C prompts, warm-up/unload verified via /api/ps, explicit keep_alive, dirty-tree and keep-first startup checks
+8253911  2026-09-20 step 6: full loop, warm-up, unload, resume, all three templates; 300 verified rows.
 ffd3e78  2026-09-18 step 5 of runner mostly complete and usual log entry
 6779746  2026-09-18 finishing prereg fixes landed and step5 of the runner unblocked
 eb83167  2026-09-18 updated handoff
