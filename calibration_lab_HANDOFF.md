@@ -2,7 +2,7 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-09-20 · **Synthesized against commit:** `09c815e`. **Status:** **Runner COMPLETE** — `run_pilot.py` steps 1–7 built and verified 2026-09-20, meeting the runner-completion hard deadline set 2026-09-18. Harness-validation run at `4254e66`: 300 rows, 0 failures, 0 cold reloads, every row's hash equal to HEAD. **That run is not the pilot.** The grader is unbuilt, so the wider Sept 21 target (harness complete) was not met; the narrower cut was. Next: grader, §11 rule, §8 procedure, then the pilot.
+**Last updated:** 2026-10-11 · **Synthesized against commit:** `94430cf` · **Status:** **Repo PUBLIC** since 2026-10-11 — `github.com/Lxzxrus/calibration_lab`, full history, README, MIT (code) + CC BY 4.0 (documents), `CITATION.cff`. **Runner COMPLETE** (steps 1–7, 2026-09-20); the 300-row harness-validation run at `4254e66` is **not the pilot**. **New pre-pilot gap, found 2026-10-08: no hypothesis names which elicitation method its AUROC comes from (§5c item 37) — decide that first.** Then: grader, §11 rule, §8 procedure, the pilot. The mid-October freeze is overtaken; a new date is not yet set.
 
 *Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
@@ -12,9 +12,9 @@
 
 **The plan changed on 2026-08-31. Read this before anything else.**
 
-Prereg prose is **paused**. Harness construction is the active work. Two prereg items
-are exceptions and remain mandatory before the pilot runs (below). Everything else in
-§5c waits.
+Prereg prose is **paused**. Harness construction is the active work. Three prereg items
+are exceptions and remain mandatory before the pilot runs (below; the third added
+2026-10-08). Everything else in §5c waits.
 
 ### Why
 
@@ -37,11 +37,18 @@ fragments where it will still work.
   landing in the fragments exactly where this re-plan wanted the prose. Not freeze.
 - **Cut line decided 2026-09-18, deadline met 2026-09-20.** Laz set runner completion as the
   hard deadline, leaving the grader for the fragments — the grader is transcription from a
-  complete §6 spec and fragment-tolerant; the runner was construction and was not. He was
-  asked to record that decision in the 09-18 lab-log entry; Claude has not read that entry,
-  so check it. The 19th produced no session (house work). Step 5's last piece, step 6, and
-  step 7 all landed on the 20th, with the close starting at 8:30 pm rather than past midnight.
-- **Freeze mid-October**, with measured numbers in §5's blanks.
+  complete §6 spec and fragment-tolerant; the runner was construction and was not.
+  **Checked 2026-10-08: half-landed.** Neither 09-18 lab-log entry records the reasoning; the
+  09-20 entry states the deadline only. Recorded as such in the 10-08/10-10 entry. The 19th
+  produced no session (house work). Step 5's last piece, step 6, and step 7 all landed on the
+  20th, with the close starting at 8:30 pm rather than past midnight.
+- ~~**Freeze mid-October**~~ — **overtaken.** No sessions ran 2026-09-21 → 10-07; the gap
+  was zero sessions per week, the variable the estimate below already named. **A new freeze
+  date needs setting, by Laz, accounting for November.**
+- **2026-10-08 / 10-10: public release.** Open checks passed at `da50cea`; one discussion-only
+  day (10-08), then one committing session (10-10 into 10-11) producing `94430cf`: README,
+  LICENSE, CITATION.cff, two prereg amendments, handoff placeholders, lab log. Pushed to a
+  new GitHub remote and made public 2026-10-11.
 - **Slice 4 deferred to October by design** — offline analysis against saved JSONL, no
   live state, the most fragment-tolerant work in the project. Half of it already exists
   in `ece_test.py`.
@@ -50,7 +57,7 @@ fragments where it will still work.
 - **Harness estimate: ~12–19 sessions, now counted in work-days (see §0b). Slice 1 came in at two. Slice 2 is budgeted 6–10; its runner half is done.** Runner steps 5–7 took two work-days (09-18, 09-20) once the prereg blockers were cleared in the first half of 09-18. Roughly nine sessions spent against 12–19, with the grader the remaining Slice 2 work.
 - **The estimate is not what broke.** Roughly seven sessions are spent against a 12–19 budget, so 5–12 remain — the harness number is holding. What has been mis-estimated the whole time is **sessions per week**, and that variable gets materially worse on the 21st. Re-planning a date teaches nothing; naming which variable the estimate got wrong is the thing that makes the next estimate better.
 
-### The two pre-pilot exceptions — mandatory
+### The three pre-pilot exceptions — mandatory
 
 Template B dropped from pre-21st scope — 2026-09-10
 
@@ -60,7 +67,8 @@ are in the validation run, and one was checked against prereg lines 186–190 (t
 verbatim) and 222 (`top_logprobs = 10`): position 0 held `False` at −0.1057 and `True` at
 −3.1908, plus the `FALSE` and ` False` variants the parsing rule counts. What did **not**
 change: B's parser is grader work and is still unbuilt. Whether the pilot of record includes
-B is open (§5c item 29), and the reversal needs its reasoning in the lab log in Laz's words.
+B is open (§5c item 29, now gated on item 37). The reversal's reasoning is on the page in
+Laz's words — the 09-20 lab-log entry, "Template B's reversal, and why" (verified 2026-10-08).
 The 09-10 reasoning below is kept as history.
 
 A completion threshold was set at the start of the 09-09/10 session: runner steps 3–6 done and step 7 started, or Template B leaves the pre-21st build. The session reached step 4. The pilot runs Template C only. Template B lands in October.
@@ -75,6 +83,12 @@ What survives intact: a C-only pilot still yields p_weak, p_strong, an AUROC flo
    measured, and `2 × floor` is H2a's and H2b's threshold. Written after seeing a floor,
    a resample structure that yields a smaller number cannot be *proven* unchosen. Same
    standard already applied to grader-rule changes.
+3. **Which elicitation method decides each verdict — added 2026-10-08.** §3 never names
+   P(True) or verbalized confidence; prereg line 314 says only "AUROC — primary metric for
+   H1, H2a, H2b." Every cell yields two AUROCs, so as written a verdict could be read off
+   whichever method supports it. Same mandatory-before-pilot logic as the two above, plus a
+   mechanical reason: every method that enters a verdict needs its own pilot-measured floor.
+   Full state in §5c item 37.
 
 ### Next actions, in order
 
@@ -83,6 +97,9 @@ What survives intact: a C-only pilot still yields p_weak, p_strong, an AUROC flo
 freeze were caught. Do not re-add it; the next scheduled review is a judgment call, not a
 standing gate.*
 
+0. **Decide the elicitation-method rule (§5c item 37)** and write it into §3 in Laz's words;
+   Claude attacks the draft before it lands. Item 29 (B in the pilot of record) falls out of
+   it. **Set the new freeze date** in the same session.
 1. **Small runner close-outs, fragment-sized** — §5c items 30–31 (resume robustness,
    whitespace-only answer) and the B-blind resume line on the page (§5c item 28, a §D
    amendment). None block the grader.
@@ -90,7 +107,7 @@ standing gate.*
 3. **§11 rule and §8 procedure**, in whatever gaps the code leaves. Both pre-pilot
    mandatory — and, since the pilot moved past the 21st, no longer pre-21st.
 4. **Slice 3** — loop the full roster. The runner already loops models and runs B; what remains is the nine-model roster and B's grader side.
-5. **Pilot**, then the remaining §5c prose, then freeze. Delete `pilot_runner_log.jsonl` first — the validation rows must not become pilot rows, and keep-first would make them authoritative.
+5. **Pilot**, then the remaining §5c prose, then freeze. Delete `pilot_runner_log.jsonl` first — the validation rows must not become pilot rows, and keep-first would make them authoritative. **Since `94430cf` it cannot happen silently:** the rows carry `4254e66`, so line 247's keep-first check hard-stops any `run_pilot.py` start while the file is present.
 
 ### Estimate check — 2026-09-05
 
@@ -103,14 +120,21 @@ sessions across runner and grader.
 
 No study data has been run. Harness code is draw_pilot.py (complete) and run_pilot.py (complete, steps 1–7, verified 2026-09-20). The 300 rows in `pilot_runner_log.jsonl` (gitignored) are harness validation at `4254e66` — not study data, not the pilot. Probe scripts — three probe*.ps1 plus probe4_endpoint_logprob_diff.py — and ece_test.py remain environment characterization and learning artifacts. All Ollama calls so far are environment characterization.
 
-**Division of labor on code (2026-08-31, held through Slice 1).** Laz writes every line.
-Claude explains constructs, reviews, and says where it will break — and does **not** supply
-code. Writing ownership across the project: code — Laz · prereg — Laz · lab log — mostly
-Laz, Claude adds and edits · handoff — Claude. Reading is both.
+**Division of labor (2026-08-31; restated publicly in the README 2026-10-10).** Laz types
+every line of the code, the prereg and the lab log, and accepts, rewrites or rejects every
+proposal. Claude explains concepts and code, reviews for errors, and proposes text. The
+handoff is written primarily by Claude, with occasional small edits by Laz (header hash,
+review). Reading is both. *Corrected 2026-10-11:* this line previously read "lab log —
+mostly Laz, Claude adds and edits," which contradicts the 09-20 lab-log entry ("Same rule
+that's held for the prereg and this log since the start of the project") and the public
+README. Laz's own statement governs.
 
-**Not recorded, 2026-09-20:** step 6 was built in a separate ~2-hour session with Sonnet,
-outside this chat. Whether the "Laz writes every line" rule held there is not known to
-Claude. Laz to state it in the lab log — it bears on §9's manual-mile bar.
+**Recorded 2026-09-20, verified 2026-10-08:** step 6 was built in a separate ~2-hour session
+with Sonnet. The 09-20 lab-log entry states it in Laz's words: "I wrote it. Every line,
+every character in run_pilot.py is mine, typed in myself." On 2026-10-10 Laz added that the
+same entry's "drafted proposed text for me to type" overstates it — Sonnet showed and
+explained Python, which he then adapted. Not in the 10-10 entry draft Claude reviewed; the
+log is append-only, so any clarification goes in a new entry.
 
 ---
 
@@ -140,13 +164,15 @@ Reasoning on the page: §F's two failures were conversation and disk drifting ap
 
 A standalone research study measuring **calibration** — whether a model's confidence matches its accuracy — on small, quantized, instruct-tuned models running on consumer hardware.
 
-Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language Models (Mostly) Know What They Know*), whose cleanest results were on large **base pretrained** models. This study asks whether that picture survives instruct-tuning, quantization, and small scale.
+Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language Models (Mostly) Know What They Know*), whose cleanest results were on **base pretrained** models from 800M to 52B. This study asks whether that picture survives quantization and small scale. Every roster model is instruct-tuned, so instruct-tuning is held constant, not tested — a cross-study difference from Kadavath (prereg §10), not an axis here.
 
 **Dual audience, deliberately:** an academic portfolio artifact (a professor sees someone learning to navigate research) *and* a community finding (a reader with 8GB of VRAM learns which model at which quantization is actually trustworthy). Neither is the afterthought. This framing drives most scope decisions below.
 
 **Research identity it serves:** *"I study whether AI systems know what they know and how humans stay meaningfully in control when they don't."*
 
-**Timeline:** first reliability diagrams by September 2026. Note: this is self-imposed. The real external gates are the REU in mid-December and PNNL CCI in January.
+**Timeline:** the original "first reliability diagrams by September 2026" target is overtaken (see §0). Self-imposed either way. The real external gates are the REU in mid-December and PNNL CCI in January.
+
+**Public since 2026-10-11** at `github.com/Lxzxrus/calibration_lab`. The README is the front door: status banner, design at a glance, repository map, how-this-was-built disclosure, reproducing steps, TriviaQA licensing note. Public name: Nathaniel (Nate) Campbell; "Laz" in the process documents is the same person, stated in the README.
 
 ---
 
@@ -295,19 +321,21 @@ The accuracy control reads out the mixture:
 
 **Every row below re-verified against the file 2026-09-18**, during the full prereg review. That pass read §1–§13 directly; no row here is carried forward from an earlier session.
 
+**2026-10-08/10:** the prereg was read in full on 10-08 against `da50cea` (unchanged since `6779746`). Two §D amendments landed in `94430cf`, both logged in the 10-08/10-10 lab-log entry: line 4's author changed from "Laz" to "Nathaniel Campbell", and line 368's probe pointer corrected to `probe*.ps1 and probe4_endpoint_logprob_diff.py at the repo root; raw CSVs and probe 4's two warm-run JSON files in probe_out/`. Both were in-place edits, so no line numbers shifted. Rows below updated only where those or the new §3 gap touch them.
+
 | § | Status | What's left |
 |---|---|---|
-| Header | ⚠️ stale | **Half fixed 2026-09-18:** `instruct-tuning` removed from the "Study:" list — nothing tests it, every roster model is instruct-tuned, and §10 correctly calls it a confound. **Still stale:** the `frontier-scale` half, which is factually wrong rather than merely dated and needs the overlap-not-absence rework (§5c item 1). `Drafted: [7-15-2026]` is a filled value inside brackets; a pre-freeze bracket scan will false-positive on it. |
+| Header | ⚠️ stale | **Half fixed 2026-09-18:** `instruct-tuning` removed from the "Study:" list — nothing tests it, every roster model is instruct-tuned, and §10 correctly calls it a confound. **Still stale:** the `frontier-scale` half, which is factually wrong rather than merely dated and needs the overlap-not-absence rework (§5c item 1). `Drafted: [7-15-2026]` is a filled value inside brackets; a pre-freeze bracket scan will false-positive on it. **2026-10-10:** author line now "Nathaniel Campbell", matching README and `CITATION.cff`. |
 | 1. Research question | ⚠️ **stale premise** | The question itself is fine — names AUROC, scoped to gemma3 + consumer hardware. The surrounding framing assumes Kadavath measured only ~120B+ models. He did not. **Rewrite before anything else.** |
 | 2. Background | ❌ unwritten | 3–5 sentences. Kadavath on base models, Tian 2023 on verbalized confidence, why small/quantized/instruct-tuned might differ, the community motivation. The stray 3×3-cell note belongs in §8 or §11. |
-| 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. Δ verified 2026-08-29 as the `q8_0 → q4_K_M` pair, present at all three sizes — H2b is testable. **E1 missing entirely.** Check H1's rationale for the old "uncharted" framing. |
+| 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. Δ verified 2026-08-29 as the `q8_0 → q4_K_M` pair, present at all three sizes — H2b is testable. **E1 missing entirely.** Check H1's rationale for the old "uncharted" framing. **Gap found 2026-10-08, pre-pilot mandatory: no hypothesis names its elicitation method** (§5c item 37). |
 | 4. Models | ✅ COMPLETE | Locked 2026-08-08. Amended 2026-08-29: the one-family line now states the recipe is fixed across all nine with QAT carrying an additional training stage. |
 | 5. Datasets | ✅ COMPLETE | Runtime block rebuilt from probe data 2026-08-28; probe date corrected and load/unload figures de-duplicated 2026-08-29. **2026-09-18:** bare `seed` renamed `draw_seed` at all three draw-context mentions, ending the collision with §6's generation `seed = 42`; integrity rule added at line 128 — fixed before `draw_main.py` first runs, recorded in `items_manifest.json`, and the first draw at that seed is the draw. Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. **`draw_seed`'s value does not exist anywhere yet.** |
 | 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. Templates fenced 2026-09-10, prompt text byte-identical. **2026-09-18:** `top_logprobs` pinned (now line 222, Template B only) and logged per row · `attempt_count` added (now line 296) · exclusion reason added to the Grader Spec per-row list · runner/grader split stated once, generally (line 239) · three more restate-vs-cite duplications killed (Truncation detector, Compliance detector, and the contamination/`load_duration` pair) · contamination source 1 relabelled `first-in-loop`, resolving an apparent contradiction with the mid-run-reload check · "never analyzed" → "never enters the study's results". **Landed 2026-09-18 evening (`6779746`):** the four §D blockers plus three issues the page surfaced — elicitation-method values `'answer'`/`'p_true'`/`'verbalized'` (line 296); model tag, digest and quantization per row; keep-first dedup with a commit-hash/Ollama-version hard stop, `run_id` considered and declined (line 247); dirty-tree hard stop with gitignored logs (line 259); runner file / grader file split (lines 292–307); `timed_out` (line 298); resume on any well-formed row, success or failure (line 243); terminal-A-failure resume clause (line 245). **New gap 2026-09-20:** line 245 names only the C call; B now runs too (§5c item 28). |
 | 7. Metrics | 🟡 partial | No throughput or memory-footprint metric, so nothing feeds E1. |
 | 8. Analysis plan | 🟡 partial | Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure**. **Landed 2026-09-18:** the H1-versus-measured-floor collision is now disclosed rather than silent — if `2 × floor` meets or exceeds H1's fixed 0.1, H1 keeps its threshold (an intentional design choice, not an oversight) but the verdict is reported alongside a note that H1 and H2a/H2b no longer share a comparable standard of evidence. |
 | 9. Exclusion rules | ✅ **COMPLETE** | Timeout filled at 90s. no_valid_response is done: false only. Mean-retained-mass and truncation-rate columns exist. **2026-09-18:** `excluded-no_valid_response` column added (exclusion table now at line 342) — the table had carried three reason-code columns against §9's four codes since a much earlier session, and survived two prior passes. |
-| 10. Confounds | ✅ near-complete | **Rewritten 2026-09-18.** All four template scaffold bullets replaced with real content; the orphan fragment became a real differential-exclusion entry citing §8's mechanism and bias direction; contamination bullet rewritten (concedes magnitude scales with size, follows it into AUROC, threatens H1 specifically, spares H2a/H2b on the shared-baseline argument); quantization-confounded-with-scale added; instruct-tuning reframed from a false within-roster claim to the real cross-study one; extrapolation limit split. `qwen3`/MMLU gone. **Two small things left:** the instruct-recipe fact is stated twice (lines 355 and 365), and bullet formatting is mixed. ECE resolved as *not* §10 — it is §11's unwritten rule. |
+| 10. Confounds | ✅ near-complete | **Rewritten 2026-09-18.** All four template scaffold bullets replaced with real content; the orphan fragment became a real differential-exclusion entry citing §8's mechanism and bias direction; contamination bullet rewritten (concedes magnitude scales with size, follows it into AUROC, threatens H1 specifically, spares H2a/H2b on the shared-baseline argument); quantization-confounded-with-scale added; instruct-tuning reframed from a false within-roster claim to the real cross-study one; extrapolation limit split. `qwen3`/MMLU gone. **Two small things left:** the instruct-recipe fact is stated twice (lines 355 and 365), and bullet formatting is mixed. ECE resolved as *not* §10 — it is §11's unwritten rule. **2026-10-10:** line 368's replicator pointer corrected (probe 4 is `.py`; `probe_out/` also holds JSON). |
 | 11. Null result | ❌ **placeholder** | Records the ECE decision but not the rule — it announces a rule for the AUROC-flat-while-calibration-degrades case and never states it. Needs full redesign — three hypotheses can null independently, and H2b can come back *not evaluable*. Option-four interpretation rule lands here. |
 | 12. Deviations | ✅ ready | Empty by design until freeze. |
 | 13. Freeze | ⏳ blocked | Two threshold numbers bracketed until the pilot. `items.jsonl` not yet committed. |
@@ -352,6 +380,8 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
 **Closed 2026-09-18 evening (`6779746`), all §D intentional amendments:** the four §D blockers (elicitation-method values, digest/model-tag/quantization scope, harness commit hash + keep-first with `run_id` declined, dirty-tree hard stop) and three found by reading the page instead of this file — runner/grader field split, the resume rule's re-roll hole ("completed" → "every well-formed row, success or failure"), and the A-failure resume clause. Plus item 22 below. Two internal line-number references removed from the prereg in favour of named references.
 
 **Closed 2026-09-20:** none on the page — code-only session. Items 22 (code side) and 21 (partially) moved in `run_pilot.py`.
+
+**Closed 2026-10-10 (`94430cf`):** none of the numbered items below. Two unlisted §D amendments landed — prereg line 4 (author) and line 368 (probe pointer) — both logged the same session. **Considered and declined:** a fallback for running `run_pilot.py` outside a git checkout (line 31's `git rev-parse HEAD` crashes on a ZIP download). Documented in the README as a requirement — clone with git — rather than changed in the harness, since a run with no commit hash would have no provenance.
 
 **Corrections to this list, 2026-08-31 (verified against the file):**
 
@@ -411,7 +441,11 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
     `items_pilot.jsonl` and `items_manifest.json` in `'w'` mode. Harmless while
     `DRAW_SEED` and `PILOT_N` are fixed — same inputs, same output — but a live risk if
     either changes. Git catches it; the hazard is worth one line where §5 describes the
-    frozen item set.
+    frozen item set. **Extended 2026-10-10:** even at the same seed, a re-run always dirties
+    the tree — `items_manifest.json` records a fresh `datetime.now()` timestamp, while
+    `items_pilot.jsonl` is rewritten byte-identical. The dirty-tree check (line 259) then
+    refuses the pilot until `git checkout -- items_manifest.json`. The README's Reproducing
+    section documents the restore step; the prereg does not yet.
 21. **§6: KV cache has no verification path.** Line 142 pins f16 with a methodological
     reason — quantizing the cache adds a second noise source on top of the weight
     quantization H2a is about, and the probabilities are the dependent variable. Line 287
@@ -453,6 +487,10 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
 29. **Is Template B in the pilot of record?** The 09-10 decision said C-only. The runner now
     produces B at trivial cost (300 calls in about four minutes). Options: include B rows and
     build B's parser before grading, or drop B from the pilot run. Decide before the pilot.
+    **Gated on item 37 since 2026-10-08:** if B enters any verdict (primary, or under
+    both-must-hold), B is in the pilot of record, because its noise floor must be measured.
+    Claude's recommendation either way: include B — the rows cost minutes, and a secondary
+    method's floor is otherwise never measured.
 30. **Resume robustness.** A line that parses as JSON but lacks a key (`question_id`,
     `raw_response`, `harness_commit_hash`) raises a `KeyError` and stops resume, rather
     than being discarded like a malformed line. Found 2026-09-20; not hit in any run.
@@ -473,6 +511,38 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
 35. **Warm-up and unload prompt text** (`'Hello'`, `num_predict` 1) is harness detail with
     no home on the page. Line 237 says "output is discarded" and nothing more. Probably
     fine as code-only, but that is a decision, not a default.
+36. **The keep-first commit-hash stop collides with daily commits** (found 2026-10-08).
+    Line 247 hard-stops a resume onto rows from a different commit; SESSION_PROTOCOL §E
+    requires a commit every work-day; line 259 hard-stops on any uncommitted edit. So an
+    interrupted run becomes un-resumable once the repo changes before resume — a commit
+    trips 247, an uncommitted edit (a lab-log note typed while the run is down) trips 259.
+    The main sweep (2–5 h, §5) is exposed; the pilot (~4 min) effectively isn't. The obvious
+    fix — hash the harness files instead of HEAD — undoes the 09-12 reasoning that the
+    repo-level hash is what pins the prereg's template text. **A decision, not a bug fix.**
+    Must be settled before the main sweep, not before the pilot.
+37. **No hypothesis names which elicitation method its AUROC comes from** (found
+    2026-10-08). Prereg line 314: "AUROC — primary metric for H1, H2a, H2b." Line 110 names
+    two methods; §3 names neither. Every cell yields a P(True) AUROC and a verbalized AUROC,
+    so as written the verdict could be read off whichever supports it — a line-9 knob.
+    **Pre-pilot mandatory.** Ruled out: averaging the two (line 348's precedent — constructs
+    a value the model never expressed; Laz recalled and agreed). Open between
+    **primary-plus-secondary** (precedent: H1's rung, line 37; ECE binning, line 310) and
+    **both-must-hold** (precedent: H2a's all-three-sizes rule, line 47). Mechanisms
+    discussed 2026-10-08, mostly favoring P(True) as primary: line 49's H2a rationale names
+    logit-level differences, which P(True) reads directly; verbalized confidence ties more
+    and its ties plausibly grow with size (probe 2: 9 of 10 C responses on the 12b were
+    `100`), putting a size effect inside the instrument on a size hypothesis — the
+    whitespace-rule argument (line 208); Kadavath's RLHF overconfidence hits ECE, not
+    AUROC, since temperature scaling is monotonic. For verbalized: it is what practitioners
+    actually see; its parser is simpler. Cost of both-must-hold: C's ties could fail H1 on
+    an artifact, and it doubles the floors to measure. **Laz drafts the §3 text; Claude
+    attacks it.**
+38. **Prior work not yet read: Proskurina et al. 2024**, *When Quantization Affects
+    Confidence of Large Language Models?* (NAACL Findings 2024, arXiv 2405.00632). Found
+    2026-10-10 while checking a README gap claim. Directly on quantization and confidence,
+    so it belongs in §2 and bears on how the study's contribution is framed (one family,
+    three sizes, published consumer quants, crossed design, pre-registered falsifiers —
+    not "nobody has looked"). Check its method overlap before citing.
 
 ---
 
@@ -589,9 +659,11 @@ typed — a hand-entered seed that disagrees with `DRAW_SEED` is worse than no m
 
 run_pilot.py — steps 1–7 COMPLETE, 2026-09-20
 
-*Described from the `run_pilot.py` uploaded mid-session on 2026-09-20, before the final test
-commits. Laz reports hitting roadblocks during testing; any code changes made to clear them
-were not seen by Claude. Verify with `git diff` at next open.*
+*Described from the `run_pilot.py` uploaded mid-session on 2026-09-20. **Re-checked
+2026-10-08 against the committed file at `da50cea`** (unchanged through `94430cf`): strip on
+both live and resume paths (lines 106, 275), `KV_CACHE_TYPE` declared and never verified
+(line 28), `keep_alive: '5m'` (line 153), the item-30 `KeyError` exposure (lines 103, 106,
+107) and the item-31 whitespace case (line 275) — all as described below.*
 
 Separate script from draw_pilot.py by design: the draw produces a frozen artifact from fixed inputs and opens its outputs in 'w'; the runner reads that artifact and appends. Fusing them would re-run the draw on every debug cycle and rewrite the committed item set.
 
@@ -783,7 +855,8 @@ Dropping `num_ctx` 131072 → 2048 cost the 12b throughput (35.9 → ~20 tok/s a
   Blockers now split: §11's rule and §8's noise floor are **pre-pilot mandatory**;
   §10's transcription and §2 are post-pilot, pre-freeze.
 - **Slice 1** — dataset loader. **COMPLETE 2026-09-05**, two sessions.
-- Slice 2 — runner + grader. ← here. **Runner complete 2026-09-20** — both pilot models, all three templates, append-only JSONL, resume, warm-up, verified unload, startup hard stops. Grader not started. Template B's pilot status open (§5c item 29).
+- Slice 2 — runner + grader. ← here. **Runner complete 2026-09-20** — both pilot models, all three templates, append-only JSONL, resume, warm-up, verified unload, startup hard stops. Grader not started. Template B's pilot status open (§5c item 29, gated on item 37).
+- **Public release — 2026-10-11**, between slices: README, LICENSE, CITATION.cff, full history pushed. Not a slice; recorded so the date is findable.
 - **Slice 3** — the full nine-model roster, and B's grader side. The runner half of "second method" landed early, in step 6.
 - **Slice 4** — analysis. **Deferred to October by design**, as the most fragment-tolerant
   work in the project.
@@ -854,6 +927,16 @@ the next pass. And told Laz to park G "in §5c" without saying §5c lives in thi
 the prereg, so G went nowhere until this rewrite (§5c item 32). Reading the page instead of
 this file at session open found three blockers this file had missed.
 
+**2026-10-08/11, two misses, both caught.** (1) Referred to "§B" and "§C" without naming the
+file. With the prereg, this handoff and `SESSION_PROTOCOL.md` all sectioned, a bare section
+sign is ambiguous; Laz could not find "the §B opening block." **Name the file with the
+section — `SESSION_PROTOCOL §B` — every time.** (2) Asked Laz to decide item 29 (B in the
+pilot of record) before noticing that item 29 depends on a gap nobody had found — which
+method decides the verdicts (item 37). Caught one turn later, when he asked what "B" meant
+and the answer required checking §3. **Before asking for a decision, check what it depends
+on.** Separately, the 2026-10-08 open caught this file's own §0 asking Claude to check an
+entry it hadn't read — the reading-the-page rule working as intended.
+
 ---
 
 ## 10. Living-doc gap — the reason this file exists
@@ -865,7 +948,8 @@ this file at session open found three blockers this file had missed.
 **Second failure mode, identified 2026-08-26:** the handoff recorded decisions as *landed* when they were only *decided*. Fixed by §0b's protocol and §5c's list.
 
 **Companions:**
-- ✅ **Lab log** — `lab_log.md`, created 2026-08-26, tracked as of 2026-08-29. Placement decision outstanding (see §5c item 10).
+- ✅ **Lab log** — `lab_log.md`, created 2026-08-26, tracked as of 2026-08-29. Placement decided and committed 2026-08-29 (§5c, closed list).
+- ✅ **README / LICENSE / CITATION.cff** — added 2026-10-10. The README is the public map of every tracked file; keep its repository table current when files are added.
 - ✅ **Session protocol** — `SESSION_PROTOCOL.md`, adopted 2026-08-29.
 - ⬜ **Decisions log** — what was chosen and why. §2 here is doing this job informally.
 
@@ -876,6 +960,7 @@ Repo holds the pre-registration and data. Vault holds interpretation. **Canonica
 ## 11. Git state
 
 ```
+94430cf  2026-10-10/11 public-release prep — README, LICENSE, CITATION.cff, prereg lines 4 + 368, handoff placeholders, lab log 10-08/10-10 (exact message: git log -1 94430cf)
 da50cea  2026-09-20 Updated handoff
 09c815e  2026-09-20 Appended lab log: 2026-09-20 Steps 5-7 done: run_pilot.py hardened, resumed, and verified clean
 b9a25be  2026-09-20 Lab log entry: 2026-09-20 Steps 5-7 done: run_pilot.py hardened, resumed, and verified clean
@@ -904,13 +989,25 @@ f8a12b4  2026-08-01  Section 3 completed
 3496554  2026-06-24  pre-registration template WIP
 ```
 
+Verified 2026-10-08 → 10-11:
+
+Open checks at `da50cea`, both 10-08 and 10-10: tree clean, `git diff --stat 09c815e HEAD` showed only this handoff, `git diff --stat da50cea HEAD` empty. `94430cf` carries all of the 10-10 work in one commit. Tracked files (`git ls-files`, 10-10) match the README's repository map plus the three new files; `.venv/`, `pilot_runner_log.jsonl` and `tempCodeRunnerFile.py` exist on disk and are ignored.
+
+**Remote added 2026-10-11:** `origin` = `https://github.com/Lxzxrus/calibration_lab.git`, branch `master`, tracking set with `push -u`. There was **no remote before this** — the repo had never been pushed. Full history (43 commits at push) is public. **Any other machine must clone fresh from GitHub**; an older local copy shares no history with it.
+
+**Commit email:** this repo's `user.email` is now the GitHub noreply address (`…+Lxzxrus@users.noreply.github.com`), from `94430cf` on; GitHub blocks pushes exposing the private address. Commits before `94430cf` keep the personal address — accepted, since rewriting history would change every hash the lab log cites.
+
+**Pre-publication audit, 2026-10-08:** commit authors — one name, one email; `pilot_runner_log.jsonl` never committed; no token patterns in history.
+
+This handoff should be the only file past `94430cf`.
+
 Verified 2026-09-20:
 
 `4254e66`: working tree clean, `pilot_runner_log.jsonl` 300 rows, every row stamped `4254e66`.
 `ffd3e78` against `6779746`: `.gitignore`, `lab_log.md`, `run_pilot.py` only — prereg untouched.
 `6779746`: prereg and lab log together, satisfying §D. The prereg has not moved since.
 `pilot_runner_log.jsonl` is gitignored (confirmed by a clean status with the file present).
-Line 259 requires the grader's log to be ignored too once it exists — not yet checked, since it doesn't. This handoff should be the only file past `09c815e`.
+Line 259 requires the grader's log to be ignored too once it exists — not yet checked, since it doesn't. (At the time: this handoff the only file past `09c815e` — confirmed 2026-10-08.)
 
 Verified 2026-09-18:
 
