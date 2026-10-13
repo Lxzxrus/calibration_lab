@@ -2,7 +2,7 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-10-11 · **Synthesized against commit:** `94430cf` · **Status:** **Repo PUBLIC** since 2026-10-11 — `github.com/Lxzxrus/calibration_lab`, full history, README, MIT (code) + CC BY 4.0 (documents), `CITATION.cff`. **Runner COMPLETE** (steps 1–7, 2026-09-20); the 300-row harness-validation run at `4254e66` is **not the pilot**. **New pre-pilot gap, found 2026-10-08: no hypothesis names which elicitation method its AUROC comes from (§5c item 37) — decide that first.** Then: grader, §11 rule, §8 procedure, the pilot. The mid-October freeze is overtaken; a new date is not yet set.
+**Last updated:** 2026-10-12 · **Synthesized against commit:** `28a33de` · **Status:** **Both-must-hold decided and on the page (2026-10-12, `28a33de`)** — AUROC is computed separately for P(True) and verbalized confidence, each held to its own noise floor, overall verdict the weaker of the two (prereg line 31; split-verdict table lines 66–86). Template B is therefore in the pilot of record and **B's grader-side parser is on the critical path**. **Repo PUBLIC** since 2026-10-11 — `github.com/Lxzxrus/calibration_lab`. **Runner COMPLETE** (steps 1–7, 2026-09-20); the 300-row harness-validation run at `4254e66` is **not the pilot and is deleted unopened before it**. Next: the remaining pre-pilot rules, the grader, the pilot. **Freeze date not set** — waiting on real REU deadlines; "mid-December" turned out to be an unverified placeholder.
 
 *Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
@@ -12,9 +12,9 @@
 
 **The plan changed on 2026-08-31. Read this before anything else.**
 
-Prereg prose is **paused**. Harness construction is the active work. Three prereg items
-are exceptions and remain mandatory before the pilot runs (below; the third added
-2026-10-08). Everything else in §5c waits.
+Prereg prose is **paused**. Harness construction is the active work. The exception is the
+set of prereg items that must exist before the pilot runs (below). The elicitation-method
+rule, which several of them depended on, landed 2026-10-12. Everything else in §5c waits.
 
 ### Why
 
@@ -49,25 +49,38 @@ fragments where it will still work.
   day (10-08), then one committing session (10-10 into 10-11) producing `94430cf`: README,
   LICENSE, CITATION.cff, two prereg amendments, handoff placeholders, lab log. Pushed to a
   new GitHub remote and made public 2026-10-11.
+- **2026-10-12: elicitation-method rule decided and written** (`28a33de`). Both-must-hold,
+  per-method floors, opt-for-weaker split verdicts; seven §D amendments, all logged in the
+  10-12 lab-log entry.
 - **Slice 4 deferred to October by design** — offline analysis against saved JSONL, no
   live state, the most fragment-tolerant work in the project. Half of it already exists
   in `ece_test.py`.
-- **Diagrams by end of October.** Treat November and December as near-zero work months;
-  the mid-December REU application should read from a finished thing.
-- **Harness estimate: ~12–19 sessions, now counted in work-days (see §0b). Slice 1 came in at two. Slice 2 is budgeted 6–10; its runner half is done.** Runner steps 5–7 took two work-days (09-18, 09-20) once the prereg blockers were cleared in the first half of 09-18. Roughly nine sessions spent against 12–19, with the grader the remaining Slice 2 work.
-- **The estimate is not what broke.** Roughly seven sessions are spent against a 12–19 budget, so 5–12 remain — the harness number is holding. What has been mis-estimated the whole time is **sessions per week**, and that variable gets materially worse on the 21st. Re-planning a date teaches nothing; naming which variable the estimate got wrong is the thing that makes the next estimate better.
+- ~~**Diagrams by end of October.** Treat November and December as near-zero work months;
+  the mid-December REU application should read from a finished thing.~~ **Superseded
+  2026-10-12.** Laz's stated pace goal is **three sessions a week, November included**
+  (worst case one a week); two ran the week before 10-12. And "mid-December" was never a
+  verified REU deadline — a July placeholder repeated as fact, this file included. REU
+  sites set their own dates, many January–April; Laz is checking a shortlist, CRA DREU
+  first. PNNL CCI, early January 2027, is the dated gate, and the recommenders are for CCI.
+- **Harness estimate: ~12–19 sessions, now counted in work-days (see §0b). Slice 1 came in at two. Slice 2 is budgeted 6–10; its runner half is done.** Runner steps 5–7 took two work-days (09-18, 09-20) once the prereg blockers were cleared in the first half of 09-18. Roughly nine harness sessions spent against 12–19 (count carried from the 09-20 rewrite; 10-10 and 10-12 were release and prereg work, not harness), with the grader the remaining Slice 2 work.
+- **The estimate is not what broke.** With roughly nine of 12–19 spent, 3–10 remain — the harness number is holding. *(Until 2026-10-12 this bullet said "roughly seven" while the one above said "roughly nine" — a stale figure left beside its update.)* What has been mis-estimated the whole time is **sessions per week**, and that variable gets materially worse on the 21st. Re-planning a date teaches nothing; naming which variable the estimate got wrong is the thing that makes the next estimate better.
+- **Whole-study estimate, 2026-10-12 — Claude's, logged in the 10-12 entry as an estimate:**
+  12–20 sessions to freeze, 8–15 more from freeze to posted results, roughly 45–55% of the
+  way to posted results. The error lives in the §8 noise-floor procedure and the grader. At
+  three sessions a week freeze is roughly 4–7 weeks out; at one a week, 12–20. Laz sets the
+  freeze date once real REU deadlines are known.
 
-### The three pre-pilot exceptions — mandatory
+### Pre-pilot mandatory items
 
 Template B dropped from pre-21st scope — 2026-09-10
 
 **Partly reversed 2026-09-20, at the runner level only.** Step 6 was built with all three
 templates. B rows — each carrying the full top-10 candidate list for every generated token —
-are in the validation run, and one was checked against prereg lines 186–190 (template text,
-verbatim) and 222 (`top_logprobs = 10`): position 0 held `False` at −0.1057 and `True` at
+are in the validation run, and one was checked against the prereg's Template B text
+(now lines 210–214, verbatim) and `top_logprobs = 10` (now line 246): position 0 held `False` at −0.1057 and `True` at
 −3.1908, plus the `FALSE` and ` False` variants the parsing rule counts. What did **not**
-change: B's parser is grader work and is still unbuilt. Whether the pilot of record includes
-B is open (§5c item 29, now gated on item 37). The reversal's reasoning is on the page in
+change: B's parser is grader work and is still unbuilt. **Settled 2026-10-12: B is in the pilot of
+record** — both-must-hold makes P(True) a verdict method, and its noise floor has to be measured. The reversal's reasoning is on the page in
 Laz's words — the 09-20 lab-log entry, "Template B's reversal, and why" (verified 2026-10-08).
 The 09-10 reasoning below is kept as history.
 
@@ -75,20 +88,30 @@ A completion threshold was set at the start of the 09-09/10 session: runner step
 
 The cost, stated rather than discovered later: B's parser is the hard one — position 0 fixed, affirmative/negative mass summed and renormalized, retained mass logged, the empty-token-with-absent-bytes edge case — and it now gets built in fragmented time alongside coursework and a newborn.
 
-What survives intact: a C-only pilot still yields p_weak, p_strong, an AUROC floor, and a debugged harness, which is what §8 says the pilot is for. The spread floor and H2b are unaffected — they need the roster, not the second method.
+*(Superseded 2026-10-12, kept as history.)* What survives intact: a C-only pilot still yields p_weak, p_strong, an AUROC floor, and a debugged harness, which is what §8 says the pilot is for. The spread floor and H2b are unaffected — they need the roster, not the second method.
 
 1. **§11's interpretation rule** (the AUROC-flat-while-ECE-degrades case). Written after
    the pilot, it is post-hoc even though pilot data is discarded.
 2. **§8's noise-floor procedure.** Sharper: the procedure defines *how* the floor is
    measured, and `2 × floor` is H2a's and H2b's threshold. Written after seeing a floor,
    a resample structure that yields a smaller number cannot be *proven* unchosen. Same
-   standard already applied to grader-rule changes.
-3. **Which elicitation method decides each verdict — added 2026-10-08.** §3 never names
-   P(True) or verbalized confidence; prereg line 314 says only "AUROC — primary metric for
-   H1, H2a, H2b." Every cell yields two AUROCs, so as written a verdict could be read off
-   whichever method supports it. Same mandatory-before-pilot logic as the two above, plus a
-   mechanical reason: every method that enters a verdict needs its own pilot-measured floor.
-   Full state in §5c item 37.
+   standard already applied to grader-rule changes. **Three questions it must answer
+   (found 2026-10-12):** how the 50-item pilot floor scales to the main-study N; whether
+   the floor is for a single AUROC or for a difference of AUROCs (H2a's steps and H2b's
+   spread are differences on the same items); and how H2b's spread floor is measured when
+   the pilot runs two cells and the spread uses four. Per method under both-must-hold.
+3. ✅ **Which elicitation method decides each verdict — LANDED 2026-10-12 (`28a33de`).**
+   Both-must-hold: separate AUROCs, each against its own floor (prereg line 31); overall
+   verdict the weaker per-method verdict, with the 15-row table (lines 66–86); per-method
+   verdicts always reported. Averaging ruled out on line 372's precedent.
+4. **§9's refusal pattern list.** Line 360 says "matches refusal patterns"; no list
+   exists anywhere. The grader cannot implement the rule, and a list written after seeing
+   pilot refusals is a new rule, not a code fix — the grader-rule declaration's own test.
+5. **Tie-rate statement, descriptive only** — in §7 or the exclusion table. Must exist
+   before any ties are seen, and must say it never changes a verdict.
+6. **§10's saturation entry (line 398) extended to verbalized confidence.** It names
+   P(True) only; verbalized now decides verdicts and is the larger tie risk (probe 2:
+   9 of 10 Template C responses on the 12b were `100`).
 
 ### Next actions, in order
 
@@ -97,17 +120,27 @@ What survives intact: a C-only pilot still yields p_weak, p_strong, an AUROC flo
 freeze were caught. Do not re-add it; the next scheduled review is a judgment call, not a
 standing gate.*
 
-0. **Decide the elicitation-method rule (§5c item 37)** and write it into §3 in Laz's words;
-   Claude attacks the draft before it lands. Item 29 (B in the pilot of record) falls out of
-   it. **Set the new freeze date** in the same session.
-1. **Small runner close-outs, fragment-sized** — §5c items 30–31 (resume robustness,
-   whitespace-only answer) and the B-blind resume line on the page (§5c item 28, a §D
-   amendment). None block the grader.
-2. Slice 2 — grader. Boundary matching over the union of normalized_value and normalized_aliases, negation detection, Template C's parser — and B's, if §5c item 29 puts B in the pilot. It reads the runner file and writes the second file described at prereg lines 292–307. §6's spec is complete, so this is transcription plus debugging. Rejoins to items_pilot.jsonl on question_id — the runner does not carry the answer key.
-3. **§11 rule and §8 procedure**, in whatever gaps the code leaves. Both pre-pilot
-   mandatory — and, since the pilot moved past the 21st, no longer pre-21st.
-4. **Slice 3** — loop the full roster. The runner already loops models and runs B; what remains is the nine-model roster and B's grader side.
-5. **Pilot**, then the remaining §5c prose, then freeze. Delete `pilot_runner_log.jsonl` first — the validation rows must not become pilot rows, and keep-first would make them authoritative. **Since `94430cf` it cannot happen silently:** the rows carry `4254e66`, so line 247's keep-first check hard-stops any `run_pilot.py` start while the file is present.
+0. ✅ **Elicitation-method rule** — landed 2026-10-12. **Freeze date** — still unset; Laz
+   sets it once real REU deadlines are known.
+1. **Pre-pilot prose, fragment-sized** — refusal pattern list, tie-rate statement, line
+   398's saturation entry, §11's rule, §8's procedure (the pre-pilot list above). Also the
+   B-blind resume clause at line 269 — a §D amendment naming B and C.
+2. **Slice 2 — grader, now including B's parser.** Boundary matching over the union of
+   normalized_value and normalized_aliases, negation detection, Template C's parser, and
+   P(True)'s — position 0, renormalization, retained mass, the empty-token-with-absent-
+   `bytes` case. Reads the runner file and writes the second file described at prereg
+   lines 314–330. Rejoins to items_pilot.jsonl on question_id — the runner does not carry
+   the answer key. Not pure transcription any more: the refusal rule needs its list first.
+3. **Pilot analysis code** — per-cell, per-method AUROC, accuracy, and the floor
+   computation. The pilot's six outputs are computed values, so this slice of Slice 4 is
+   pre-freeze.
+4. **Small runner close-outs** — resume robustness and the whitespace-only answer (§5c,
+   open list). None block the grader.
+5. **Pilot.** Delete `pilot_runner_log.jsonl` first, **unopened** — provenance commitment
+   2026-10-12: the 300 validation rows are the pilot items on the pilot models, so they are
+   not opened for any pre-pilot rule. Line 271's keep-first check hard-stops any
+   `run_pilot.py` start while the file is present regardless.
+6. **Then** Slice 3 (full roster), the remaining §5c prose, OSF registration, freeze.
 
 ### Estimate check — 2026-09-05
 
@@ -118,7 +151,7 @@ sessions across runner and grader.
 
 ### Standing
 
-No study data has been run. Harness code is draw_pilot.py (complete) and run_pilot.py (complete, steps 1–7, verified 2026-09-20). The 300 rows in `pilot_runner_log.jsonl` (gitignored) are harness validation at `4254e66` — not study data, not the pilot. Probe scripts — three probe*.ps1 plus probe4_endpoint_logprob_diff.py — and ece_test.py remain environment characterization and learning artifacts. All Ollama calls so far are environment characterization.
+No study data has been run. Harness code is draw_pilot.py (complete) and run_pilot.py (complete, steps 1–7, verified 2026-09-20). The 300 rows in `pilot_runner_log.jsonl` (gitignored) are harness validation at `4254e66` — not study data, not the pilot. **Not to be opened for any pre-pilot rule, and deleted unopened before the pilot of record** (2026-10-12; they were inspected 09-20 for counts, duplicates, provenance and schema only — no grading, no AUROC). Probe scripts — three probe*.ps1 plus probe4_endpoint_logprob_diff.py — and ece_test.py remain environment characterization and learning artifacts. All Ollama calls so far are environment characterization.
 
 **Division of labor (2026-08-31; restated publicly in the README 2026-10-10).** Laz types
 every line of the code, the prereg and the lab log, and accepts, rewrites or rejects every
@@ -127,7 +160,10 @@ handoff is written primarily by Claude, with occasional small edits by Laz (head
 review). Reading is both. *Corrected 2026-10-11:* this line previously read "lab log —
 mostly Laz, Claude adds and edits," which contradicts the 09-20 lab-log entry ("Same rule
 that's held for the prereg and this log since the start of the project") and the public
-README. Laz's own statement governs.
+README. Laz's own statement governs. **2026-10-12, per Laz:** lab-log entries do not restate
+authorship each session; the division of labor lives in the README, this file and his briefs.
+Claude's 10-12 claim that the 09-20 entry set a per-entry rule was wrong — that entry was a
+one-time statement about step 6.
 
 **Recorded 2026-09-20, verified 2026-10-08:** step 6 was built in a separate ~2-hour session
 with Sonnet. The 09-20 lab-log entry states it in Laz's words: "I wrote it. Every line,
@@ -170,7 +206,7 @@ Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language 
 
 **Research identity it serves:** *"I study whether AI systems know what they know and how humans stay meaningfully in control when they don't."*
 
-**Timeline:** the original "first reliability diagrams by September 2026" target is overtaken (see §0). Self-imposed either way. The real external gates are the REU in mid-December and PNNL CCI in January.
+**Timeline:** the original "first reliability diagrams by September 2026" target is overtaken (see §0). Self-imposed either way. The dated external gate is **PNNL CCI, early January 2027** — the recommenders are for CCI. The REU's "mid-December" was an unverified placeholder; real site deadlines are pending (§0).
 
 **Public since 2026-10-11** at `github.com/Lxzxrus/calibration_lab`. The README is the front door: status banner, design at a glance, repository map, how-this-was-built disclosure, reproducing steps, TriviaQA licensing note. Public name: Nathaniel (Nate) Campbell; "Laz" in the process documents is the same person, stated in the README.
 
@@ -222,7 +258,7 @@ Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language 
 **P(True) framing is non-self-referential — a deliberate deviation from Kadavath.** Every call is stateless; the model has no memory of producing the answer, so "your answer" would assert something false about the context.
 
 **Verbalized confidence: strict integer, permissive normalization** (settled 2026-08-26).
-- Entire response must parse as an integer after stripping **whitespace, then trailing `%`, then leading zeros**, in that order. Divided by 100 to put both methods on [0,1] so AUROC can compare them.
+- Entire response must parse as an integer after stripping **whitespace, then trailing `%`, then leading zeros**, in that order. Divided by 100 to put it on [0,1], because ECE, Brier score and the reliability diagrams compare confidence against accuracy, a proportion. **Not** for AUROC, which is rank-only and unchanged by rescaling — this file and the prereg both carried the wrong reason until 2026-10-12 (now prereg line 236).
 - **Leading zeros stripped, not rejected.** `int("085")` is total and unambiguous — no judgment, no stopping-point problem, unlike the `Yes` case. Also a reporting argument: excluding would bury a formatting artifact in the same bucket as refusals, inflating a rate the exclusion table reports as a finding.
 - **`done_reason: "length"` → flag, never exclude.** The strict entire-response-is-an-integer rule plus the [0,100] bound mean a truncated response almost always fails parsing on other grounds. The flag is a check that the hazard didn't materialize, not a caveat on the numbers. **The strict rule and the flag-don't-exclude decision are load-bearing on each other.**
 - Exclusion-on-`length` was considered and rejected: it fires on a *risk* rather than an absent value, and would land disproportionately on the 1b. Rejected because it buys nothing, NOT because "we can't afford differential exclusion" — that reasoning would also have kept refusals in.
@@ -245,6 +281,8 @@ Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language 
 
 **AUROC is the primary metric.** All three hypotheses rest on it. Chosen over ECE because the practitioner question is "can I *trust* this model's confidence" — discrimination, not calibration. Side effect: AUROC is bin-independent, so the binning debate can't touch the hypotheses.
 
+**Both-must-hold across elicitation methods (decided and landed 2026-10-12, prereg lines 31 and 66–86).** Every cell yields a P(True) AUROC and a verbalized AUROC; until 10-12 §3 named neither, so a verdict could have been read off whichever supported it. Averaging rejected on line 372's precedent (constructs a value the model never expressed). Primary-plus-secondary was the alternative (precedents: line 38's rung, line 334's binning). **The rule:** each method clears the hypothesis's bar against **its own** pilot-measured floor; the overall verdict is the weaker per-method verdict (H1 confirmed > suggestive > falsified; H2a supported > falsified; H2b supported > not evaluable > falsified); per-method verdicts always reported. **Accepted in advance:** verbalized saturation on the 12b can falsify H1 on that method; a tie rate may be reported, descriptively, never verdict-changing. **For the write-up:** both AUROCs share items and answers, so the methods are correlated — stricter than one, not two independent confirmations. **Consequences:** B in the pilot of record, B's parser on the critical path, six pilot outputs (line 149).
+
 **ECE as co-primary: considered and DECLINED (2026-08-26).** The vulnerability is real — AUROC is invariant under monotonic transformations, so if quantization compresses confidence while preserving rank, AUROC reports a null that is true and misleading. Four options were weighed; **option four adopted**: keep AUROC confirmatory, and pre-register an interpretation rule in §11 stating that AUROC-flat-while-ECE-or-Brier-degrades is reported as a named finding rather than a null. Costs no new confirmatory threshold and no third noise floor; lands in §11, which needs rewriting anyway. **Only works if written before the pilot.** Co-primary was declined against the timeline; that goes in §10 as considered-and-rejected, which is judgment rather than omission.
 
 **Accuracy measured per cell as a control.** Free, and it's the instrument that adjudicates the open mechanistic question — see §4.
@@ -259,13 +297,13 @@ Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language 
 
 **H2b uses endpoints, not strict monotonicity.** Three points in the predicted order occur ~17% of the time under pure noise, and a difference-of-differences is three subtractions deep. Δ(4B) is measured and **declared descriptive context, not part of the verdict**.
 
-**H2b has a sign precondition.** All-negative Δs can satisfy `Δ(1B) > Δ(12B)` while contradicting the premise. Evaluated only if Δ(1B) > 0; otherwise **not evaluable**, not falsified. *Not evaluable* and *not supported* are distinct verdicts throughout §3.
+**H2b has a sign precondition.** All-negative Δs can satisfy `Δ(1B) > Δ(12B)` while contradicting the premise. Evaluated only if Δ(1B) > 0; otherwise **not evaluable**, not falsified. *Not evaluable* and *falsified* are distinct verdicts throughout §3. (Since 2026-10-12 the labels are confirmed / suggestive / falsified for H1 and supported / falsified (+ not evaluable for H2b) for H2a and H2b; "not supported" is retired from §3.)
 
 **k = 2 for both H2a and H2b, committed blind 2026-08-01.** Multiplication, not subtraction — the floor is in AUROC units, k is a bare count of noise-widths. Identical k because **the differing noise floors already account for the differing noise**; a larger k on H2b would charge it twice for the same fact.
 
 **H1 keeps hardcoded thresholds; H2a/H2b use the formula.** **Where you have judgment, use it; where you don't, defer to the instrument.**
 
-**H2a's verdict rule: supported only if all three per-model checks hold**, with per-model verdicts reported individually regardless. A 2-of-3 outcome is a genuine finding and must not vanish under a bare "not supported."
+**H2a's verdict rule: supported only if all three per-model checks hold**, with per-model verdicts reported individually regardless. A 2-of-3 outcome is a genuine finding and must not vanish under a bare "falsified" (the label since 2026-10-12).
 
 **H2a's magnitude threshold is per-step, not total span.** The claim is that each drop in precision costs something.
 
@@ -273,15 +311,15 @@ Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language 
 
 **10 bins for ECE, dual scheme.** Equal-width primary, equal-mass robustness check. Declaring primacy in advance is required, or reporting two ECEs is a fresh degree of freedom.
 
-**Thresholds (H1): ≥0.1 confirms · 0.05–0.1 suggestive · <0.05 refutes.** Chosen by decision relevance, not statistical convention. **Total gap now defined** as `AUROC(12B) − AUROC(1B)`.
+**Thresholds (H1): ≥0.1 confirms · 0.05–0.1 suggestive · <0.05 falsifies.** Chosen by decision relevance, not statistical convention. **Total gap now defined** as `AUROC(12B) − AUROC(1B)`.
 
 **Exclusion rules are mechanical, per-item decision procedures.** The "items where all models fail" rule was **deleted** — data-dependent, and it would delete the hardest, most informative items.
 
 ---
 
-## 3. Hypotheses (§3 COMPLETE — locked 2026-08-02)
+## 3. Hypotheses (§3 COMPLETE — locked 2026-08-02, amended 2026-10-12)
 
-**Definitions block.** Δ(M) = AUROC(M, q8_0) − AUROC(M, q4_K_M). Uniform at all three sizes. fp16 rungs serve only H2a's within-model check and never enter Δ.
+**Definitions block.** Δ(M) = AUROC(M, q8_0) − AUROC(M, q4_K_M). Uniform at all three sizes. fp16 rungs serve only H2a's within-model check and never enter Δ. **Both-must-hold (2026-10-12):** AUROC per elicitation method, each against its own pilot-measured floor.
 
 **H1 (confirmatory).** As parameter count increases across gemma3 1B → 4B → 12B — same family, all sizes at q4_K_M, same prompts — AUROC increases monotonically.
 *Rationale:* a larger model has capacity to store both the facts it was trained on and how reliably it holds each one; a smaller model's capacity goes to the facts themselves. So a larger model's confidence **varies** with how well it knows a given fact, while a smaller model's is comparatively flat — and that variation is what AUROC reads.
@@ -292,11 +330,14 @@ Conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *Language 
 *Rationale:* the confidence signal lives in fine-grained logit differences; quantization noise corrupts those before it touches the argmax.
 *Prediction:* stated orderings, each step independently ≥ 2 × pilot noise floor, across all five comparisons.
 *Falsifier:* any ordering other than predicted, or **any per-step gap** below the magnitude threshold. (Corrected 2026-08-26 — previously said "the change (Δ)", which misused Δ.)
+*Verdict label:* "falsified" on a break at any size (was "not supported" until 2026-10-12).
 
 **H2b (confirmatory, interaction — the most original claim).** Δ(1B) > Δ(12B).
 *Rationale:* larger models have enough weights to absorb compression; smaller models have no slack.
 *Precondition:* evaluated only if Δ(1B) > 0.
 *Prediction:* spread ≥ 2 × the pilot-measured floor **for the spread** — a different number from H2a's.
+
+**Split verdicts (2026-10-12, lines 66–86).** Overall verdict = the weaker of the two per-method verdicts; a 15-row table covers every pair; per-method verdicts always reported.
 
 **E1 (exploratory, labeled).** Sweet-spot map: calibration and throughput against memory footprint. **NOT YET IN §3 — see §5c.**
 
@@ -323,22 +364,24 @@ The accuracy control reads out the mixture:
 
 **2026-10-08/10:** the prereg was read in full on 10-08 against `da50cea` (unchanged since `6779746`). Two §D amendments landed in `94430cf`, both logged in the 10-08/10-10 lab-log entry: line 4's author changed from "Laz" to "Nathaniel Campbell", and line 368's probe pointer corrected to `probe*.ps1 and probe4_endpoint_logprob_diff.py at the repo root; raw CSVs and probe 4's two warm-run JSON files in probe_out/`. Both were in-place edits, so no line numbers shifted. Rows below updated only where those or the new §3 gap touch them.
 
+**2026-10-12 (`28a33de`):** seven §D amendments, all logged in the 10-12 entry — line 31 (both-must-hold + per-method floor), line 48 (H2a "not supported" → "falsified", "supported or not" → "supported or falsified"), line 58 (H2b "confirmed" → "supported"), lines 66–86 (split verdicts), line 149 (six pilot outputs), line 236 (division-by-100 reason), line 350 (per-method collision). Lines shifted +1 after line 31, +23 after the table, +24 after line 149. **Every prereg line number in this file was re-mapped against `28a33de` on 2026-10-12.**
+
 | § | Status | What's left |
 |---|---|---|
-| Header | ⚠️ stale | **Half fixed 2026-09-18:** `instruct-tuning` removed from the "Study:" list — nothing tests it, every roster model is instruct-tuned, and §10 correctly calls it a confound. **Still stale:** the `frontier-scale` half, which is factually wrong rather than merely dated and needs the overlap-not-absence rework (§5c item 1). `Drafted: [7-15-2026]` is a filled value inside brackets; a pre-freeze bracket scan will false-positive on it. **2026-10-10:** author line now "Nathaniel Campbell", matching README and `CITATION.cff`. |
-| 1. Research question | ⚠️ **stale premise** | The question itself is fine — names AUROC, scoped to gemma3 + consumer hardware. The surrounding framing assumes Kadavath measured only ~120B+ models. He did not. **Rewrite before anything else.** |
+| Header | ⚠️ stale | **Half fixed 2026-09-18:** `instruct-tuning` removed from the "Study:" list — nothing tests it, every roster model is instruct-tuned, and §10 correctly calls it a confound. **Still stale:** the `frontier-scale` half, which is factually wrong rather than merely dated and needs the overlap-not-absence rework (§5c, header *frontier-scale*). `Drafted: [7-15-2026]` is a filled value inside brackets; a pre-freeze bracket scan will false-positive on it. **2026-10-10:** author line now "Nathaniel Campbell", matching README and `CITATION.cff`. |
+| 1. Research question | ✅ fine | Names AUROC, scoped to gemma3 + consumer hardware. *Corrected 2026-10-12:* this row still said "stale premise — rewrite before anything else" six weeks after the 2026-08-31 correction (§5c) found §1 carries no such claim. The stale text is the header's *frontier-scale*. |
 | 2. Background | ❌ unwritten | 3–5 sentences. Kadavath on base models, Tian 2023 on verbalized confidence, why small/quantized/instruct-tuned might differ, the community motivation. The stray 3×3-cell note belongs in §8 or §11. |
-| 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. Δ verified 2026-08-29 as the `q8_0 → q4_K_M` pair, present at all three sizes — H2b is testable. **E1 missing entirely.** Check H1's rationale for the old "uncharted" framing. **Gap found 2026-10-08, pre-pilot mandatory: no hypothesis names its elicitation method** (§5c item 37). |
+| 3. Hypotheses | ✅ COMPLETE | Locked 2026-08-02. H2a falsifier and H1 total-gap fixed 2026-08-26. Δ verified 2026-08-29 as the `q8_0 → q4_K_M` pair, present at all three sizes — H2b is testable. **E1 missing entirely.** Check H1's rationale for the old "uncharted" framing. Elicitation-method gap (found 10-08) **closed 2026-10-12** — both-must-hold, lines 31 and 66–86; H2a/H2b labels unified (lines 48, 58). |
 | 4. Models | ✅ COMPLETE | Locked 2026-08-08. Amended 2026-08-29: the one-family line now states the recipe is fixed across all nine with QAT carrying an additional training stage. |
-| 5. Datasets | ✅ COMPLETE | Runtime block rebuilt from probe data 2026-08-28; probe date corrected and load/unload figures de-duplicated 2026-08-29. **2026-09-18:** bare `seed` renamed `draw_seed` at all three draw-context mentions, ending the collision with §6's generation `seed = 42`; integrity rule added at line 128 — fixed before `draw_main.py` first runs, recorded in `items_manifest.json`, and the first draw at that seed is the draw. Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. **`draw_seed`'s value does not exist anywhere yet.** |
-| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. Templates fenced 2026-09-10, prompt text byte-identical. **2026-09-18:** `top_logprobs` pinned (now line 222, Template B only) and logged per row · `attempt_count` added (now line 296) · exclusion reason added to the Grader Spec per-row list · runner/grader split stated once, generally (line 239) · three more restate-vs-cite duplications killed (Truncation detector, Compliance detector, and the contamination/`load_duration` pair) · contamination source 1 relabelled `first-in-loop`, resolving an apparent contradiction with the mid-run-reload check · "never analyzed" → "never enters the study's results". **Landed 2026-09-18 evening (`6779746`):** the four §D blockers plus three issues the page surfaced — elicitation-method values `'answer'`/`'p_true'`/`'verbalized'` (line 296); model tag, digest and quantization per row; keep-first dedup with a commit-hash/Ollama-version hard stop, `run_id` considered and declined (line 247); dirty-tree hard stop with gitignored logs (line 259); runner file / grader file split (lines 292–307); `timed_out` (line 298); resume on any well-formed row, success or failure (line 243); terminal-A-failure resume clause (line 245). **New gap 2026-09-20:** line 245 names only the C call; B now runs too (§5c item 28). |
-| 7. Metrics | 🟡 partial | No throughput or memory-footprint metric, so nothing feeds E1. |
-| 8. Analysis plan | 🟡 partial | Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure**. **Landed 2026-09-18:** the H1-versus-measured-floor collision is now disclosed rather than silent — if `2 × floor` meets or exceeds H1's fixed 0.1, H1 keeps its threshold (an intentional design choice, not an oversight) but the verdict is reported alongside a note that H1 and H2a/H2b no longer share a comparable standard of evidence. |
-| 9. Exclusion rules | ✅ **COMPLETE** | Timeout filled at 90s. no_valid_response is done: false only. Mean-retained-mass and truncation-rate columns exist. **2026-09-18:** `excluded-no_valid_response` column added (exclusion table now at line 342) — the table had carried three reason-code columns against §9's four codes since a much earlier session, and survived two prior passes. |
-| 10. Confounds | ✅ near-complete | **Rewritten 2026-09-18.** All four template scaffold bullets replaced with real content; the orphan fragment became a real differential-exclusion entry citing §8's mechanism and bias direction; contamination bullet rewritten (concedes magnitude scales with size, follows it into AUROC, threatens H1 specifically, spares H2a/H2b on the shared-baseline argument); quantization-confounded-with-scale added; instruct-tuning reframed from a false within-roster claim to the real cross-study one; extrapolation limit split. `qwen3`/MMLU gone. **Two small things left:** the instruct-recipe fact is stated twice (lines 355 and 365), and bullet formatting is mixed. ECE resolved as *not* §10 — it is §11's unwritten rule. **2026-10-10:** line 368's replicator pointer corrected (probe 4 is `.py`; `probe_out/` also holds JSON). |
+| 5. Datasets | ✅ COMPLETE | Runtime block rebuilt from probe data 2026-08-28; probe date corrected and load/unload figures de-duplicated 2026-08-29. **2026-09-18:** bare `seed` renamed `draw_seed` at all three draw-context mentions, ending the collision with §6's generation `seed = 42`; integrity rule added (now line 152) — fixed before `draw_main.py` first runs, recorded in `items_manifest.json`, and the first draw at that seed is the draw. Three brackets outstanding (`p_weak`, `p_strong`, `N`) — pilot fills them. **`draw_seed`'s value does not exist anywhere yet.** **2026-10-12:** pilot outputs four → six (line 149). |
+| 6. Procedure | ✅ **COMPLETE** | Content, structure, consistency. Findings block, `load_duration` threshold line, and loop-order block rewritten 2026-08-29 to cite rather than restate. Templates fenced 2026-09-10, prompt text byte-identical. **2026-09-18:** `top_logprobs` pinned (now line 246, Template B only) and logged per row · `attempt_count` added (now line 320) · exclusion reason added to the Grader Spec per-row list · runner/grader split stated once, generally (line 263) · three more restate-vs-cite duplications killed (Truncation detector, Compliance detector, and the contamination/`load_duration` pair) · contamination source 1 relabelled `first-in-loop`, resolving an apparent contradiction with the mid-run-reload check · "never analyzed" → "never enters the study's results". **Landed 2026-09-18 evening (`6779746`):** the four §D blockers plus three issues the page surfaced — elicitation-method values `'answer'`/`'p_true'`/`'verbalized'` (line 320); model tag, digest and quantization per row; keep-first dedup with a commit-hash/Ollama-version hard stop, `run_id` considered and declined (line 271); dirty-tree hard stop with gitignored logs (line 283); runner file / grader file split (lines 314–330); `timed_out` (line 322); resume on any well-formed row, success or failure (line 267); terminal-A-failure resume clause (line 269). **New gap 2026-09-20:** line 269 names only the C call; B now runs too (§5c, resume clause). **2026-10-12:** line 236's division-by-100 reason corrected; line 236 also states the leading-zero rule twice (consistency review). |
+| 7. Metrics | 🟡 partial | No throughput or memory-footprint metric, so nothing feeds E1. Tie-rate statement (descriptive only) owed here or in §9's table — pre-pilot. Line 338 names no method; line 31 now governs. |
+| 8. Analysis plan | 🟡 partial | Needs the per-hypothesis walkthrough **and the noise-floor measurement procedure**. **Landed 2026-09-18:** the H1-versus-measured-floor collision is now disclosed rather than silent — if `2 × floor` meets or exceeds H1's fixed 0.1, H1 keeps its threshold (an intentional design choice, not an oversight) but the verdict is reported alongside a note that H1 and H2a/H2b no longer share a comparable standard of evidence. **2026-10-12:** the collision rule is now per method (line 350, "either method's"). The procedure itself is still unwritten; the three questions it must answer are in §0. |
+| 9. Exclusion rules | ✅ **COMPLETE** | Timeout filled at 90s. no_valid_response is done: false only. Mean-retained-mass and truncation-rate columns exist. **2026-09-18:** `excluded-no_valid_response` column added (exclusion table now at line 366) — the table had carried three reason-code columns against §9's four codes since a much earlier session, and survived two prior passes. **Gap found 2026-10-12:** the refusal rule (line 360) has no pattern list — pre-pilot. |
+| 10. Confounds | ✅ near-complete | **Rewritten 2026-09-18.** All four template scaffold bullets replaced with real content; the orphan fragment became a real differential-exclusion entry citing §8's mechanism and bias direction; contamination bullet rewritten (concedes magnitude scales with size, follows it into AUROC, threatens H1 specifically, spares H2a/H2b on the shared-baseline argument); quantization-confounded-with-scale added; instruct-tuning reframed from a false within-roster claim to the real cross-study one; extrapolation limit split. `qwen3`/MMLU gone. **Two small things left:** the instruct-recipe fact is stated twice (lines 390 and 400), and bullet formatting is mixed. ECE resolved as *not* §10 — it is §11's unwritten rule. **2026-10-10:** the replicator pointer (now line 392) corrected (probe 4 is `.py`; `probe_out/` also holds JSON). **2026-10-12:** the saturation entry (line 398) covers P(True) only; extend to verbalized — pre-pilot. |
 | 11. Null result | ❌ **placeholder** | Records the ECE decision but not the rule — it announces a rule for the AUROC-flat-while-calibration-degrades case and never states it. Needs full redesign — three hypotheses can null independently, and H2b can come back *not evaluable*. Option-four interpretation rule lands here. |
 | 12. Deviations | ✅ ready | Empty by design until freeze. |
-| 13. Freeze | ⏳ blocked | Two threshold numbers bracketed until the pilot. `items.jsonl` not yet committed. |
+| 13. Freeze | ⏳ blocked | Three §5 brackets until the pilot. `items.jsonl` not yet committed. **OSF (decided 2026-10-12):** register the prereg on OSF at freeze, post results to the OSF project at completion; nothing registered yet. Line 432's mechanics name only the git tag — add the OSF step before freeze. |
 
 ---
 
@@ -360,9 +403,11 @@ Order: **environment → findings → templates → parsing rules → parameters
 
 ---
 
-## 5c. DECIDED BUT NOT YET WRITTEN
+## 5c. DECIDED BUT NOT YET WRITTEN — and OPEN
 
-*Items leave this list only by landing on the page. Nothing else.*
+*Items leave these lists only by landing on the page, or — for the open list — by being decided, "considered and declined" included. Nothing else.*
+
+**Restructured 2026-10-12.** Until now one numbered list held both decided-but-unwritten items and genuinely open decisions, which is how the elicitation-method question sat under "decided" for four days. Now two lists, items named by content. **Numbering retired** — the numbers meant nothing on Laz's side. The closed records below are history and still cite the old numbers; landed items have been removed from the lists, and their records stand.
 
 **Closed 2026-08-29:** §5 runtime paragraph (landed). §10 ECE-declined entry (**resolved as not §10** — §7 already reports ECE with its binning spec, so nothing is hidden from a reader; the real gap is §11's unwritten rule, now item 6). Lab-log placement (**committed**). Template C `eval_count` (measured — four tokens, §6's reasoning confirmed).
 
@@ -399,156 +444,60 @@ Closed 2026-09-10 (both pre-pilot, both landed on the page, both logged as §D i
   from the dead one — the 1b cold-load figure generalized to the roster — same digits.
   The sweep killed the load figure; the runtime component is live and correct.
 
-1. **§1 framing sentence and header "Study:" line** — the Kadavath scale belief was wrong. Rewrite around overlap, not absence. Highest-visibility stale claim in the document. **Half done 2026-09-18:** `instruct-tuning` is out of the "Study:" line; the `frontier-scale` half is untouched and still needs its own session, since that rework is entangled with authoring §2.
-2. ✅ **LANDED 2026-09-18.** **§10: contamination bullet, rewritten.** Gemma3 has almost certainly seen TriviaQA. The version currently drafted in conversation still contains a contradiction — it argues uniform inflation cancels, then concedes magnitude scales with size. Resolve in favour of the concession, because larger models memorise more of their training data, so contamination is a gradient along H1's own axis. Follow it into AUROC: a memorised item is answered correctly *and* confidently, which is a correctly-discriminated item, so memorisation plausibly inflates AUROC more in larger models — H1's predicted result arriving by a non-calibration mechanism. Then restore the half that survives: H2a and H2b compare quantizations *within* a size, sharing a memorisation baseline, so uniform inflation genuinely does cancel there. Cite §5's `unfiltered` choice rather than re-arguing it.
-3. ✅ **LANDED 2026-09-18.** **§10: extrapolation limit, rewritten and split into three blocks, conclusion first.** (a) Scope and split — every performance figure is configuration-bound and E1 does not transfer; the calibration results *do*, because AUROC is computed from probabilities and a spilling model is slow, not differently confident. (b) Evidence — 15.4 → 43.9 tok/s on a driver update alone, framed as a regime change: the largest cell changed bottleneck, so **no scaling factor recovers the table from different hardware.** Silicon lottery as a subordinate clause only. (c) For replicators — re-measure your own constants, scripts committed (`probe*.ps1` at repo root, CSVs in `probe_out/`). Two things to check while writing: §6 documents flash attention as *not bit-identical*, so "same distribution" overclaims by one clause; and the ~6% run-to-run swing on the 1b cells is the only spread figure actually measured. Context: peak 15474 MB against 16304 MB available, 2256 MB desktop baseline, four 1440p displays, under 1 GB margin on the largest cell.
-4. ✅ **LANDED 2026-09-18.** **§10: one-line differential-exclusion entry** citing §8. §8 already carries the mechanism and the interpretation rule; the only thing missing is direction — the bias runs *toward the null*, against H1. Then delete the orphan `differential exclusion named as a limitation` fragment at the top of §10.
-5. ✅ **LANDED 2026-09-18.** **§10: delete the four scaffold bullets** (qwen3/MMLU contamination, quantization-as-confound, instruct-tuning-is-not-RLHF, single hardware/runtime) and the `[others]` placeholder. Fill from §5d.
-6. **§11: the option-four interpretation rule** — currently a placeholder that announces a rule and never states it. Must be written before the pilot or it's post-hoc.
-7. ✅ **LANDED 2026-09-18.** **§10 or §2: the instruct-tuning limitation, correctly stated.** Not "recipes differ from each other" — one family fixed that. Relative to Kadavath, *four* things change at once: instruct-tuning, quantization, scale, and lineage. Within-roster comparisons are clean; the cross-study framing sentence is what's limited.
-8. **§3: E1**, and **§7: throughput + memory footprint metrics** to feed it.
-9. ✅ **LANDED 2026-09-18.** Item 9 shrinks (verified 2026-09-07). The "within N seconds" clause does not exist in the file and the mean-retained-mass and truncation-rate columns already do. What remains is one thing: the exclusion table has no no_valid_response column.
-10. **§8: noise-floor measurement procedure.** Two floors. Plus the direction-of-bias clause from item 4.
-11. **`items.jsonl` committed** — §5 promises it.
-12. ✅ **LANDED 2026-09-18.** **Re-enable AMD driver auto-update and Ollama auto-update post-study.** Disabled 2026-08-26.
-13. **Fix the 08-28 lab-log line** saying scripts and CSVs are both under `probe_out/`. The scripts are at repo root.
-14. *Optional:* §10's roster-asymmetry entry could be reworded — "the shape across the two steps on the 1b and across the two steps on the 4b" is clumsy. Content is correct.
-15. *Optional:* re-run the three 1b cells at higher `num_predict` for a longer timing window, so every row in the throughput table means something.
-16. ✅ **LANDED 2026-09-18.** **§10 line 331 is wrong on the page, not merely scaffolding.** It reads *"qwen3 has
-    almost certainly seen MMLU and TriviaQA."* The roster is gemma3 and MMLU was dropped.
-    Two stale design decisions in one bullet.
-17. **`qf_1637` needs two entries.** (a) §5: one line stating the row is dropped at draw
-    time, by id, as a source defect — question and answer entity do not correspond
-    (a roadrunner question wired to static-library answers), `value` is the fragment
-    `'(a'`, `normalized_value` blank. Dropped before any model runs, so it is **not** a
-    §9 exclusion and must not enter the exclusion table. (b) §10: rows mis-wired *without*
-    blanking a field are undetectable mechanically — an unquantifiable dataset-quality
-    limitation, uniform across cells, with `qf_1637` as the existence proof.
-18. **§10's off-label entry now has a measured number.** Alias-set size across the
-    validation split: **min 1, max 214, mean 11.7.** The 214 is `sfq_9993` — every Google
-    country-code domain plus scraped typos (`gogole com`, `giigke cin`). No cap applied:
-    an alias-count threshold is the same unjustifiable free parameter already rejected for
-    minimum alias length and minimum retained mass.
-19. **§10: TriviaQA construction artifacts are a pattern, not three coincidences.**
-    Three distinct fields carry leftover machinery from dataset construction: the
-    **answer wiring** (`qf_1637` — a valid answer entity attached to the wrong question),
-    the **`value` field** (`'(a'` on qf_1637, `"A: Basketball"` on tc_543), and the
-    **`question` field** (`qw_402` — CSV escaping never stripped: the whole question
-    wrapped in quotes with `""` doubled around an internal title). Written as one
-    dataset-quality entry with three instances, alongside the off-label alias entry
-    (item 18). All uniform across cells, so none can produce a differential.
-20. **§5: `draw_pilot.py`'s output is destructive on re-run.** The script opens
-    `items_pilot.jsonl` and `items_manifest.json` in `'w'` mode. Harmless while
-    `DRAW_SEED` and `PILOT_N` are fixed — same inputs, same output — but a live risk if
-    either changes. Git catches it; the hazard is worth one line where §5 describes the
-    frozen item set. **Extended 2026-10-10:** even at the same seed, a re-run always dirties
-    the tree — `items_manifest.json` records a fresh `datetime.now()` timestamp, while
-    `items_pilot.jsonl` is rewritten byte-identical. The dirty-tree check (line 259) then
-    refuses the pilot until `git checkout -- items_manifest.json`. The README's Reproducing
-    section documents the restore step; the prereg does not yet.
-21. **§6: KV cache has no verification path.** Line 142 pins f16 with a methodological
-    reason — quantizing the cache adds a second noise source on top of the weight
-    quantization H2a is about, and the probabilities are the dependent variable. Line 287
-    lists KV cache type as a per-run logged field. `run_pilot.py` contains **zero**
-    references to it: no check, no log. The Ollama version and the digest each get a hard
-    stop (line 255) for a weaker version of the same risk, and KV cache is a server-level
-    setting — the same class of thing that already drifted once. Whether the API reports
-    cache type is unchecked; line 144 solves the analogous problem for flash attention by
-    reading the server log at model load. **Finding 1 of the 2026-09-18 review, and the
-    only substantive item from that session with no home on any page.**
-    **Partly moved 2026-09-20:** `run_pilot.py` now declares `KV_CACHE_TYPE = 'f16'` and
-    writes it on every row. Still no verification path — the code comment says "verified via
-    server log," but nothing in the code reads the log. The row records what was *set*.
-22. ✅ **LANDED 2026-09-18 (page, line 298) and 2026-09-20 (code, tested by forced timeout).** **Runner-side timeout recording.** Three of §9's four codes are grader-derivable from
-    stored output. `timeout` is not — a call with no response in 90 seconds has no body to
-    parse, so only the runner can know it happened, and the row schema gives it nowhere to
-    record that. Not blocking (timeouts are step 6/7; step 5 writes rows from successful
-    calls), but it surfaces at implementation if it isn't written first.
-23. **Digest prefix equality check in `run_pilot.py`** — deferred deliberately 2026-09-18.
-    §4's table carries 12-character prefixes, the code carries full 64-character digests.
-    Optional hardening, not a live bug.
-24. **Template text is duplicated between §6 (now lines 180–202) and `run_pilot.py`'s
-    `prompt_a` / `prompt_b` / `prompt_c`, with no automated equality check.** B joined the
-    duplication 2026-09-20; its text was checked by hand against lines 186–190. Code must hold the literal
-    string, so there is no citing out of this one. Byte-matched by hand 2026-09-12; the only
-    guard is a comment. Same shape as item 23 and strictly more load-bearing.
-25. **`draw_seed`'s value.** The integrity rule landed at line 128; the number exists
-    nowhere. Not blocking — `draw_main.py` can't be written until the pilot reports p_weak
-    and p_strong — but the value is arbitrary and could be chosen now, which would make the
-    line-128 commitment checkable rather than declared.
-26. **§10 states the instruct-recipe fact twice** (lines 355 and 365), introduced by the
-    2026-09-18 rewrite; bullet formatting in that section is now mixed.
-27. **§11's closing sentence trails off mid-thought**, no terminal punctuation. Separate
-    from item 6, which is the unwritten rule itself.
-28. **Line 245's resume clause names only the C call.** Since 2026-09-20 the runner also
-    makes a B call per item and skips it on a terminal A failure — code ahead of the page.
-    Line 235 already says the answer feeds "both Template B and C". §D amendment: make 245
-    say B and C, and check the page for other C-only phrasings written while B was deferred.
-29. **Is Template B in the pilot of record?** The 09-10 decision said C-only. The runner now
-    produces B at trivial cost (300 calls in about four minutes). Options: include B rows and
-    build B's parser before grading, or drop B from the pilot run. Decide before the pilot.
-    **Gated on item 37 since 2026-10-08:** if B enters any verdict (primary, or under
-    both-must-hold), B is in the pilot of record, because its noise floor must be measured.
-    Claude's recommendation either way: include B — the rows cost minutes, and a secondary
-    method's floor is otherwise never measured.
-30. **Resume robustness.** A line that parses as JSON but lacks a key (`question_id`,
-    `raw_response`, `harness_commit_hash`) raises a `KeyError` and stops resume, rather
-    than being discarded like a malformed line. Found 2026-09-20; not hit in any run.
-31. **Whitespace-only Template A answer.** `.strip()` gives `""`, which is not `None`, so B
-    and C run with an empty `[Answer]`. Arguably correct — the runner records, the grader's
-    compliance detector decides — but no text on the page has considered the case.
-32. **G: does a terminal Template A failure need a fifth §9 reason code?** Open in the
-    2026-09-12 lab log and dropped from this file until now. §9's codes all describe the
-    confidence call; an A failure removes the item from the B and C cells with no code
-    saying so. Grader-session decision.
-33. **Digest verified at startup, not "at the point of load, once per model"** (line 259).
-    `run_pilot.py` checks `/api/tags` for both models before any call. Defensible, since
-    nothing can change the weights mid-process without the hard stops firing on the next
-    run, but the code and the line disagree. Move one of them.
-34. **`keep_alive: '5m'` on measurement calls** equals Ollama's default. Line 257 says
-    "generous within a cell." The validation run had zero mid-cell reloads, so it held
-    at pilot size; whether 5m is the frozen value is undecided.
-35. **Warm-up and unload prompt text** (`'Hello'`, `num_predict` 1) is harness detail with
-    no home on the page. Line 237 says "output is discarded" and nothing more. Probably
-    fine as code-only, but that is a decision, not a default.
-36. **The keep-first commit-hash stop collides with daily commits** (found 2026-10-08).
-    Line 247 hard-stops a resume onto rows from a different commit; SESSION_PROTOCOL §E
-    requires a commit every work-day; line 259 hard-stops on any uncommitted edit. So an
-    interrupted run becomes un-resumable once the repo changes before resume — a commit
-    trips 247, an uncommitted edit (a lab-log note typed while the run is down) trips 259.
-    The main sweep (2–5 h, §5) is exposed; the pilot (~4 min) effectively isn't. The obvious
-    fix — hash the harness files instead of HEAD — undoes the 09-12 reasoning that the
-    repo-level hash is what pins the prereg's template text. **A decision, not a bug fix.**
-    Must be settled before the main sweep, not before the pilot.
-37. **No hypothesis names which elicitation method its AUROC comes from** (found
-    2026-10-08). Prereg line 314: "AUROC — primary metric for H1, H2a, H2b." Line 110 names
-    two methods; §3 names neither. Every cell yields a P(True) AUROC and a verbalized AUROC,
-    so as written the verdict could be read off whichever supports it — a line-9 knob.
-    **Pre-pilot mandatory.** Ruled out: averaging the two (line 348's precedent — constructs
-    a value the model never expressed; Laz recalled and agreed). Open between
-    **primary-plus-secondary** (precedent: H1's rung, line 37; ECE binning, line 310) and
-    **both-must-hold** (precedent: H2a's all-three-sizes rule, line 47). Mechanisms
-    discussed 2026-10-08, mostly favoring P(True) as primary: line 49's H2a rationale names
-    logit-level differences, which P(True) reads directly; verbalized confidence ties more
-    and its ties plausibly grow with size (probe 2: 9 of 10 C responses on the 12b were
-    `100`), putting a size effect inside the instrument on a size hypothesis — the
-    whitespace-rule argument (line 208); Kadavath's RLHF overconfidence hits ECE, not
-    AUROC, since temperature scaling is monotonic. For verbalized: it is what practitioners
-    actually see; its parser is simpler. Cost of both-must-hold: C's ties could fail H1 on
-    an artifact, and it doubles the floors to measure. **Laz drafts the §3 text; Claude
-    attacks it.**
-38. **Prior work not yet read: Proskurina et al. 2024**, *When Quantization Affects
-    Confidence of Large Language Models?* (NAACL Findings 2024, arXiv 2405.00632). Found
-    2026-10-10 while checking a README gap claim. Directly on quantization and confidence,
-    so it belongs in §2 and bears on how the study's contribution is framed (one family,
-    three sizes, published consumer quants, crossed design, pre-registered falsifiers —
-    not "nobody has looked"). Check its method overlap before citing.
+**Closed 2026-10-12 (`28a33de`):** the elicitation-method rule (old 37) and B in the pilot of record (old 29), decided and written — both-must-hold, per-method floors, split verdicts, seven §D amendments. Removed from the list body as already landed: old 2, 3, 4, 5, 7, 9, 12, 16 (closed 09-18) and 22 (closed 09-18/20).
+
+### Decided, not yet written
+
+**Pre-pilot:**
+- **§11's option-four interpretation rule.** Currently a placeholder that announces a rule and never states it. Post-hoc if written after the pilot.
+- **Tie-rate statement, descriptive only** (decided 2026-10-12). Location open: §7 or the exclusion table. Must say it never changes a verdict.
+- **§10's saturation entry extended to verbalized confidence** (line 398, decided 2026-10-12). Verbalized now decides verdicts and is the larger tie risk.
+- **Resume clause names only the C call** (line 269). Since 2026-09-20 the runner also makes a B call per item and skips it on a terminal A failure — code ahead of the page. Line 259 already says the answer feeds "both Template B and C". §D amendment: make 269 say B and C, and check the page for other C-only phrasings written while B was deferred.
+
+**Before freeze:**
+- **Header *frontier-scale* and §2's overlap framing.** Line 3 still says *frontier-scale*; Kadavath topped out at 52B, and the roster's 1b and 12b overlap two of his four sizes. A one-line header fix plus authoring §2 (empty) around overlap, not absence. Read Proskurina et al. 2024 first (below). `instruct-tuning` already came out of the line on 2026-09-18.
+- **Proskurina et al. 2024**, *When Quantization Affects Confidence of Large Language Models?* (NAACL Findings 2024, arXiv 2405.00632). Not yet read. Found 2026-10-10. Directly on quantization and confidence, so it belongs in §2 and bears on how the contribution is framed (one family, three sizes, published consumer quants, crossed design, pre-registered falsifiers — not "nobody has looked"). Check its method overlap before citing.
+- **§3: E1, and §7: throughput + memory-footprint metrics** to feed it.
+- **`items.jsonl` committed** — §5 promises it (line 139).
+- **OSF step in §13** (decided 2026-10-12). Line 432 names only the git tag; add the OSF registration and a place for its DOI.
+- **`qf_1637` needs two entries.** (a) §5: one line stating the row is dropped at draw time, by id, as a source defect — question and answer entity do not correspond (a roadrunner question wired to static-library answers), `value` is the fragment `'(a'`, `normalized_value` blank. Dropped before any model runs, so it is **not** a §9 exclusion and must not enter the exclusion table. (b) §10: rows mis-wired *without* blanking a field are undetectable mechanically — an unquantifiable dataset-quality limitation, uniform across cells, with `qf_1637` as the existence proof.
+- **§10's off-label entry, with its measured number.** Alias-set size across the validation split: **min 1, max 214, mean 11.7.** The 214 is `sfq_9993` — every Google country-code domain plus scraped typos (`gogole com`, `giigke cin`). No cap applied: an alias-count threshold is the same unjustifiable free parameter already rejected for minimum alias length and minimum retained mass.
+- **§10: TriviaQA construction artifacts are a pattern, not three coincidences.** Three distinct fields carry leftover machinery from dataset construction: the **answer wiring** (`qf_1637` — a valid answer entity attached to the wrong question), the **`value` field** (`'(a'` on qf_1637, `"A: Basketball"` on tc_543), and the **`question` field** (`qw_402` — CSV escaping never stripped: the whole question wrapped in quotes with `""` doubled around an internal title). Written as one dataset-quality entry with three instances, alongside the off-label alias entry above. All uniform across cells, so none can produce a differential.
+- **§5: `draw_pilot.py`'s output is destructive on re-run.** The script opens `items_pilot.jsonl` and `items_manifest.json` in `'w'` mode. Harmless while `DRAW_SEED` and `PILOT_N` are fixed — same inputs, same output — but a live risk if either changes. Git catches it; the hazard is worth one line where §5 describes the frozen item set. **Extended 2026-10-10:** even at the same seed, a re-run always dirties the tree — `items_manifest.json` records a fresh `datetime.now()` timestamp, while `items_pilot.jsonl` is rewritten byte-identical. The dirty-tree check (line 283) then refuses the pilot until `git checkout -- items_manifest.json`. The README's Reproducing section documents the restore step; the prereg does not yet.
+- **§10 states the instruct-recipe fact twice** (lines 390 and 400), introduced by the 2026-09-18 rewrite; bullet formatting in that section is mixed.
+- **§11's closing sentence trails off mid-thought**, no terminal punctuation. Separate from the option-four rule, which is the unwritten rule itself.
+- **Line 236 states the leading-zero rule twice** — once in the opening sentence, again as "Leading zeros are stripped." before the 085 example. Keep the reasoning, drop the restatement. Consistency review (noted 2026-10-12).
+- **The 08-28 lab-log line** saying scripts and CSVs are both under `probe_out/` — the scripts are at repo root. The log is append-only, so the correction goes in a new entry.
+- *Optional:* §10's roster-asymmetry entry could be reworded — "the shape across the two steps on the 1b and across the two steps on the 4b" is clumsy. Content is correct.
+- *Optional:* re-run the three 1b cells at higher `num_predict` for a longer timing window, so every row in the throughput table means something.
+
+### Open — not yet decided
+
+**Pre-pilot:**
+- **§9's refusal pattern list** (line 360; found 2026-10-12). No list exists. The grader cannot implement the rule without one, and a list written after seeing pilot refusals is a new rule.
+- **§8's noise-floor procedure.** Unwritten. Must answer: how the 50-item pilot floor scales to the main-study N; single-AUROC floor vs difference-of-AUROCs floor; how H2b's spread floor is measured when the pilot runs two cells and the spread uses four (more pilot cells — cheap at ~4 min per 300 calls — or a derived floor with a stated assumption). Per method, so twice.
+- **G: does a terminal Template A failure need a fifth §9 reason code?** Open since the 2026-09-12 lab log. §9's codes all describe the confidence call; an A failure removes the item from the B and C cells with no code saying so. Grader-session decision.
+- **Whitespace-only Template A answer.** `.strip()` gives `""`, which is not `None`, so B and C run with an empty `[Answer]`. Arguably correct — the runner records, the grader's compliance detector decides — but no text on the page has considered the case.
+
+**Before freeze:**
+- **The freeze date.** Laz sets it once real REU deadlines are known (§0).
+- **`draw_seed`'s value.** The integrity rule is at line 152; the number exists nowhere. Not blocking — `draw_main.py` can't be written until the pilot reports p_weak and p_strong — but the value is arbitrary and could be chosen now, which would make the commitment checkable rather than declared.
+- **§6: KV cache has no verification path.** Line 168 pins f16 with a methodological reason — quantizing the cache adds a second noise source on top of the weight quantization H2a is about, and the probabilities are the dependent variable. Line 318 lists KV cache type as a per-run logged field. The Ollama version and the digest each get a hard stop (line 283) for a weaker version of the same risk, and KV cache is a server-level setting — the same class of thing that already drifted once. Whether the API reports cache type is unchecked; line 170 solves the analogous problem for flash attention by reading the server log at model load. **Finding 1 of the 2026-09-18 review.** **Partly moved 2026-09-20:** `run_pilot.py` now declares `KV_CACHE_TYPE = 'f16'` and writes it on every row. Still no verification path — the code comment says "verified via server log," but nothing in the code reads the log. The row records what was *set*.
+- **Digest verified at startup, not "at the point of load, once per model"** (line 283). `run_pilot.py` checks `/api/tags` for both models before any call. Defensible, since nothing can change the weights mid-process without the hard stops firing on the next run, but the code and the line disagree. Move one of them.
+- **`keep_alive: '5m'` on measurement calls** equals Ollama's default. Line 281 says "generous within a cell." The validation run had zero mid-cell reloads, so it held at pilot size; whether 5m is the frozen value is undecided.
+- **Warm-up and unload prompt text** (`'Hello'`, `num_predict` 1) is harness detail with no home on the page. Line 261 says "output is discarded" and nothing more. Probably fine as code-only, but that is a decision, not a default.
+- **Template text is duplicated between §6 (now lines 204–226) and `run_pilot.py`'s `prompt_a` / `prompt_b` / `prompt_c`, with no automated equality check.** B joined the duplication 2026-09-20; its text was checked by hand. Code must hold the literal string, so there is no citing out of this one. Byte-matched by hand 2026-09-12; the only guard is a comment. Same shape as the digest-prefix check and strictly more load-bearing.
+- **Digest prefix equality check in `run_pilot.py`** — deferred deliberately 2026-09-18. §4's table carries 12-character prefixes, the code carries full 64-character digests. Optional hardening, not a live bug.
+
+**Before the main sweep (not the pilot):**
+- **The keep-first commit-hash stop collides with daily commits** (found 2026-10-08). Line 271 hard-stops a resume onto rows from a different commit; SESSION_PROTOCOL §E requires a commit every work-day; line 283 hard-stops on any uncommitted edit. So an interrupted run becomes un-resumable once the repo changes before resume — a commit trips 271, an uncommitted edit (a lab-log note typed while the run is down) trips 283. The main sweep (2–5 h, §5) is exposed; the pilot (~4 min) effectively isn't. The obvious fix — hash the harness files instead of HEAD — undoes the 09-12 reasoning that the repo-level hash is what pins the prereg's template text. **A decision, not a bug fix.**
+- **Resume robustness.** A line that parses as JSON but lacks a key (`question_id`, `raw_response`, `harness_commit_hash`) raises a `KeyError` and stops resume, rather than being discarded like a malformed line. Found 2026-09-20; not hit in any run. Code fix; the open part is whether such a line is discarded or is itself a hard stop.
 
 ---
 
 ## 5d. §10 accumulated list
 
-benchmark contamination (gemma3 has likely seen TriviaQA) · quantization confounded with scale · **H1's primary rung is q4_K_M, so the headline size effect is measured on compressed models throughout** · vision asymmetry (1b text-only; 4b/12b multimodal) · context asymmetry (32K vs 128K) · differential exclusion across cells threatening H1/H2b · thin positive class on the weakest cells · **floor compression: if the 1b's AUROC at q8_0 is near 0.5 it has little room to fall, squeezing Δ(1B) and biasing against H2b** · **saturation: the 12b pinning near 1.0 risks ties in P(True); ties push AUROC toward 0.5, biasing against H1 for reasons unrelated to the capacity mechanism — the mirror of floor compression, different mechanism, different hypothesis** · **the k × noise-floor rule is a heuristic; bootstrapped CIs are the clean version, and if not implemented that must be stated** · QAT arm not bit-matched · **extrapolation limit, driver-aware version** (see §5c item 2) · H1's "bluffs less" contested in literature · **cold-load logprob variance observed once (n=1)** · **the AUROC noise floor is estimated via Hanley–McNeil pre-pilot; the pilot's measured floor governs** · **`unfiltered` avoids compounding contamination but does not remove it** · **degenerate generation at 1b: some "incorrect" answers are non-answers rather than wrong facts** · **forced response puts lucky guesses in the correct class; uniform across cells** · **TriviaQA used off-label** — built as a reading-comprehension benchmark, so its Wikipedia-harvested aliases are deliberately permissive; closed-book generation makes that permissiveness a false-positive hazard · **the `value` field carries scraping artifacts** (`"A: Basketball"` on tc_543) — `normalized_value` is canonical · **throughput numbers are only valid on an otherwise-idle GPU with the previous model unloaded** · **low retained mass produces a renormalized value computed from tail probabilities, less stable than the same value from dominant ones; a minimum-mass threshold was considered and rejected as an unjustifiable free parameter** · **ECE co-primary considered and declined against the timeline** · **throughput measured on one driver version; a driver update moved the largest cell from spilling to resident**
+benchmark contamination (gemma3 has likely seen TriviaQA) · quantization confounded with scale · **H1's primary rung is q4_K_M, so the headline size effect is measured on compressed models throughout** · vision asymmetry (1b text-only; 4b/12b multimodal) · context asymmetry (32K vs 128K) · differential exclusion across cells threatening H1/H2b · thin positive class on the weakest cells · **floor compression: if the 1b's AUROC at q8_0 is near 0.5 it has little room to fall, squeezing Δ(1B) and biasing against H2b** · **saturation: the 12b pinning near 1.0 risks ties in P(True); ties push AUROC toward 0.5, biasing against H1 for reasons unrelated to the capacity mechanism — the mirror of floor compression, different mechanism, different hypothesis; **on the page for P(True) only — extend to verbalized confidence, the larger tie risk and now verdict-deciding (2026-10-12)**** · **both AUROCs share items and answers: the methods are correlated, so passing both is not two independent confirmations (2026-10-12)** · **the k × noise-floor rule is a heuristic; bootstrapped CIs are the clean version, and if not implemented that must be stated** · QAT arm not bit-matched · **extrapolation limit, driver-aware version** (landed 2026-09-18) · H1's "bluffs less" contested in literature · **cold-load logprob variance observed once (n=1)** · **the AUROC noise floor is estimated via Hanley–McNeil pre-pilot; the pilot's measured floor governs** · **`unfiltered` avoids compounding contamination but does not remove it** · **degenerate generation at 1b: some "incorrect" answers are non-answers rather than wrong facts** · **forced response puts lucky guesses in the correct class; uniform across cells** · **TriviaQA used off-label** — built as a reading-comprehension benchmark, so its Wikipedia-harvested aliases are deliberately permissive; closed-book generation makes that permissiveness a false-positive hazard · **the `value` field carries scraping artifacts** (`"A: Basketball"` on tc_543) — `normalized_value` is canonical · **throughput numbers are only valid on an otherwise-idle GPU with the previous model unloaded** · **low retained mass produces a renormalized value computed from tail probabilities, less stable than the same value from dominant ones; a minimum-mass threshold was considered and rejected as an unjustifiable free parameter** · **ECE co-primary considered and declined against the timeline** · **throughput measured on one driver version; a driver update moved the largest cell from spilling to resident**
 
 ---
 
@@ -660,7 +609,7 @@ typed — a hand-entered seed that disagrees with `DRAW_SEED` is worse than no m
 run_pilot.py — steps 1–7 COMPLETE, 2026-09-20
 
 *Described from the `run_pilot.py` uploaded mid-session on 2026-09-20. **Re-checked
-2026-10-08 against the committed file at `da50cea`** (unchanged through `94430cf`): strip on
+2026-10-08 against the committed file at `da50cea`** (unchanged through `94430cf`; `28a33de` was meant to carry only the prereg and lab log — confirm at next open): strip on
 both live and resume paths (lines 106, 275), `KV_CACHE_TYPE` declared and never verified
 (line 28), `keep_alive: '5m'` (line 153), the item-30 `KeyError` exposure (lines 103, 106,
 107) and the item-31 whitespace case (line 275) — all as described below.*
@@ -673,19 +622,19 @@ Step 2 — version and digest hard stop. GET /api/version against a frozen OLLAM
 
 Steps 3–4 — the A→B/C chain. Now inside `run_call` (below). The answer is stripped before entering `[Answer]`, in both the live path and the resume path. **The strip was lost once in the step-6 refactor** and 300 rows were generated with unstripped answers before it was caught in review; they were deleted and re-run.
 
-Step 5 — one row per call. `per_run_fields` (the nine per-run fields) is built once and copied into every row, then identity, response, timing and raw fields are added. `top_logprobs` is `None` on A and C, `10` on B. On a timeout, `done`, `done_reason`, timing and raw response are left out entirely rather than written as null (line 298). On `done: false`, each response field is logged if present — line 298 only promises absence on a timeout. One shared `base_options` object feeds both the request and the row, so the row cannot claim a value that wasn't sent. 90-second timeout, one retry, `attempt_count` recorded, `done` checked before anything else is read, Ollama error responses crash loudly as harness faults. Rows appended and the file closed per row.
+Step 5 — one row per call. `per_run_fields` (the nine per-run fields) is built once and copied into every row, then identity, response, timing and raw fields are added. `top_logprobs` is `None` on A and C, `10` on B. On a timeout, `done`, `done_reason`, timing and raw response are left out entirely rather than written as null (line 322). On `done: false`, each response field is logged if present — line 322 only promises absence on a timeout. One shared `base_options` object feeds both the request and the row, so the row cannot claim a value that wasn't sent. 90-second timeout, one retry, `attempt_count` recorded, `done` checked before anything else is read, Ollama error responses crash loudly as harness faults. Rows appended and the file closed per row.
 
-Step 6 — the loop. Outer loop over models, inner over items (line 254). One warm-up per model on every start and resume, output discarded, checked for `done`. A → B → C per item; a terminal A failure skips B and C. Resume collects triples from every well-formed row and skips them; a malformed line is discarded. After each model's items, `unload()` sends `keep_alive: 0` and polls `/api/ps` up to five times until the model is gone, else hard stop. Measurement calls carry `keep_alive: '5m'` explicitly.
+Step 6 — the loop. Outer loop over models, inner over items (line 277). One warm-up per model on every start and resume, output discarded, checked for `done`. A → B → C per item; a terminal A failure skips B and C. Resume collects triples from every well-formed row and skips them; a malformed line is discarded. After each model's items, `unload()` sends `keep_alive: 0` and polls `/api/ps` up to five times until the model is gone, else hard stop. Measurement calls carry `keep_alive: '5m'` explicitly.
 
-Step 7 — startup checks. `git status --porcelain` must be empty or the run hard-stops (line 259); the gitignored log does not appear in it. If the output file already has rows, their commit hashes and Ollama versions must all equal this process's, or hard stop (line 247).
+Step 7 — startup checks. `git status --porcelain` must be empty or the run hard-stops (line 283); the gitignored log does not appear in it. If the output file already has rows, their commit hashes and Ollama versions must all equal this process's, or hard stop (line 271).
 
 **Tests, 2026-09-20, all passed per Laz.** Forced timeout (`timeout=0.001`): A row with `timed_out: true`, `attempt_count: 2`, no B or C row for the item. Dirty tree: stops on an edited tracked file, proceeds when reverted. Hash mismatch: refused to resume onto rows from an older commit.
 
-**Validation run at `4254e66`, verified 2026-09-20 by Laz's pasted output:** 300 rows · 100 each of `answer` / `p_true` / `verbalized` · 0 rows with `timed_out: true`, `done: false` or `attempt_count: 2` · 0 rows with a 10+-digit `load_duration` (no mid-cell reload, line 249) · row `harness_commit_hash` equal to HEAD. First row's `load_duration` 0.23 s against a 3.52 s cold load measured 2026-09-18 — the warm-up works. Position 1 of the first B row contains a candidate with an empty token string and no `bytes` key — the edge case line 252 says the parser must tolerate, now observed in real data.
+**Validation run at `4254e66`, verified 2026-09-20 by Laz's pasted output:** 300 rows · 100 each of `answer` / `p_true` / `verbalized` · 0 rows with `timed_out: true`, `done: false` or `attempt_count: 2` · 0 rows with a 10+-digit `load_duration` (no mid-cell reload, line 273) · row `harness_commit_hash` equal to HEAD. First row's `load_duration` 0.23 s against a 3.52 s cold load measured 2026-09-18 — the warm-up works. Position 1 of the first B row contains a candidate with an empty token string and no `bytes` key — the edge case line 275 says the parser must tolerate, now observed in real data. **Provenance, 2026-10-12:** these rows are the 50 pilot items on the two pilot models — pilot data in everything but name. Not opened for any pre-pilot rule; deleted unopened before the pilot of record.
 
-**False-provenance incident, 2026-09-20.** An earlier 300-row run at 17:20 was stamped `ffd3e78` (the 09-18 step-5 commit) while the whole step-6 loop was uncommitted. Every row claimed code that did not produce it. Found in review the same evening, before the dirty-tree check existed — line 259's reason, measured rather than argued. Those rows were deleted.
+**False-provenance incident, 2026-09-20.** An earlier 300-row run at 17:20 was stamped `ffd3e78` (the 09-18 step-5 commit) while the whole step-6 loop was uncommitted. Every row claimed code that did not produce it. Found in review the same evening, before the dirty-tree check existed — line 283's reason, measured rather than argued. Those rows were deleted.
 
-Dedup rule for the append-only output: keep-first — on the page since 2026-09-18 (line 247), enforced in code since 2026-09-20. First occurrence wins; a re-run never replaces an observation already made, which closes the "re-run until it looks better" degree of freedom. Precondition: only valid within an unchanged harness, so the row must carry enough to prove that — digest, Ollama version, generation parameters, and the harness's own git commit hash. Rows from two harness versions are a discard-and-re-run question, not a dedup question. Append order is itself arrival order, so the rule is executable without a timestamp.
+Dedup rule for the append-only output: keep-first — on the page since 2026-09-18 (line 271), enforced in code since 2026-09-20. First occurrence wins; a re-run never replaces an observation already made, which closes the "re-run until it looks better" degree of freedom. Precondition: only valid within an unchanged harness, so the row must carry enough to prove that — digest, Ollama version, generation parameters, and the harness's own git commit hash. Rows from two harness versions are a discard-and-re-run question, not a dedup question. Append order is itself arrival order, so the rule is executable without a timestamp.
 
 Endpoint: /api/chat — settled with evidence 2026-09-10
 
@@ -713,7 +662,7 @@ distinguish artifact quotes from legitimate quoted titles, which is the unjustif
 parameter rejected for minimum alias length, minimum retained mass, and alias caps.
 
 Together with `qf_1637` and tc_543, these make **three distinct fields** carrying
-construction artifacts. See §5c item 19.
+construction artifacts. See §5c, the construction-artifacts entry.
 
 ### Remaining in Slice 1's family
 
@@ -855,7 +804,7 @@ Dropping `num_ctx` 131072 → 2048 cost the 12b throughput (35.9 → ~20 tok/s a
   Blockers now split: §11's rule and §8's noise floor are **pre-pilot mandatory**;
   §10's transcription and §2 are post-pilot, pre-freeze.
 - **Slice 1** — dataset loader. **COMPLETE 2026-09-05**, two sessions.
-- Slice 2 — runner + grader. ← here. **Runner complete 2026-09-20** — both pilot models, all three templates, append-only JSONL, resume, warm-up, verified unload, startup hard stops. Grader not started. Template B's pilot status open (§5c item 29, gated on item 37).
+- Slice 2 — runner + grader. ← here. **Runner complete 2026-09-20** — both pilot models, all three templates, append-only JSONL, resume, warm-up, verified unload, startup hard stops. Grader not started. Template B **in** the pilot of record (decided 2026-10-12); B's parser is grader work and now on the critical path.
 - **Public release — 2026-10-11**, between slices: README, LICENSE, CITATION.cff, full history pushed. Not a slice; recorded so the date is findable.
 - **Slice 3** — the full nine-model roster, and B's grader side. The runner half of "second method" landed early, in step 6.
 - **Slice 4** — analysis. **Deferred to October by design**, as the most fragment-tolerant
@@ -865,15 +814,15 @@ Dropping `num_ctx` 131072 → 2048 cost the 12b throughput (35.9 → ~20 tok/s a
 **Different seed**, and **pilot items removed from the main draw pool by subtraction**
 (see §5e).
 
-Determines **four** numbers: p_weak, p_strong, the AUROC noise floor, and the spread noise
-floor. **A materially wider measured floor is a §12 disclosure**, stated in advance.
+Determines **six** numbers (since 2026-10-12, line 149): p_weak, p_strong, and an AUROC noise
+floor and a spread noise floor **per elicitation method**. **A materially wider measured floor is a §12 disclosure**, stated in advance.
 
 **Scope risk, restated 2026-08-31 with the correct emphasis:** the document is nearly done
 and the harness is where the deadline actually turns. The prereg is the visible pile and
 the smaller one. Sessions spent on §10's wording are sessions not spent on the thing the
 timeline depends on.
 
-**Freeze mechanics:** `git tag -a prereg-frozen -m "Slice 0 frozen"`. Record the hash in the header. **Before tagging, hash the file you edited and confirm it matches the commit** — a stale handoff costs a session; a stale freeze costs the claim.
+**Freeze mechanics:** `git tag -a prereg-frozen -m "Slice 0 frozen"`. Record the hash in the header. **Before tagging, hash the file you edited and confirm it matches the commit** — a stale handoff costs a session; a stale freeze costs the claim. **Plus OSF (decided 2026-10-12):** register the frozen prereg on OSF at freeze — a timestamped, immutable registration a reviewer outside git can check — and record its DOI in §13 beside the commit. Results go to the OSF project at completion. Prereg line 432 names only the git tag; add the OSF step there before freeze.
 
 **Scope risk worth naming:** the document is nearly done; the harness doesn't exist. Slices 1–4 are where beginners lose months. If something must be cut for time, cut there — drop the QAT arm, or run at smaller N and disclose — not from the parts that make the study interpretable.
 
@@ -885,7 +834,7 @@ timeline depends on.
 
 **Explanation protocol.** Name the term, state the problem it exists to solve, show the concrete failure it prevents — then apply it to the file. Don't slow down; decompress. Worked examples with actual numbers land far better than definitions.
 
-**Concepts explained and confirmed landed** (don't re-explain from scratch; do check they haven't regressed): threshold = k × floor is multiplicative · bootstrapping is resampling *with replacement* · more resamples don't reduce uncertainty, only N does · *not evaluable* vs *not supported* · `num_ctx` vs `num_predict` · raw vs renormalized mass · **digest = cryptographic hash, same thing as a git commit hash** · **a priori vs a posteriori** · **AUROC = P(random correct ranks above random incorrect), ties count 0.5, which is why saturation degrades it**.
+**Concepts explained and confirmed landed** (don't re-explain from scratch; do check they haven't regressed): threshold = k × floor is multiplicative · bootstrapping is resampling *with replacement* · more resamples don't reduce uncertainty, only N does · *not evaluable* vs *not supported* · `num_ctx` vs `num_predict` · raw vs renormalized mass · **digest = cryptographic hash, same thing as a git commit hash** · **a priori vs a posteriori** · **AUROC = P(random correct ranks above random incorrect), ties count 0.5, which is why saturation degrades it** · **AUROC is computed within one cell; rank-only, so rescaling cannot change it; undefined only when a cell has no correct or no incorrect items (2026-10-12)** · **saturation = confidence piling up at the scale's top whether right or wrong; not always an artifact — it can be genuine overconfidence (2026-10-12)**.
 
 **Manual mile.** ARIA is ~5% Laz / 95% Claude by his own assessment. `calibration_lab` is the corrective — small enough to write alone, the artifact he can put his name on without an asterisk. The bar: rebuild the harness solo from a blank editor by OSU arrival. **Deprecated — in need of review.** The bar itself still holds; its deadline is anchored to a transfer plan no longer being pursued. Noted rather than ignored, and it needs re-anchoring to a date that still exists.
 
@@ -937,6 +886,8 @@ and the answer required checking §3. **Before asking for a decision, check what
 on.** Separately, the 2026-10-08 open caught this file's own §0 asking Claude to check an
 entry it hadn't read — the reading-the-page rule working as intended.
 
+**2026-10-12, five misses, all caught.** (1) The REU's "mid-December" deadline was carried as fact since July with no site ever named — a planning placeholder. **A date in this file needs a source.** (2) This file's verbalized-confidence bullet and the prereg both said dividing by 100 was for AUROC; AUROC is rank-only. Claude carried the error in its own document. (3) Told Laz the 09-20 lab-log entry set a standing per-entry authorship rule; it was a one-time statement — a precedent overstated from memory, the 09-12 failure in small. (4) Claude's amendment table said line 48 changed "twice"; it was two different phrases, and the error reached Laz's log draft before review caught it. (5) Called the unwritten §8 procedure "three gaps", implying a paragraph exists. **Process change, per Laz:** this file's item numbers meant nothing on his side — refer to everything by content. §5c's numbering retired the same day. Also found at open: §5's row for §1 still said "stale premise — rewrite before anything else" six weeks after the 08-31 correction voided it.
+
 ---
 
 ## 10. Living-doc gap — the reason this file exists
@@ -960,6 +911,8 @@ Repo holds the pre-registration and data. Vault holds interpretation. **Canonica
 ## 11. Git state
 
 ```
+28a33de  2026-10-12 Both-must-hold decided; §3 split verdicts; prereg (seven §D amendments) + lab log 10-12 (exact message: git log -1 28a33de)
+032ba89  2026-10-11 Handoff rewritten against 94430cf
 94430cf  2026-10-10/11 public-release prep — README, LICENSE, CITATION.cff, prereg lines 4 + 368, handoff placeholders, lab log 10-08/10-10 (exact message: git log -1 94430cf)
 da50cea  2026-09-20 Updated handoff
 09c815e  2026-09-20 Appended lab log: 2026-09-20 Steps 5-7 done: run_pilot.py hardened, resumed, and verified clean
@@ -989,6 +942,12 @@ f8a12b4  2026-08-01  Section 3 completed
 3496554  2026-06-24  pre-registration template WIP
 ```
 
+Verified 2026-10-12:
+
+Open check: `git log --oneline 94430cf..HEAD` returned only `032ba89 (HEAD -> master, origin/master)`; tree clean; prereg unchanged since `94430cf`. `28a33de` was committed by Laz with the prereg and the 10-12 lab-log entry; its file list was **not** shown to Claude — next open, run `git diff --stat 032ba89 28a33de` and expect exactly those two files. Per Laz's git check (10-12 entry), origin held 44 commits after the second 10-11 push (`032ba89`). Whether `28a33de` and this handoff are pushed is not recorded here.
+
+**This handoff should be the only file past `28a33de`.**
+
 Verified 2026-10-08 → 10-11:
 
 Open checks at `da50cea`, both 10-08 and 10-10: tree clean, `git diff --stat 09c815e HEAD` showed only this handoff, `git diff --stat da50cea HEAD` empty. `94430cf` carries all of the 10-10 work in one commit. Tracked files (`git ls-files`, 10-10) match the README's repository map plus the three new files; `.venv/`, `pilot_runner_log.jsonl` and `tempCodeRunnerFile.py` exist on disk and are ignored.
@@ -999,7 +958,7 @@ Open checks at `da50cea`, both 10-08 and 10-10: tree clean, `git diff --stat 09c
 
 **Pre-publication audit, 2026-10-08:** commit authors — one name, one email; `pilot_runner_log.jsonl` never committed; no token patterns in history.
 
-This handoff should be the only file past `94430cf`.
+(At the time: this handoff the only file past `94430cf` — confirmed 2026-10-12.)
 
 Verified 2026-09-20:
 
