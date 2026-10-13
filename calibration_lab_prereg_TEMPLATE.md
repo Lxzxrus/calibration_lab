@@ -28,7 +28,8 @@ Within the gemma3 family, how do parameter count and weight quantization affect 
 
 ## 3. Hypotheses
 
-- Definitions: Δ = the within-model AUROC gap across the q8_0 → q4_K_M rung pair: Δ(M) = AUROC(M, q8_0) − AUROC(M, q4_K_M). Used uniformly at all three sizes. fp16 rungs, where published (1b, 4b), are used only for H2a's within-model monotonicity check and never enter Δ.
+- Definitions: Δ = the within-model AUROC gap across the q8_0 → q4_K_M rung pair: Δ(M) = AUROC(M, q8_0) − AUROC(M, q4_K_M). Used uniformly at all three sizes. fp16 rungs, where published (1b, 4b), are used only for H2a's within-model monotonicity check and never enter Δ. Both-must-hold: AUROC is computed separately for each elicitation method - P(True) logprobs and verbalized confidence. A hypothesis's overall verdict requires both per-method results to clear its bar; one method passing alone does not produce that verdict. Where a threshold is derived from the pilot noise floor, each method is held to the floor measured for that method - P(True) and verbalized confidence do not share one floor.
+
 
 - H1: As parameter count increases across gemma3 1B → 4B → 12B (same family, all sizes at q4_K_M, same prompts), the model's ability to distinguish its own correct from incorrect answers improves: AUROC increases monotonically. 
 
@@ -44,7 +45,7 @@ Falsifier: Non-monotonic ordering, or total gap < 0.05.
 
 - H2a (main effect): Within each model, AUROC decreases monotonically as precision drops: AUROC(fp16) > AUROC(q8_0) > AUROC(q4_K_M). Three separate monotonic checks, one per model, not one interleaved chain: Three-rung on 1b and 4b model sizes (fp16, q8_0, q4_k_M), fp16 does not exist at 12b, so 12b is a two-rung check at q8_0 and q4_K_M.
 
-Verdict: supported only if all 3 per-model checks confirm AUROC score decreases monotonically as precision drops. A break at any size means H2a is not supported. Per-model verdicts will still be recorded and reported regardless of H2a itself being supported or not. 
+Verdict: supported only if all 3 per-model checks confirm AUROC score decreases monotonically as precision drops. A break at any size means H2a is falsified. Per-model verdicts will still be recorded and reported regardless of H2a itself being supported or falsified. 
     
 H2a rationale: The confidence signal AUROC reads lives in fine-grained differences between logits. Quantization adds noise to those logits, and that noise corrupts the small differences carrying the discrimination signal before it touches the answer. So self discrimination degrades as precision drops. 
 
@@ -54,13 +55,35 @@ Falsifier: any ordering other than the predicted one falsifies, or any per-step 
 
 - H2b (interaction): The size of that drop (q8_0 → q4_K_M) is larger for smaller models. Formally: Δ(1B) > Δ(12B). 
 
-Precondition: H2b is evaluated only if Δ(1B) > 0. If Δ(1B) ≤ 0, the 1b model did not degrade under compression, H2b's premise does not obtain, and H2b is reported as not evaluable rather than confirmed or falsified.
+Precondition: H2b is evaluated only if Δ(1B) > 0. If Δ(1B) ≤ 0, the 1b model did not degrade under compression, H2b's premise does not obtain, and H2b is reported as not evaluable rather than supported or falsified.
 
 H2b rationale: Larger models have enough weights that quantization's compression has little effect on the model's self-assessment capability, where a smaller model does not have enough weights to support that same compression without more noticeable adverse effects to self-assessment capability. There simply is not "enough" of the model at smaller parameter sizes to handle quantization without capability deterioration.
 
 Prediction: Δ(1B) > Δ(12B), where Δ is the AUROC gap from q8_0 → q4_K_M at both sizes. The spread Δ(1B) − Δ(12B) must be ≥ 2 × the pilot-measured noise floor for the spread. Δ(4B) is measured and reported as descriptive context but it does not enter the H2b verdict. k = 2 committed 08-01-2026.
 
 Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the large model's, or the spread Δ(1B) − Δ(12B) falls below the magnitude threshold. Cases where the precondition fails (Δ(1B) ≤ 0) are reported as not evaluable, not falsified.
+
+**Split verdicts.** Under the both-must-hold clause, the overall verdict for each hypothesis is the weaker of its two per-method verdicts - ordered confirmed > suggestive > falsified for H1, supported > falsified for H2a, and supported > not evaluable > falsified for H2b - giving the overall verdict for every pair of per-method outcomes below.
+
+| Hypothesis | One method | Other method | Overall verdict |
+|---|---|---|---|
+| H1 | confirmed | confirmed | confirmed |
+| H1 | confirmed | suggestive | suggestive |
+| H1 | confirmed | falsified | falsified |
+| H1 | suggestive | suggestive | suggestive |
+| H1 | suggestive | falsified | falsified |
+| H1 | falsified | falsified | falsified |
+| H2a | supported | supported | supported |
+| H2a | supported | falsified | falsified |
+| H2a | falsified | falsified | falsified |
+| H2b | supported | supported | supported |
+| H2b | supported | not evaluable | not evaluable |
+| H2b | supported | falsified | falsified |
+| H2b | not evaluable | not evaluable | not evaluable |
+| H2b | not evaluable | falsified | falsified |
+| H2b | falsified | falsified | falsified |
+
+Per-method verdicts are reported regardless of the overall verdict, the same precedent already set for H2a's per-model verdicts above.
 
 - Note on thresholds. H1's numbers are hardcoded while H2a's and H2b's are a formula (2 × the pilot-measured noise floor). This is intentional. H1's gap is a quantity I have an informed opinion about: "≥0.1 confirming" comes from asking how big a difference would have to be before I'd actually tell someone about it. H2a's per-step gaps and H2b's spread are quantities I have never observed and have no basis for guessing, so the threshold defers to the instrument: the noise floor sets the scale, and k = 2 sets how far above that noise an effect must sit before I'll claim it.
 
@@ -123,7 +146,8 @@ Falsifier: Δ(1B) ≤ Δ(12B): the small model's drop is not greater than the la
 
  The runtime probe (run 2026-08-28, complete) yielded that the load_duration was nearly identical between 12b-q8_0 and 1b-q4_K_M - 215.73 ms and 215.39 ms respectively. This accounts for ~72% of projected runtime and it is invariant across model size, quantization, template, prompt length, and logprobs, therefore it is a constant. The remaining ~28% is made up of prompt_eval, eval, and server_slack measurements. When accounted for, the 12b-q8_0 has a wall-clock time of 317.86 ms per call, and the 1b-q4_K_M 251.52 ms per call. Model load and unload across all nine cells is negligible against the sweep; per-model figures and total are in section 6's findings block.
 
- The pilot is specified below, not yet run. p_weak = the accuracy of the weakest cell, and p_strong is the accuracy of the strongest cell. The formula: N = 200 / min(p_weak, 1 - p_strong) plus 10% exclusion margin. The pilot spec: 50 items each on gemma3:1b-it-q4_k_m and gemma3:12b-it-q8_0, different draw_seed, and pilot items excluded from the main draw pool and data discarded. 50 pilot items on both extremes to ensure no thin cells in the case of extreme high/low accuracy. So, the pilot has four outputs: p_weak, p_strong, the AUROC noise floor, and the spread noise floor.
+ The pilot is specified below, not yet run. p_weak = the accuracy of the weakest cell, and p_strong is the accuracy of the strongest cell. The formula: N = 200 / min(p_weak, 1 - p_strong) plus 10% exclusion margin. The pilot spec: 50 items each on gemma3:1b-it-q4_k_m and gemma3:12b-it-q8_0, different draw_seed, and pilot items excluded from the main draw pool and data discarded. 50 pilot items on both extremes to ensure no thin cells in the case of extreme high/low accuracy. So, the pilot has six outputs: p_weak, p_strong, the AUROC noise floor for each elicitation method, and the spread noise floor for each elicitation method.
+
 
  - draw_seed is fixed before draw_main.py is first executed, recorded in items_manifest.json, and the draw is not repeated - the first draw at that seed is the draw.
 
@@ -209,7 +233,7 @@ Reasoning: Whitespace behavior correlates with model size. A whitespace sensitiv
 
 - P(True) - Why renormalize at all: raw True-mass conflates uncertainty about the answer with failure to follow the format. Format-following degrades at smaller model sizes, especially across this consumer-level order of magnitude - a 12b obeys "answer with True or False" more consistently than a 1b does. So raw mass would be systematically lower on small models for a reason unrelated to calibration, and H1 is a size hypothesis. Renormalizing removes that effect from the measurement; logging the retained mass keeps the format-following signal visible as a reported statistic instead of letting it slip away. Read the generated token position 0 only, fixed, no exceptions because scanning forward for a position that matches would rescue more items on the 1b than the 12b which is differential exclusion, and searching for the position where you find what you want is a degree of freedom. Normalize each candidate: strip whitespaces, make lowercase. The affirmative mass is the sum of the probabilities of all candidates whose normalized form is `true`, and likewise for `false` 'True' , 'TRUE' , 'true' , and [sp]True will all normalize to true after strip and lowercase. Strict format compliance; exact match against {true} / {false} only. The prompt names two tokens, so two tokens count; semantic enumeration has no natural stopping point. Anything else is non-compliant and remains outside the retained mass. P(True) = affirmative mass / (affirmative + negative mass); computed from raw logprobs at full precision because concentrated mass can round to a zero in the denominator - unacceptable. Zero retained mass will be recorded as unparseable and logged in section 9 as an exclusion (logged with the per-cell rate); 0.5 manufactures a number the model never expressed, and  0 treats the absence of 'true' as evidence for 'false'. No minimum mass floor; I considered but rejected it because any threshold I could come up with would just be an invented number with no basis. Retained mass is logged per row and per-cell mean is reported in the main body. Raw logprobs of both matched tokens will be logged per row too. And the parser will tolerate a candidate with an absent 'bytes' key and an empty token string.
 
-- Verbalized confidence parsing rule: The entire response, after stripping whitespaces, stripping a trailing % (since 85% is the same as 85/100), and stripping any leading zeros, must parse as an integer. The integer is then divided by 100 to put it on a scale [0,1] so the two elicitation methods end up on the same scale, since AUROC needs them comparable. When a response returns done_reason: "length", follow the Grader Spec's Truncation detector. Reasoning: A truncated response that is long enough to be cut off is almost certainly a response that failed the entire-response-is-an-integer rule so it's already excluded on those grounds. The only case that could survive to corrupt a value is a bare integer that was clipped midway through the digits, which needs a digits-only response longer than num_predict. The [0,100] scale makes that impossible. So the flag is simply a check that the hazard didn't show up. Anything else is unparseable → §9 exclusion, logged. Leading zeros are stripped. 085 parses as 85 - the transformation is unambiguous and adds no degree of freedom, and excluding it would put a formatting artifact in the same bucket as refusals and genuine non-answers, inflating a rate the exclusion table reports as a finding.
+- Verbalized confidence parsing rule: The entire response, after stripping whitespaces, stripping a trailing % (since 85% is the same as 85/100), and stripping any leading zeros, must parse as an integer. The integer is then divided by 100 to put it on [0,1], since ECE, Brier score, and the reliability diagrams compare confidence against accuracy, which is a proportion. When a response returns done_reason: "length", follow the Grader Spec's Truncation detector. Reasoning: A truncated response that is long enough to be cut off is almost certainly a response that failed the entire-response-is-an-integer rule so it's already excluded on those grounds. The only case that could survive to corrupt a value is a bare integer that was clipped midway through the digits, which needs a digits-only response longer than num_predict. The [0,100] scale makes that impossible. So the flag is simply a check that the hazard didn't show up. Anything else is unparseable → §9 exclusion, logged. Leading zeros are stripped. 085 parses as 85 - the transformation is unambiguous and adds no degree of freedom, and excluding it would put a formatting artifact in the same bucket as refusals and genuine non-answers, inflating a rate the exclusion table reports as a finding.
 
 Parameters
 - num_predict = Template A: 25 tokens; generous headroom well beyond a ten-words-or-fewer answer, including hedging. Template B: 5 tokens; one token for True/False plus a stop token, with margin. Template C: 10 tokens; worst case is three digit tokens for 100 plus a stop token, four total, plus headroom.
@@ -323,7 +347,7 @@ Accuracy — per cell, bin-independent. Control distinguishing knowledge decay f
 
 if exclusion rates differ substantially across cells, H1 and H2b results are interpreted in light of that, since selective removal of a small model's worst outputs inflates its apparent AUROC.
 
-If the pilot-measured noise floor is high enough that 2x the floor meets or exceeds H1's threshold, H1's verdict is still read against that fixed value (section 3), but reported alongside a note that the same gap would not clear H2a/H2b's own evidentiary bar: the two verdicts would not share a comparable standard of evidence in that case.
+If either method's pilot-measured noise floor is high enough that 2x that floor meets or exceeds H1's threshold, H1's verdict is still read against that fixed value (section 3), but reported alongside a note that the same gap would not clear H2a/H2b's own evidentiary bar for that method: the two verdicts would not share a comparable standard of evidence in that case.
 
 ⚠ **Stopping rule.** The full sweep runs to completion. No looking at partial results and deciding you have enough.
 
