@@ -2,6 +2,86 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
+## 2026-10-18 Prereg prose pass: thirteen amendments landed; four sheet items open
+
+Opening check, run at the start of the pass: git status --short was empty; git log -4 showed 4d737e8 on top, then 17377bd, 7f4c892, b351c13; local HEAD and the remote head read from GitHub were both 4d737e8, so nothing was unpushed. A second check showed the prereg last changed at 28a33de (10-12) and that none of the 10-16 drafts had landed (old refusal line present, no refusal pattern list, no forced-response entry). It was a combined check, not the literal §B block. The 10-16 entry's next open check, git diff --stat 17377bd HEAD, was not part of it; run at close it shows lab_log.md only (23 insertions).
+
+Amendments (§D), each intentional:
+
+1. §5 Pool Rule: qf_1637 is dropped by id at draw time and is not a §9 exclusion. The README already pointed at §5, the page said nothing, and draw_pilot.py already filters by id with an assert.
+
+2. §5 draw re-run: a verification re-run is not a second draw, so restore it from git and never commit it. The re-run rewrites the manifest timestamp, which trips §6's clean-tree stop, and committing it would overwrite the original draw time. The wording says "the same items", not "byte for byte" (see measurements).
+
+3. §6 leading zeros: deleted the restated sentence, so the rule is stated once.
+
+4. §6 resume clause: "C" became "B and C" in three places. The runner has gated both on A since 09-20, and the clause was written while B was deferred.
+
+5. §6 Grader Spec: added the multi-candidate flag and its detector. The trigger is the whole word "or", it is observational, and its limits are stated. Probe 5 showed multi-candidate answers at both extremes, and "any match = correct" scores them correct.
+
+6. §7: the tie-rate is defined on correct-incorrect pairs (the pairs AUROC scores 0.5), covers both methods, is descriptive, and never changes a verdict. It closes the 10-12 note.
+
+7. §9 refusal rule: consolidated, with a closed 13-entry list, "list phrase AND no alias match", the both-cells cascade, provenance and two stated consequences. It implements decision A from 10-16 and replaces the one-liner that excluded hedged wrong guesses.
+
+8. §9 G: a terminal A failure removes the item from both cells under the A row's own code, with no fifth code, plus the missing period on "No valid response". It closes G, open since 09-12.
+
+9. §9 exclusion table: three flag-rate columns (compliance, negation, multi-candidate). The Grader Spec promised per-cell rates but only truncation had a column. Negation was previously "report if high", and is now always reported.
+
+10. §10 forced-response and refusals-exit entries: §10 had no forced-response entry, though the HANDOFF listed one (found 10-16).
+
+11. §10 saturation: extended to verbalized confidence (10-12 note).
+
+12. §10 multi-candidate entry.
+
+13. §10 4b-qat bullet: removed the restated instruct-recipe fact, which stays in the Instruct-tuning paragraph.
+
+Accidents reverted: a replacement sentence for the Provenance paragraph landed on the end of the old one-line rule before the consolidated text existed, and two stray blank lines sat after the §11 paragraph. Cosmetic: curly quotes and apostrophes in the pasted text were straightened.
+
+Measurements (read-only on the cached public dataset, a scratch copy of draw_pilot.py outside the repo, and the committed probe 5 file; the 300 validation rows were not opened):
+
+- Draw re-run: items_pilot.jsonl came out byte-identical (25,660 bytes). The manifest differed on the timestamp line only (2026-09-05T21:10:50.315940 committed versus 2026-10-18T20:05:56.836821 re-run).
+
+- Line endings: the committed draw files are CRLF throughout (50 CRLF in the items file, 12 in the manifest). An LF-writing platform would give 25,610 bytes, so "byte-identical" is a Windows result.
+
+- Whole-word "or" in gold answers: 87 of 11,313 normalized_values (0.77%), and 164 (1.45%) counting any alias. In probe 5 the 12b example fires the detector and the 1b example doesn't.
+
+- Alias-set sizes reproduced: normalized_aliases min 1, max 214 (sfq_9993), mean 11.66. The raw aliases field gives max 230 and mean 14.03.
+
+- Refusal list against aliases: 4 of 11,313 items have an alias inside a list phrase (i, no, know), and 156 (1.38%) have a single-character alias.
+
+- Construction artifacts confirmed: qf_1637, tc_543 and qw_402, which is one of the 50 pilot items.
+
+- Probe 5: its 20 outputs contain no apostrophes of either kind.
+
+Open: the pending items, kept here until the next handoff rewrite moves them to §5c:
+
+- the construction-artifacts and off-label bullets, where "rejected for minimum alias length" is recorded only in the HANDOFF
+- the §11 closing paragraph, which needs a predicate and typo fixes
+- the OSF step, where the DOI location is undecided
+- the "0" wording gap in the leading-zero rule
+- the README's "regenerates exactly" caveat, and "excluded" becoming "dropped"
+- §5's "no guessing floor" read against §10
+- the generic items.jsonl versus items_pilot.jsonl
+
+Credits and misses, by content:
+
+Sonnet caught:
+- "byte for byte" is Windows-only
+- the tie-rate defined on items instead of pairs
+- "Detected, never corrected" false for the range example
+- "ten words fits three or four" unsupported
+- "proxy for both"
+- "which now decides verdicts"
+
+Sonnet missed:
+- the detector's "gold answers" wording, which Fable caught
+- an instruction that assumed a paragraph not yet in the file
+- claimed no opening check has been run, when one had. Nate caught.
+
+Fable caught:
+- the flag-rate column gap (negation overstated)
+- the curly apostrophes
+- the stray blank lines
+
 ## 2026-10-14 - 2026-10-16 Probe 5 committed; refusal list settled, rule drafted not landed; push status recorded
 
 Push status, unrecorded since 10-12. git log --oneline origin/master..HEAD lists four commits that are not on origin: 28a33de (both-must-hold decided, section 3 split verdicts, lab log 10-12), b351c13 (handoff rewrite, 10-12), 7f4c892 (FUNDING.yml, 10-14), and 17377bd (probe 5, 10-16). The remote's head, read from GitHub and not from the local tracking ref, is 032ba89, the 10-11 handoff rewrite, so the public repository has not had the both-must-hold prereg text since the decision was made. Not pushed at the time of writing.
