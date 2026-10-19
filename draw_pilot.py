@@ -50,7 +50,7 @@ assert len(items) == PILOT_N
 # containing the 5 values needed. + '\n' creates a new line on every iteration, without it the file would be one line with 50 items on it.
 # jsonl instead of json because one item per line means git diff shows which item changed rather than the whole file changed - and it's 
 # readable in any editor.
-with open('items_pilot.jsonl', 'w', encoding='utf-8') as outfile:
+with open('items_pilot.jsonl', 'w', encoding='utf-8', newline='\n') as outfile:
     for item in items:
         outfile.write(json.dumps(item) + '\n') 
 
@@ -70,5 +70,5 @@ manifest = {
     'items_drawn': len(items)
 }
 
-with open('items_manifest.json', 'w', encoding='utf-8') as outfile:
+with open('items_manifest.json', 'w', encoding='utf-8', newline='\n') as outfile:
     json.dump(manifest, outfile, indent=2)
