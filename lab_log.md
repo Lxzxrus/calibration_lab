@@ -2,6 +2,85 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
+## 2026-10-19 Normalizer defect found by measuring the data; int() and CRLF fixes; nine prereg amendments
+
+Opening check, run at the start of the day (09:40): git status was empty, HEAD was 6d7ed5b (the 10-18 entry and prereg), and the remote head read from GitHub was also 6d7ed5b. Reading the committed 10-18 entry against the files turned up three corrections, recorded here because the log is append-only. Amendment 7 said the new refusal rule replaces "the one-liner that excluded hedged wrong guesses"; the old rule (matches refusal patterns and contains no answer) did not exclude them by its wording, it named no list and "contains no answer" had no definition, and the new rule is the one that excludes a hedged wrong guess containing a list phrase, as a stated consequence. The heading said four sheet items open while the Open section listed seven bullets; the four sheet items are the construction-artifacts bullet, the off-label bullet, the section 11 closing paragraph and the OSF step. The grader-session list and a next open check were missing; both are below.
+
+Reproduction check on TriviaQA's normalizer. The function is normalize_answer from the TriviaQA evaluation script (mandarjoshi90/triviaqa, evaluation/triviaqa_evaluation.py, last changed in commit 51b53595131828a00a1fed09cca9c87f512090e2, 2017-05-05; repo head at fetch ca43b5820b107f3970cf4b7d67f7db7a98117b79, 2023-11-13). In order: underscores to spaces, lowercase, punctuation to spaces (ASCII punctuation plus the curly single quotes and the acute accent), standalone a, an and the removed, whitespace collapsed. I extracted the function from the downloaded file without importing it and ran it over every item of the validation split (cached revision 0f7faf33a3908546c6fd5b73a660e0f8ff173c2f, unfiltered.nocontext, 11,313 items). It reproduces normalized_value on all 11,313 items. It reproduces normalized_aliases, compared as sets, on all but five items, where it turns a raw alias into the empty string and the dataset drops it: tc_2758, tc_3156, bb_3685, bb_9279 and qf_1637. The dataset has no empty-string alias and one blank normalized_value (qf_1637, dropped at draw). Re-applying the function to the dataset's 143,174 keys changes none. The 13 refusal phrases and 17 negation markers pass through it unchanged, and a curly apostrophe is handled. It leaves some characters alone: curly double quotes, en and em dashes and the ellipsis stay attached to their word; 153 items (1.35%) have a key containing one, 135 of them an en dash. The ASCII hyphen is punctuation (13mm-15mm becomes 13mm 15mm).
+
+Self-match measurement and the defect. Definition: take an item's gold value as if a model had answered it perfectly, normalize it by the Grader Spec's old Normalize bullet (lowercase, punctuation to space, collapse whitespace), and match it as whole words or phrases against the item's normalized_value and normalized_aliases. 389 of 11,313 items (3.44%) matched none of their own keys: 387 with an internal article (Fiddler on the Roof against the key fiddler on roof), qf_1637 (dropped at draw) and sfq_15030 (a pound sign the old rule deleted and the dataset keeps). In the pool of 11,312 that is 388 (3.43%). With normalize_answer applied to the response, one item fails (qf_1637), so none in the pool. Expected: about 1.7 such items in a 50-item draw, about 76 at N = 2200. No normalized alias or value in the dataset contains a standalone a, an or the (0 of 131,861 aliases, 0 of 11,313 values). The old bullet said no article stripping, because boundary matching absorbs leading scaffolding. That is true for a leading article and false for an internal one; the prereg and the HANDOFF both carried it as settled and the internal case was never tested. It was found by running every item's own answer through the rule, not by reading the spec. Likely direction of the bias, inferred and not measured: a model that gives the exact title is marked wrong, so models that know more of these items lose more accuracy and AUROC, which works against H1. Decision: Normalize is now TriviaQA's own function, copied verbatim into the grader and cited there, so article removal is inherited from the dataset's keys and is not a grader choice.
+
+B-shaped call. One Template B call with a hand-written question (What is the capital of France?, answer Paris), not a pool item: no exact match and no question containing "capital of France" among the 11,313 validation questions. Model gemma3:1b-it-q4_k_m, Ollama 0.32.14, base options, num_predict 5, logprobs true, top_logprobs 10, keep_alive 0; nothing saved; api/ps empty afterward. Reason: the committed probe 4 JSON has twelve positions but no nested candidate lists, so no committed file showed the shape the fixtures must copy. Result: the output was True plus a newline in two positions; each position has bytes, logprob, token and top_logprobs; the nested list has 10 entries (bytes, logprob, token), sorted descending, total probability 0.994; position 0 read True -0.0629, False -3.3937, Yes -4.6845, TRUE -5.3292. In the runner file this array is the raw_logprobs field; the row-level top_logprobs is the request value (10 for B, null for A and C). This was the only model call of the day.
+
+CRLF fix, two commits. Found 10-18: the committed draw files were CRLF, so a re-run on Linux or macOS would not reproduce them byte for byte. Commit 5ce1f7b: draw_pilot.py now opens both outputs with newline set to a backslash-n; items_pilot.jsonl (25,660 to 25,610 bytes, 50 line endings) and items_manifest.json (274 to 262 bytes, 12 line endings) were converted from CRLF to LF, terminators only. These are frozen artifacts, so: git diff --ignore-cr-at-eol was empty for both; the manifest timestamp (2026-09-05T21:10:50.315940) was kept because the draw was not re-run in the project; an offline re-run of the edited script on a scratch copy reproduced the items file byte for byte and the manifest except its timestamp. Commit 8b87f92 adds .gitattributes with text eol=lf for both files. Why: on copies, the current layout is clean on Windows (either autocrlf setting) and shows the items file modified on Linux/macOS; the fix alone is clean on Linux/macOS and on Windows with autocrlf false, but shows the items file modified on a Windows-default clone (this machine's system Git config sets autocrlf true; the project overrides it to false); the fix plus .gitattributes was clean on a Windows-default and a Linux-style clone. Not run on a real Linux or macOS machine. The 10-18 caveat about the README's "regenerates exactly" is closed by this.
+
+int() defect. As written, the rule stripped any leading zeros before parsing, so 0 and 00 became the empty string and a zero-confidence response was unparseable under a literal reading (in Python, '0'.lstrip('0') is empty and int('0') is 0). No grader existed, so no data were affected. Found 10-18 by checking the sentence against Python's behavior. Fixed: after stripping whitespace and then a trailing %, the response must parse as an integer with int(); 085 parses as 85 and 0 or 00 as 0. Noted for the fixtures: int() also accepts +85, 8_5 and full-width digits (none plausible model output), and the rule strips one trailing %, so 85%% is unparseable.
+
+Amendments (§D), nine, all intentional, committed together as 3e429f0 (11 lines changed). The prereg cites this entry in its Normalize and no-prefix bullets; the reproduction check and the self-match measurement above are what they cite.
+
+1. §6 whitespace strip rule: a response empty after the strip is scored incorrect and not excluded, though it enters B and C as a non-answer by the same mechanism section 9 excludes refusals for; no code is invented for a case not yet observed (probe 5: 0 of 20 empty; the 300 sealed rows were not opened to check).
+
+2. §6 verbalized confidence parsing rule: the int() fix above.
+
+3. §6 Grader Spec, Normalize and the no-prefix bullet: TriviaQA's normalize_answer verbatim, with its punctuation set stated and the characters it leaves alone declared; the old no-article-stripping bullet became no prefix stripping.
+
+4. §6 Grader Spec, Match and Per-row logging: every distinct hit is logged as a list (the field matched aliases replaces which alias matched), deduplicated because normalized_value also sits inside normalized_aliases in 11,312 of 11,313 items; an empty alias never matches (not needed for the pool, since the only blank key is qf_1637, which is dropped, but its absence would score every response correct); raw word count (int) added to the row.
+
+5. §6 compliance detector: true when raw word count is 10 or fewer, counted as len(raw.split()); the stated reason now says normalization splits words apart and drops articles.
+
+6. §6 negation detector: the window precedes the earliest match in the response; false when nothing matched; per-cell rate reported (the only detector lacking it).
+
+7. §6 grader file: one row per item and method, including the B and C cells of a terminal A failure, which have no runner row; if A succeeded and its B or C row is missing, the grader stops.
+
+8. §7 accuracy: computed over the cell's retained items (section 9), so accuracy and AUROC share one item set. The trade-off is named: a cell that refuses more shows higher accuracy among its retained items; the refusal rate sits beside it in the exclusion table.
+
+9. §9 refusal rule: the A row carries the refusal code as well as the B and C cells.
+
+Accidents reverted: a blank line inserted into the Grader Spec bullet list. One amendment sentence (the Match bullet) was left with only a trailing space until review caught it.
+
+Credits and misses, by content.
+
+Sonnet caught:
+- the normalizer defect, by measuring all 11,313 gold answers against their own keys
+- a fixture (alias the hague) that tested a state the data never has
+- the logprobs field is raw_logprobs, and probe 4's JSON has no nested candidate lists
+- two fixture distributions (fx_023 and fx_024) whose probabilities summed above 1: 1.055 and 1.27
+- the need to dedupe matched aliases, and an unanchored negation window once several aliases can match
+- word count had to be a logged integer for the empty-answer case to be findable
+- the 10-18 amendment 7 wording, found when reviewing the committed entry
+
+Sonnet missed:
+- the empty-alias hazard, the "every item" overclaim in the Normalize bullet, and "dashes" versus en and em dashes (Fable caught)
+- amendment 7's description of the old refusal rule, in the 10-18 outline
+
+Fable caught:
+- TriviaQA's own function verbatim as the fix
+- the empty-alias guard, the overclaim, and the hyphen and dash precision
+- the negation detector missing its per-cell phrase
+- the unfinished Match bullet
+
+Fable missed:
+- the first reply to the article finding framed a fixture with an article in the alias as a declared false negative; nothing declared it and the data has none
+- fx_023 and fx_024: top-10 distributions whose probabilities summed to 1.055 (exp(-0.1) + exp(-2.5) + exp(-3.0) + exp(-4.0)) and 1.27 (exp(-0.1) + exp(-1.0)), impossible lists written without checking the arithmetic
+
+
+Open.
+
+From the 10-18 sheet (four): the construction-artifacts bullet; the off-label bullet (its "rejected for minimum alias length" appears only in the HANDOFF and needs confirming or removing); the section 11 closing paragraph (no verb); the OSF step (where the DOI is recorded).
+
+Pre-pilot and unwritten: section 8's noise-floor procedure (scaling from 50 items, one AUROC versus a difference, H2b's spread with two pilot cells, per method) and section 11's interpretation rule for AUROC flat while ECE degrades.
+
+Fixtures: three files in fixtures/ (items.jsonl, runner_log.jsonl, expected.jsonl), not yet written. Fable's spec stands with these changes: key names from the runner (raw_logprobs, with the nested shape from the B-shaped call); candidate probabilities summing to at most 1; complete A, B and C rows for every item; fx_040 becomes alias fiddler on roof with response Fiddler on the Roof (matched true); fx_045 hague with The Hague; fx_046 an empty alias with a wrong response (matched false); added cases: 85%%, a B row with done false, a 10-word answer, a gold answer containing "or", the curly-double-quote gap, and a whole-split test (grading every gold value should fail only qf_1637); negation boundary cases use a single-word marker plus the prereg's couldn t ever be vancouver, and filler words are not articles.
+
+Elsewhere: the README map needs .gitattributes, .github/FUNDING.yml, CITATION.cff, probe5_refusal_phrasing.py and fixtures/; section 5's "no guessing floor" read against section 10; items.jsonl versus items_pilot.jsonl in the prereg; the grader's own output file needs a .gitignore line when it is named.
+
+Grader session: single-character aliases (156 items, 1.38%, counting any alias; 17 items have a single-letter normalized_value); 4 items where a refusal phrase alone hits an alias (i, no, know); the 153 items whose keys contain characters the function leaves alone; the rate of empty Template A answers (count them in the runner file); resume robustness; delete pilot_runner_log.jsonl unopened before the pilot of record.
+
+The HANDOFF is still the 28a33de one; rewrite it against the file when this chat ends.
+
+Next open check: after the push, git diff --stat 3e429f0 HEAD should show lab_log.md only, and git status -sb should show master in sync with origin.
+
+
 ## 2026-10-18 Prereg prose pass: thirteen amendments landed; four sheet items open
 
 Opening check, run at the start of the pass: git status --short was empty; git log -4 showed 4d737e8 on top, then 17377bd, 7f4c892, b351c13; local HEAD and the remote head read from GitHub were both 4d737e8, so nothing was unpushed. A second check showed the prereg last changed at 28a33de (10-12) and that none of the 10-16 drafts had landed (old refusal line present, no refusal pattern list, no forced-response entry). It was a combined check, not the literal §B block. The 10-16 entry's next open check, git diff --stat 17377bd HEAD, was not part of it; run at close it shows lab_log.md only (23 insertions).
