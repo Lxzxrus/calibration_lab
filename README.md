@@ -103,6 +103,8 @@ This study uses TriviaQA (Joshi, Choi, Weld & Zettlemoyer, *TriviaQA: A Large Sc
 
 Code is released under the [MIT License](LICENSE). Documents and measurements (`*.md`, `probe_out/`) are released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). TriviaQA records are excluded; see [Data](#data).
 
+`triviaqa_normalize.py` is a verbatim copy of one function from [mandarjoshi90/triviaqa](https://github.com/mandarjoshi90/triviaqa). It is under that repository's [Apache License 2.0](third_party/triviaqa/LICENSE), not this repository's MIT License.
+
 ## Contact
 
 Questions and critique are welcome: please [open an issue](https://github.com/Lxzxrus/calibration_lab/issues).

@@ -292,18 +292,18 @@ The three contamination sources and procedural protections above apply equally h
 
  4 word marker window: 4 words because something like "couldn t ever be vancouver" is a realistic answer and is 4 words back from "vancouver" after normalization. 
 
- What happens when the negation marker flags? Set a boolean on the row. It never changes the score. It is for recording only. If the rate comes back high on any cell, I'll know that the substring matching is producing false positives and I can report that.
+ What happens when the negation marker flags? Set a boolean on the row. It never changes the score. It is for recording only. If the rate comes back high on any cell, I'll know that the alias matching is producing false positives and I can report that.
 
 Grader Spec:
 - Normalize: TriviaQA's own normalize_answer function (evaluation/triviaqa_evaluation.py in mandarjoshi90/triviaqa, commit 51b5359), copied verbatim into the grader and cited there: underscores to spaces, lowercase, punctuation to spaces, standalone a, an and the removed, whitespace collapsed. Punctuation means ASCII punctuation plus the curly single quotes and the acute accent; other characters, such as curly double quotes and en and em dashes, are left as they are. Applied to the response. TriviaQA's normalized_value and normalized_aliases are already its output, apart from empty strings the dataset drops (checked on every validation item, lab log 10-19), so both sides go through one function.
-- Match: normalized_value plus all of normalized_aliases , checked as complete words/phrases (word boundary regex) against the normalized response. Every distinct hit is logged, normalized_value first, then normalized_aliases in stored order. An empty alias never matches.
+- Match: normalized_value plus all of normalized_aliases , checked as complete words/phrases (whitespace-delimited: the key must be preceded and followed by a space or an end of the text; regex \b is not used, because it cannot match a key that begins or ends with a non-word character) against the normalized response. Every distinct hit is logged, normalized_value first, then normalized_aliases in stored order. An empty alias never matches.
 - Any match = correct. No match = incorrect.
 - No prefix stripping. Boundary matching absorbs leading scaffolding. Article removal is not a grader choice but part of the dataset's own normalization: a normalizer without it could never match a correct answer that contains an internal article (measured, lab log 10-19).
 - Per-row logging: matched (bool), matched aliases (list), negation flag (bool), raw word count (int), compliance flag (bool), truncation flag (bool), multi-candidate flag (bool), exclusion reason (one of section 9's codes, or blank if not excluded).
 - Compliance detector: true when raw word count ≤ 10, counted as len(raw.split()) on the raw response rather than the normalized one — normalization splits words apart and drops articles, so raw is what the model actually emitted. Purely observational, never changes the score, per-cell rate reported.
 - Truncation detector: set when done_reason is "length". Purely observational, never changes the score, per-cell rate reported.
-- Negation detector: marker list frozen, 4-word window preceding the earliest match in the response (false when nothing matched), purely observational — never changes the score, per-cell rate reported.
-- Multi-candidate detector: set when "or" appears as a complete word in the normalized response. Purely observational, never changes the score, per-cell rate reported. Crude by design: it misses candidate lists written with commas or ranges, and it fires on single answers that themselves contain "or".
+- Negation detector: marker list frozen, set when a marker lies wholly within the 4-word window preceding the earliest match in the normalized response (false when nothing matched), purely observational — never changes the score, per-cell rate reported. Markers match as whole words and phrases, by the same boundary rule as the Match bullet.
+- Multi-candidate detector: set when "or" appears as a whitespace-delimited word in the normalized response. Purely observational, never changes the score, per-cell rate reported. Crude by design: it misses candidate lists written with commas or ranges, and it fires on single answers that themselves contain "or".
 
 Grader Rule Declaration:
 - What may change? Code that fails to implement a written rule.
@@ -364,7 +364,7 @@ If either method's pilot-measured noise floor is high enough that 2x that floor 
 
 Unparseable → IF no confidence value can be extracted per the method's parsing rule, THEN exclude that item from that cell; log reason='unparseable'.
 
-Refusal → IF the normalized Template A response contains any entry of the refusal pattern list as a complete phrase (word-boundary match, same normalizer as the Grader Spec) AND the Grader Spec finds no alias match, THEN exclude that item from both of that model's calibration cells (p_true and verbalized); log reason='refusal' on the A row and in both cells. An alias match is scored correct regardless of refusal patterns — the match rule governs, so refusal exclusion only ever removes items from the incorrect class.
+Refusal → IF the normalized Template A response contains any entry of the refusal pattern list as a complete phrase (whitespace-delimited match, same normalizer as the Grader Spec) AND the Grader Spec finds no alias match, THEN exclude that item from both of that model's calibration cells (p_true and verbalized); log reason='refusal' on the A row and in both cells. An alias match is scored correct regardless of refusal patterns — the match rule governs, so refusal exclusion only ever removes items from the incorrect class.
 
 Refusal pattern list, closed at freeze, in normalized form: i don t know · i do not know · cannot know · can t know · no way to know · impossible to know · cannot determine · can t determine · not enough information · insufficient information · cannot answer · can t answer · unable to answer.
 
@@ -421,6 +421,8 @@ Extrapolation limit. Every throughput and memory-footprint figure in this docume
 - The asymmetry in the model roster in section 4 (the lack of 12b-fp16) causes asymmetry in section 3's H2a within-model check: 2 rungs for the 1b, 2 rungs for the 4b (excluding the exploratory 4b-qat), but just 1 rung for the 12b. This means the shape across the two steps on the 1b and across the two steps on the 4b are observable, but the 12b is only a directional test between two quants.
 
 - Multi-candidate answers. Under "any match = correct," a response naming several candidates is scored correct if any one is an alias, and ten words can name several. Observed in probe 5 on both extremes ("Possibly a terrier or chihuahua."; "13mm - 15mm, likely 13mm."). A recognition-shaped hazard inside a free-form design. Never corrected; section 6's multi-candidate detector flags only responses that use "or" (the first example, not the second), per-cell rate reported.
+
+- Characters the normalizer leaves alone. TriviaQA's normalizer turns ASCII punctuation into spaces but leaves en dashes, em dashes, curly double quotes and the ellipsis as they are, so a correct answer typed with a different dash or quote than the key is scored incorrect, in either direction: an answer typed with a hyphen misses a key that holds an en dash, and an answer typed with an en or em dash misses a key that holds a space where the gold value has a hyphen. A correct answer with one of those characters attached to it (for example in curly double quotes, or joined to the next word by an em dash) is also missed, because matching is whitespace-delimited. Counts are in lab log 10-20. How often models type those characters is not measured; the pilot counts them in the runner file. Never corrected.
 
 ## 11. What a null result looks like
 

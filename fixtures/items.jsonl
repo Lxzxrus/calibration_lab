@@ -1,0 +1,52 @@
+{"question_id": "fx_001", "question": "Fixture: two hits, list order", "normalized_value": "paris", "normalized_aliases": ["paris", "paris france"], "value": "Paris"}
+{"question_id": "fx_002", "question": "Fixture: substring must not match", "normalized_value": "exile", "normalized_aliases": ["exile"], "value": "exile"}
+{"question_id": "fx_003", "question": "Fixture: markdown punctuation", "normalized_value": "xiaowei yi", "normalized_aliases": ["xiaowei yi"], "value": "Xiaowei Yi"}
+{"question_id": "fx_004", "question": "Fixture: curly apostrophe in the response", "normalized_value": "o neil", "normalized_aliases": ["o neil"], "value": "O'Neil"}
+{"question_id": "fx_005", "question": "Fixture: single-character alias, refusal collision", "normalized_value": "i", "normalized_aliases": ["i"], "value": "I"}
+{"question_id": "fx_006", "question": "Fixture: whitespace-only answer", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_007", "question": "Fixture: negation: not Paris", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_008", "question": "Fixture: negation: marker 4 words back", "normalized_value": "vancouver", "normalized_aliases": ["vancouver"], "value": "Vancouver"}
+{"question_id": "fx_009", "question": "Fixture: negation: marker 5 words back", "normalized_value": "vancouver", "normalized_aliases": ["vancouver"], "value": "Vancouver"}
+{"question_id": "fx_010", "question": "Fixture: negation: marker but no match", "normalized_value": "vancouver", "normalized_aliases": ["vancouver"], "value": "Vancouver"}
+{"question_id": "fx_011", "question": "Fixture: multi-candidate true", "normalized_value": "chihuahua", "normalized_aliases": ["chihuahua"], "value": "Chihuahua"}
+{"question_id": "fx_012", "question": "Fixture: multi-candidate miss", "normalized_value": "13mm", "normalized_aliases": ["13mm"], "value": "13mm"}
+{"question_id": "fx_013", "question": "Fixture: or inside a word", "normalized_value": "orwell", "normalized_aliases": ["orwell"], "value": "Orwell"}
+{"question_id": "fx_014", "question": "Fixture: eleven-word answer", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_015", "question": "Fixture: truncation", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_016", "question": "Fixture: refusal", "normalized_value": "1915", "normalized_aliases": ["1915"], "value": "1915"}
+{"question_id": "fx_017", "question": "Fixture: refusal, hedged right", "normalized_value": "1915", "normalized_aliases": ["1915"], "value": "1915"}
+{"question_id": "fx_018", "question": "Fixture: refusal, hedged wrong", "normalized_value": "1915", "normalized_aliases": ["1915"], "value": "1915"}
+{"question_id": "fx_019", "question": "Fixture: \"not sure\" is off the list", "normalized_value": "lyon", "normalized_aliases": ["lyon"], "value": "Lyon"}
+{"question_id": "fx_020", "question": "Fixture: A row timed out", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_021", "question": "Fixture: A row not done", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_022", "question": "Fixture: C row timed out", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_023", "question": "Fixture: P(True): case variants and a Yes", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_024", "question": "Fixture: P(True): near-miss word", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_025", "question": "Fixture: P(True): leading space and lowercase", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_026", "question": "Fixture: P(True): empty token without bytes", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_027", "question": "Fixture: P(True): no true or false candidate", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_028", "question": "Fixture: P(True): True only at position 1", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_029", "question": "Fixture: confidence: plain integer", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_030", "question": "Fixture: confidence: percent sign", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_031", "question": "Fixture: confidence: leading zero", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_032", "question": "Fixture: confidence: zero", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_033", "question": "Fixture: confidence: surrounding whitespace", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_034", "question": "Fixture: confidence: a range", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_035", "question": "Fixture: confidence: spelled out", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_036", "question": "Fixture: confidence: out of range", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_037", "question": "Fixture: confidence: the word percent", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_038", "question": "Fixture: confidence: cut off at the token limit", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_039", "question": "Fixture: confidence: empty", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_040", "question": "Fixture: article inside the answer", "normalized_value": "fiddler on roof", "normalized_aliases": ["fiddler on roof"], "value": "Fiddler on the Roof"}
+{"question_id": "fx_041", "question": "Fixture: confidence: doubled percent sign", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_042", "question": "Fixture: B row not done", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_043", "question": "Fixture: ten-word answer", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_044", "question": "Fixture: or inside the gold answer", "normalized_value": "truth or dare", "normalized_aliases": ["truth or dare"], "value": "Truth or Dare"}
+{"question_id": "fx_045", "question": "Fixture: article at the start of the answer", "normalized_value": "hague", "normalized_aliases": ["hague"], "value": "The Hague"}
+{"question_id": "fx_046", "question": "Fixture: empty alias", "normalized_value": "paris", "normalized_aliases": ["paris", ""], "value": "Paris"}
+{"question_id": "fx_047", "question": "Fixture: en dash in the key", "normalized_value": "1939\u20131945", "normalized_aliases": ["1939\u20131945"], "value": "1939\u20131945"}
+{"question_id": "fx_048", "question": "Fixture: curly double quote in the key", "normalized_value": "\u201ccasablanca\u201d", "normalized_aliases": ["\u201ccasablanca\u201d"], "value": "\u201cCasablanca\u201d"}
+{"question_id": "fx_049", "question": "Fixture: negation: two-word marker", "normalized_value": "vancouver", "normalized_aliases": ["vancouver"], "value": "Vancouver"}
+{"question_id": "fx_050", "question": "Fixture: negation: two-word marker straddling the window edge", "normalized_value": "vancouver", "normalized_aliases": ["vancouver"], "value": "Vancouver"}
+{"question_id": "fx_051", "question": "Fixture: negation: marker inside another word", "normalized_value": "vancouver", "normalized_aliases": ["vancouver"], "value": "Vancouver"}
+{"question_id": "fx_052", "question": "Fixture: curly double quotes around a plain key", "normalized_value": "casablanca", "normalized_aliases": ["casablanca"], "value": "Casablanca"}
