@@ -2,6 +2,89 @@
 
 *Append-only. Newest first. Raw measurements and what happened, dated.*
 
+## 2026-10-24 - 2026-10-26 Handoff audited against the files; plan checked against the page; eleven prereg amendments
+
+Amendments 1 to 9 were made on 10-24 and saved by 13:32 that day (the file's modification time, read on 10-24 and again at 12:50 on 10-26, both before amendments 10 and 11 were saved). The chat then sat open until 10-26 with no work in between. The 10-26 opening check, run by Sonnet at 12:50, returned: HEAD f136874, the handoff-only commit (one file, 650 insertions and 776 deletions against 556b441, as checked on 10-24); master in sync with origin after a fetch that returned nothing new; and the prereg modified in the working tree, with amendments 1 to 9 uncommitted and intact. Amendments 10 and 11 were made on 10-26, at closing, after Opus read the lines amendments 4 and 6 had touched, and this entry was written the same day.
+
+Opening check, run by Sonnet alongside the one run with Opus: HEAD was f136874 (Handoff rewritten against 556b441), a handoff-only commit on the handoff's header hash 556b441; git status was empty and origin/master was the same commit. The handoff's own checks passed: no WORK_COMMIT is left in the log, and git show --stat 1c2fa48 lists the nine files its git section names.
+
+Handoff audit (SESSION_PROTOCOL section C step 4): all 877 lines read, claims checked against the prereg, the log, the code and the data. Reproduced or confirmed: 87 of 11,313 normalized_values (0.77%) and 164 (1.45%) with any alias containing the word or; normalized alias lists of 1 to 214 entries (sfq_9993), mean 11.66; the pool of 11,262; qf_1637 (a question about the roadrunner, value "(a", blank normalized_value, aliases about static libraries) and tc_543 ("A: Basketball"); items_pilot.jsonl (50 rows, five fields, first id odql_4374, qw_402 with doubled quotes) and its manifest; the run_pilot.py parameters, timeout, retry and warm-up; the probe 5 output (20 rows, load_duration 0.220 to 0.234 s, no response contains a refusal phrase, one has markdown bold); the nine throughput figures, the VRAM peak, the 215.5 ms load constant and the driver, Ollama and hardware names it takes from the prereg; and which section 10 bullets are on the page. Not matched: 5 of the 40 dates in its git list differ from git's author dates (cb92a94 is 09-01, not 08-31, and its subject is "updated lab_log 09-01-2026", not the description given; a213298 is 08-27, not 08-28; a37c996 is 08-26, not 08-27; f8a12b4 is 08-02, not 08-01; 3496554 is 07-24, not 06-24, though its message says June 24th). Unsourced: the validation run at 4254e66 is not in the lab log (that commit is the 09-20 revert after the timeout test; only the sealed rows' own hash field would settle it, and they were not opened), and the five-digit P(True) probe values (0.94765, 0.04254, 0.99493, 0.95724) are in no committed file (the prereg has 0.948 and 0.995). "About 30 amendments" is 29 by the entry headings (13 + 9 + 7).
+
+Provenance of the files, as Laz stated it on 10-26. The README sentence "I typed every line" and the handoff's division-of-labor line say Laz typed all code, which is true of most files and not of all; the 10-20 entry did not say so for the two measurement scripts. Typed by Laz: the prereg and the lab log; the Python files draw_pilot.py, run_pilot.py, probe4_endpoint_logprob_diff.py, probe5_refusal_phrasing.py and build_fixture_items.py; the header lines and imports of triviaqa_normalize.py; and the small files POST_STUDY_TODO.md, .gitattributes, .gitignore and .github/FUNDING.yml. Sonnet adds two facts the repository does not record: build_fixture_items.py and the header of triviaqa_normalize.py are blocks Sonnet wrote in the 10-20 session and Laz typed, which is the rule as the 09-20 entry states it for run_pilot.py (Sonnet drafts proposed text, Laz types it). The repository records no author for draw_pilot.py, probe4 or probe5, so Laz's statement stands alone for them.
+
+Everything else. Written by Claude: measure_normalizer.py and measure_boundary.py (Sonnet; committed 10-20 in 1c2fa48 and copied in by Laz with a command; both headers say "Written with Claude (Sonnet 5.5) for Laz"), the three PowerShell probes (probe1_per_call_overhead.ps1, probe2_prompt_eval.ps1, probe3_load_unload.ps1), CITATION.cff, LICENSE (the MIT text), the README, SESSION_PROTOCOL.md and the handoff. SESSION_PROTOCOL.md was created on 08-29 and amended three times (08-30 twice, 09-09); its rules record Laz's decisions on how he works, and Laz, who reviewed the file line by line on 10-26, says every word of it is Claude's, including the first-person lines in section E. The handoff is rewritten by Claude in each chat; Laz edited earlier versions by hand several times, Claude carried those edits into later rewrites, and he has made none in roughly the last six. Third party: the function in triviaqa_normalize.py, which Laz copied from TriviaQA's repository (it matches normalize_answer in evaluation/triviaqa_evaluation.py at commit 51b5359, checked again on 10-26), and third_party/triviaqa/LICENSE. Produced by the scripts or by a command: items_pilot.jsonl and items_manifest.json (draw_pilot.py), fixtures/items.jsonl (build_fixture_items.py), probe_out/, and requirements.txt (not named in Laz's statement; it has the form of pip freeze output, sorted name==version lines). Decided: the README states the exceptions plainly (the "How this was built" paragraph, committed with this entry), and the two measurement scripts stay as committed and are acknowledged as Claude's rather than retyped; retyping would change later versions only, since 1c2fa48 is public.
+
+Opus's plan for the day, checked against the page. The plan was six mechanical amendments (A), the section 8 noise-floor procedure (B), section 11 (C), decisions that need no data (D), prose that needs no data (E), what only the pilot can fill (F) and a freeze-readiness grep (G). Every "before" string in A occurs exactly once. Corrections Opus accepted after checking: items.jsonl appears three times in all (twice in section 5, once in section 6), not four; the Drafted date would not trip the plan's own bracket grep; E1 has three mentions in two places and is glossed in section 10, and what is missing is a section 3 definition and a section 7 metric; the scaffolding list also needs the italic freeze-mechanics line in section 13, and there are four warning-sign lines (the header blockquote, Frozen roster, Stopping rule, Pilot exemption), three of them commitments under a template marker; "every other date is ISO" was false (section 3 had a US-order date). The freeze-readiness grep returned five hits: the FROZEN line's [date] and [hash], an empty bracket in section 2, "Decisions to make and justify here" in section 4, the p_weak line in section 5 and the section 13 signature line; the FROZEN line, the p_weak line and the signature line are the hits expected before the pilot, and at freeze itself only the FROZEN line and the signature line remain, because the p_weak line is filled from the pilot before freeze. The section 2 bracket and the section 4 line are work still to do.
+
+Noise-floor arithmetic from the plan, recomputed (Hanley-McNeil, AUROC 0.7). A pilot of 50 items at 10% accuracy (5 correct, 45 incorrect, as the plan assumes) has a standard error of 0.1368, so twice the floor is 0.2735. The main study at 200 and 1,800 has 0.0214 and 0.0429; at 220 and 1,980, 0.0204 and 0.0409. An unscaled pilot floor therefore puts the H2a and H2b bar at about 0.27, which meets section 8's collision test against H1's 0.1 by construction. Opus's further point, not separately computed here: a floor estimated from five positives is itself a noisy estimate. The choice is between pilot-measured floors with a scaling rule (A) and floors from the main study's own paired bootstrap (B). Not decided. The handoff's ordering rule is code in uninterrupted blocks and prose in fragments; the plan put prose first on a day that could have been a block, Opus agreed that the fixtures did not depend on section 8, and Laz chose a fragmented day, so the prose plan stood.
+
+Amendments (§D), eleven, all intentional, committed as 48482ee (9 insertions and 9 deletions: nine lines, two of which carry two amendments each). Before and after, changed words only.
+
+1. §10 roster-asymmetry bullet: "2 rungs for the 1b, 2 rungs for the 4b (excluding the exploratory 4b-qat), but just 1 rung for the 12b" became "2 steps for the 1b, 2 steps for the 4b (excluding the exploratory 4b-qat), but just 1 step for the 12b". Section 3 calls the 12b a two-rung check (two precision levels, one step); the bullet counted steps and called them rungs.
+
+2. §6 grader-file line: "The grader writes one row per item and method" became "The grader writes one row per item, model and method". The rows are keyed on the item, model tag and method triple.
+
+3. §6 Match bullet: "normalized_aliases , checked" became "normalized_aliases, checked".
+
+4. §6 paragraph on 127.0.0.1: "via 127.0.0.1 , roughly" became "via 127.0.0.1, roughly".
+
+5. §5 pilot-values line: "p_weak = [ ] , p_strong = [ ] , N = [ ]" became "p_weak = [ ], p_strong = [ ], N = [ ]". Found by Laz's search for a space before a comma; not on the original list.
+
+6. §6 P(True) parsing rule: "'True' , 'TRUE' , 'true' ," became "'True', 'TRUE', 'true',". Found by the same search; spacing only.
+
+7. Header: "**Drafted:** [7-15-2026]" became "**Drafted:** 2026-07-15". The brackets went so that a filled value does not look like an unfilled slot beside the FROZEN line.
+
+8. §3 H2b prediction: "k = 2 committed 08-01-2026" became "k = 2 committed 2026-08-01". The prereg's dates are now ISO throughout (there were two in US order and two ISO); no date changed meaning.
+
+9. §6 Grader Spec, Normalize bullet: "copied verbatim into the grader and cited there:" became "copied with its body unchanged into triviaqa_normalize.py (Apache-2.0; license copy at third_party/triviaqa/LICENSE), which the grader imports. In order:". "Verbatim" was too strong because the file has an added license header, and the function lives in that file; the lab log 10-20 says "body unchanged". This closes the 10-20 Open item on the Normalize wording, and amendments 3 and 4 close its item on the two stray spaces.
+
+10. §6 paragraph on 127.0.0.1, the same sentence as amendment 4: "via 127.0.0.1, roughly 900 ms per call" became "via 127.0.0.1, a difference of roughly 900 ms per call". The 900 is the difference between the two routes, (5,855 - 1,338) / 5 = 903 ms per call; the 127.0.0.1 route alone is 1,338 / 5 = 268 ms per call, and the next sentence (27 calls, about 24 s per item) uses the difference. Found by Opus reading the line amendment 4 touched.
+
+11. §6 P(True) parsing rule, the same sentence as amendment 6: "likewise for `false` 'True', 'TRUE', 'true', and [sp]True will all normalize to true" became "likewise for `false`. 'True', 'TRUE', 'true', and [sp]True will all normalize to true". Two sentences were fused at false, as they were before today; the smallest repair is one period. Found by Opus on the same pass.
+
+Accidents reverted: none.
+
+Credits and misses, by content.
+
+Opus caught:
+- that an unscaled pilot floor from 5 positives puts the H2a and H2b bar near 0.27 and fires the section 8 collision by construction
+- that the roster-asymmetry bullet mixes rungs and steps (amendment 1) and that "verbatim" is false for the Normalize bullet (amendment 9)
+- that the three warning-sign lines in the body are commitments under a template marker, so the scaffolding decision is to strip the markers and restate the commitments, not strip or keep
+- that the 127.0.0.1 sentence reads as that route's own figure when the 900 is a difference (amendment 10), and the fused P(True) sentence (amendment 11)
+- that retyping the two measurement scripts could not correct the README, because 1c2fa48 is public, so the README has to state the exceptions either way
+
+Opus missed:
+- the items.jsonl count, E1 "defined nowhere", the section 13 italic line, the fourth warning-sign line, the reason for amendment 7, and "every other date is ISO"
+- that the plan put prose ahead of fixtures against the handoff's ordering rule (raised by Sonnet, conceded)
+- that its SESSION_PROTOCOL section C step 4 audit of the handoff on 10-24 checked the handoff against the prereg and the log only, not git, the code or the data, which is where the five dates, 4254e66, the P(True) values and the scripts' provenance were found (Opus's own statement)
+
+Sonnet caught:
+- the plan details corrected above, the US-order date in section 3 (amendment 8), and the colon in amendment 9's before-string
+- in the handoff: the five dates, the unsourced 4254e66 and P(True) values, and the missing provenance of the two scripts
+- the arithmetic behind amendment 10, that the handoff repeats the same slip, and that the localhost test's raw figures have no home in the log
+
+Sonnet missed:
+- the colon in amendment 9's before-string in its first list (caught on the second pass)
+
+Laz:
+- found two more stray spaces by search (amendments 5 and 6); kept the brackets on the Drafted date once, then removed them
+- told Sonnet on 10-26, file by file, which files he typed and which he did not, and chose to correct the README and acknowledge the two measurement scripts as Claude's rather than retype them
+
+Open.
+
+Decisions not taken today: the section 8 noise-floor procedure (A or B above) and what follows from it in sections 3 and 5; the section 11 rule (what flat means, the magnitude of calibration degrading, one metric, which comparisons it covers, what the named finding claims, the null structure) and its closing paragraph (it reads a null as no effect, calls AUROC calibration, recommends the biggest model from a discrimination null, and has no verb or terminal punctuation).
+
+Decisions that end as a sentence on the page: the digest check (the page says at the point of load, the code checks at process start; changing the page is four words, changing the code is a re-check before each model's warm-up); the draw_seed value; the keep-first commit-hash stop against daily commits (pre-freeze: the rule is in section 6, though the handoff files it under the main sweep); KV-cache verification; the keep_alive value; the warm-up call text; a template-text equality check; a resume line that parses but lacks a key; the OSF step and where the DOI is recorded; the main items file name (items.jsonl appears three times in sections 5 and 6); template scaffolding (strip the header blockquote and the italic guidance lines, including the section 13 freeze-mechanics line, and restate the Frozen roster, Stopping rule and Pilot exemption commitments in Laz's words).
+
+Prose: section 5 against section 10 on the guessing floor; the construction-artifacts bullet; the off-label aliases bullet (cite the 08-31 entry for declining to cap the alias set, drop "minimum alias length", which no entry records, and say which single-character figure is used, 151 letter or digit or 527 any character); E1 in section 3 and a throughput and footprint metric in section 7; the Study line's "frontier-scale" and section 2, after reading Proskurina et al.
+
+Unsourced in the prereg: the localhost test (5 calls, 5,855 ms via localhost, 1,338 ms via 127.0.0.1) appears only in the prereg; it needs a lab-log home, either the 08-28 runtime probes or a re-run.
+
+Fixtures: runner_log.jsonl and expected.jsonl are still not started. Two rows need more than the handoff's table gives. The expected negation flag for fx_017 is true: in the normalized response i cannot know but probably 1915, cannot lies wholly within the 4 words before 1915 (a run of the written rule over the table's other A responses that contain a marker found no further omission). And fx_028 does not say what position 0 holds, so its expected p_true cannot be computed from the table; it needs a position-0 content, for example no true or false candidate, which makes the expected value unparseable although position 1 holds True. The 10-20 README items stand.
+
+Handoff corrections owed: the five dates and the cb92a94 description in its git section, the sources for 4254e66 and the P(True) values, the count of 29, its note that the file list of 1c2fa48 is not verified (it is), its line "~900 ms per call via localhost" (the 900 is the difference between the routes; localhost alone is 1,171 ms per call), its division-of-labor line (the same correction as the README), its "13 of the 17 markers end in t" (15 end in the letter t; 13 end in a standalone t token, which is what the argument needs, and the 10-20 entry's identical wording is ambiguous in the same way), its filing of the keep-first stop under "Before the main sweep (not the pilot)" (the rule is in section 6, which freezes), and the rows of its section 5 table and section 5c lists that today's amendments closed (the Drafted bracket in the Header row, the two stray spaces, the Normalize wording).
+
+
 ## 2026-10-20 Whitespace boundary measured and named; negation rule completed; fixtures items file built; seven prereg amendments
 
 Opening check, run with Opus at the start of the day: clean, HEAD 3ff0833 (the 10-19 entry) with nothing past it. Opus's plan was the fixtures items file, after two points from his build sheet were settled: the dash finding from 10-19 had to be declared in the prereg, and the word boundary behind the 10-19 measurement had to be named.

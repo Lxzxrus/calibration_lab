@@ -48,7 +48,7 @@ To test how calibration holds up under the two constraints in play in models run
 
 ## How this was built
 
-I worked closely with Claude (Anthropic) on this project: Claude explained concepts and code, reviewed my work for errors, and proposed text. I typed every line, and I accepted, rewrote, or rejected every proposal in the prereg, lab log, and all code. The handoff is written primarily by Claude with my occasional edit, as that is Claude's document.
+I worked closely with Claude (Anthropic) on this project: Claude explained concepts and code, reviewed my work for errors, and proposed text and code. I typed every line of the prereg, the lab log and the Python code, and I accepted, rewrote, or rejected every proposal, with two exceptions: `measure_normalizer.py` and `measure_boundary.py` were written by Claude and copied into the repository by me, and the function in `triviaqa_normalize.py` is TriviaQA's, copied from their repository without changes to its text. Claude also wrote the three PowerShell probes (`probe1_per_call_overhead.ps1`, `probe2_prompt_eval.ps1`, `probe3_load_unload.ps1`) and `CITATION.cff`, and generated the `LICENSE` text. The handoff, `SESSION_PROTOCOL.md` and this README are written primarily by Claude.
 
 "Laz" in the process documents is me.
 
