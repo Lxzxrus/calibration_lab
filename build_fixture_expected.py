@@ -67,12 +67,12 @@ STANDARD_B = {
     'p_true': 0.90 / (0.90 + 0.05), 'retained_mass': 0.90 + 0.05,
     'matched_token_logprobs': [logprob('True', 0.90), logprob('False', 0.05)],
 }
-# Template C, and ordinary row: '90'.
+# Template C, an ordinary row: '90'.
 STANDARD_C = {
     'truncation': False, 'exclusion_reason': None,
     'parsed_integer': 90, 'mapped_confidence': 0.90,
 }
-# A call with no valiud response (E3): nothing read past done, so nothing derived.
+# A call with no valid response (E3): nothing read past done, so nothing derived.
 NO_B = {'truncation': None, 'p_true': None, 'retained_mass': None, 'matched_token_logprobs': None}
 NO_C = {'truncation': None, 'parsed_integer': None, 'mapped_confidence': None}
 UNPARSEABLE_C = {'parsed_integer': None, 'mapped_confidence': None, 'exclusion_reason': 'unparseable'}
@@ -142,7 +142,7 @@ def make_rows(model, question_id, answer, b_changes, c_changes):
         'multi_candidate': multi,
     }
     a_row = dict(shared, elicitation_method='answer', truncation=truncation, exclusion_reason=exclusion)
-    # E2: B and C carry the A response's fields; truncation and the rest are on their own call's.
+    # E2: B and C carry the A response's fields; truncation and the rest are their own call's.
     b_row = dict(shared, elicitation_method='p_true')
     b_row.update(STANDARD_B)
     b_row.update(b_changes)

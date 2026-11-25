@@ -36,7 +36,8 @@ MODEL_12B = {
 NUM_PREDICT = {'answer': 25, 'p_true': 5, 'verbalized': 10}
 
 def candidate(token, p, has_bytes=True):
-    # One top_logprobs entry, in the key order probe_out/api_chat_logprob_warm.json shows.
+    # One top_logprobs entry, with the key order of the logprobs entries in probe_out/api_chat_logprob_warm.json
+    # (token, logprob, bytes). That file has no nested top_logprobs lists, so the candidate shape is assumed.
     # logprob is computed from p, never typed, so every probability below is exact.
     entry = {'token': token, 'logprob': math.log(p)}
     if has_bytes:
