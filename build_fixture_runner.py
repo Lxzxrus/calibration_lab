@@ -189,6 +189,10 @@ CASES = {
     'fx_050': {'A': a_call("couldn't ever really be Vancouver")},
     'fx_051': {'A': a_call('I know Vancouver')},
     'fx_052': {'A': a_call('“Casablanca”')},
+    # Negation is read on the normalized response, so a capitalised marker still counts.
+    'fx_053': {'A': a_call('Not Paris')},
+    # int() rejects a decimal point, so 85.5 is unparseable.
+    'fx_054': {'A': a_call('Paris'), 'C': c_call('85.5', eval_count=5)},
 }
 
 # DECISION D5: two items also run on the 12b, so the grader's join and both cascades

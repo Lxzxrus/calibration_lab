@@ -52,6 +52,7 @@ ANSWERS = {
     'fx_050': (True,  ['vancouver'],       False, 5,  True,  False, False, None),
     'fx_051': (True,  ['vancouver'],       False, 3,  True,  False, False, None),
     'fx_052': (False, [],                  False, 1,  True,  False, False, None),
+    'fx_053': (True,  ['paris'],           True,  2,  True,  False, False, None),
 }
 # Every other 1b case answered a plain 'Paris': one word, matched, nothing flagged.
 PLAIN_PARIS = (True, ['paris'], False, 1, True, False, False, None)
@@ -127,6 +128,8 @@ C_CHANGES = {
     'fx_039': UNPARSEABLE_C,
     # One trailing % is stripped; '85%' is left, which int() rejects.
     'fx_041': UNPARSEABLE_C,
+    # int() rejects '85.5'; the rule takes integers only.
+    'fx_054': UNPARSEABLE_C,
 }
 
 def make_rows(model, question_id, answer, b_changes, c_changes):
@@ -152,7 +155,7 @@ def make_rows(model, question_id, answer, b_changes, c_changes):
     return [a_row, b_row, c_row]
 
 rows = []
-for number in range (1, 53):
+for number in range (1, 55):
     question_id = 'fx_%03d' % number
     rows += make_rows(MODEL_1B, question_id, ANSWERS.get(question_id, PLAIN_PARIS),
                       B_CHANGES.get(question_id, {}), C_CHANGES.get(question_id, {}))
@@ -174,7 +177,7 @@ with open('fixtures/runner_log.jsonl', 'r', encoding='utf-8') as infile:
     runner = [json.loads(line) for line in infile]
 runner_triples = {(r['question_id'], r['model_tag'], r['elicitation_method']) for r in runner}
 expected_triples = {(r['question_id'], r['model_tag'], r['elicitation_method']) for r in rows}
-assert len(expected_triples) == len(rows) == 162
+assert len(expected_triples) == len(rows) == 168
 assert runner_triples <= expected_triples
 assert expected_triples - runner_triples == {
     ('fx_020', MODEL_1B, 'p_true'), ('fx_020', MODEL_1B, 'verbalized'),

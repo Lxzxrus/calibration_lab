@@ -50,3 +50,5 @@
 {"question_id": "fx_050", "question": "Fixture: negation: two-word marker straddling the window edge", "normalized_value": "vancouver", "normalized_aliases": ["vancouver"], "value": "Vancouver"}
 {"question_id": "fx_051", "question": "Fixture: negation: marker inside another word", "normalized_value": "vancouver", "normalized_aliases": ["vancouver"], "value": "Vancouver"}
 {"question_id": "fx_052", "question": "Fixture: curly double quotes around a plain key", "normalized_value": "casablanca", "normalized_aliases": ["casablanca"], "value": "Casablanca"}
+{"question_id": "fx_053", "question": "Fixture: negation: capitalised marker", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}
+{"question_id": "fx_054", "question": "Fixture: confidence: decimal point", "normalized_value": "paris", "normalized_aliases": ["paris"], "value": "Paris"}

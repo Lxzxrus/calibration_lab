@@ -72,6 +72,8 @@ CASES = [
     ('fx_050', 'negation: two-word marker straddling the window edge', 'Vancouver', []),
     ('fx_051', 'negation: marker inside another word', 'Vancouver', []),
     ('fx_052', 'curly double quotes around a plain key', 'Casablanca', []),
+    ('fx_053', 'negation: capitalised marker', 'Paris', []),
+    ('fx_054', 'confidence: decimal point', 'Paris', []),
 ]
 
 rows = []
