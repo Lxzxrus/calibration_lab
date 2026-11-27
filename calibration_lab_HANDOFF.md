@@ -2,13 +2,13 @@
 
 *Operational snapshot. Drop this + the pre-registration into a fresh chat and say hello — that's enough to resume.*
 
-**Last updated:** 2026-11-24 · **Synthesized against commit:** `fc5c977` · **Status:** **Fixtures complete; grader not started.** `fixtures/items.jsonl` (52 rows), `fixtures/runner_log.jsonl` (158 rows) and `fixtures/expected.jsonl` (162 rows) are committed, and the grader's output fields are decided (E1–E6, lab log 11-20 to 11-23). **Runner COMPLETE** since 2026-09-20. **Repo PUBLIC** since 2026-10-11. Pre-pilot prose still unwritten: **§8's noise-floor procedure** and **§11's interpretation rule**. **Freeze date: not set, by Laz's decision.**
+**Last updated:** 2026-11-26 · **Synthesized against commit:** `b0d5a38` · **Status:** **Fixtures complete; grader not started.** `fixtures/items.jsonl` (54 rows), `fixtures/runner_log.jsonl` (164 rows) and `fixtures/expected.jsonl` (168 rows) are committed, and the grader's output fields are decided (E1–E6, lab log 11-20 to 11-23). **Runner COMPLETE** since 2026-09-20. **Repo PUBLIC** since 2026-10-11. Pre-pilot prose still unwritten: **§8's noise-floor procedure** and **§11's interpretation rule**. **Freeze date: not set, by Laz's decision.**
 
 *Session protocol lives in `SESSION_PROTOCOL.md`. Open by running its §B block.*
 
 *Section signs: a bare `§N` is the prereg's section N. This file's own sections are written `handoff §N` wherever the number also exists in the prereg (§1 to §11); `§0`, `§0b` and `§5b` to `§5e` have no prereg twin and stay bare. SESSION_PROTOCOL's sections are always written with the file name (`SESSION_PROTOCOL §B`).*
 
-*Rewritten 2026-11-24 against the files on disk at `fc5c977`, read from Laz's machine, not from the previous handoff or the conversation: the prereg, `lab_log.md`, `SESSION_PROTOCOL.md`, `README.md`, `run_pilot.py`, `draw_pilot.py`, `build_fixture_items.py`, `build_fixture_runner.py`, `build_fixture_expected.py`, `triviaqa_normalize.py`, `fixtures/*.jsonl`, `.gitignore`, `.gitattributes`, `POST_STUDY_TODO.md`, and `git log`. Not re-read this time: `measure_normalizer.py`, `measure_boundary.py`, the probe scripts. The corrections the 10-24 to 10-26 and 11-20 to 11-23 entries list as owed to this file are folded in. **Prereg locations are cited by section and bullet name, not line number**; get line numbers with a search at session time.*
+*Updated 2026-11-26 against the files on disk at `b0d5a38` (the 11-24 rewrite, `34ae627`, plus what `8bdcba5`, `32a9cca` and `b0d5a38` changed: the fixtures, the 11-24 to 11-25 lab-log entry, the runner's candidate comment; prereg, `SESSION_PROTOCOL.md` and README unchanged since `34ae627`, checked by `git diff`). The 11-24 rewrite read, from Laz's machine and not from the previous handoff or the conversation: the prereg, `lab_log.md`, `SESSION_PROTOCOL.md`, `README.md`, `run_pilot.py`, `draw_pilot.py`, `build_fixture_items.py`, `build_fixture_runner.py`, `build_fixture_expected.py`, `triviaqa_normalize.py`, `fixtures/*.jsonl`, `.gitignore`, `.gitattributes`, `POST_STUDY_TODO.md`, and `git log`. Not re-read this time: `measure_normalizer.py`, `measure_boundary.py`, the probe scripts. The corrections the 10-24 to 10-26 and 11-20 to 11-23 entries list as owed to this file are folded in. **Prereg locations are cited by section and bullet name, not line number**; get line numbers with a search at session time.*
 
 ---
 
@@ -16,10 +16,8 @@
 
 ### Critical path, in order
 
-1. **Before the grader: two small decisions.**
-   - **The three wrong graders no fixture catches** (lab log 11-20 to 11-23, under the wrong-grader table): a refusal phrase matched as a substring of the response; negation markers matched case-sensitively; `parsed_integer` accepting a decimal point. Add fixtures or accept and record the gap. Decide first: each added fixture changes `items.jsonl`, `runner_log.jsonl`, `expected.jsonl` and all three hashes.
-   - **Name the grader's output file** and add its `.gitignore` line (§6 requires the grader's per-row log gitignored).
-2. **`grade_pilot.py`** (name not yet fixed) — transcription of §6's Grader Spec and §9's exclusion rules, with the output schema fixed by E1–E6 (handoff §2, below). Imports `triviaqa_normalize.py`. Reads the runner file and joins the items file on `question_id`. **Done when** it reproduces every row of `fixtures/expected.jsonl` (162 at `fc5c977`; more if item 1 adds fixtures) (floats within `abs_tol=1e-9`, everything else exactly equal) **and** passes the whole-split test (grade every gold value against its own keys; only `qf_1637` may fail).
+1. **Before the grader: name the grader's output file** and add its `.gitignore` line (§6 requires the grader's per-row log gitignored). *(The three wrong graders no fixture caught are handled, `8bdcba5`: fx_053 and fx_054 added, the substring-refusal gap left unfixtured on Opus's recommendation and accepted by Laz on 11-26 (the 11-24 to 11-25 entry says who decided was not recorded).)*
+2. **`grade_pilot.py`** (name not yet fixed) — transcription of §6's Grader Spec and §9's exclusion rules, with the output schema fixed by E1–E6 (handoff §2, below). Imports `triviaqa_normalize.py`. Reads the runner file and joins the items file on `question_id`. **Done when** it reproduces every row of `fixtures/expected.jsonl` (168 at `b0d5a38`) (floats within `abs_tol=1e-9`, everything else exactly equal) **and** passes the whole-split test (grade every gold value against its own keys; only `qf_1637` may fail).
 3. **§8's noise-floor procedure** — pre-pilot, unwritten, and now a choice between two options (10-24 to 10-26 entry):
    - **(A)** pilot-measured floors plus a scaling rule to the main-study N, or **(B)** floors from the main study's own paired bootstrap.
    - The arithmetic that forces the choice (Hanley–McNeil, assumed AUROC 0.7, as recomputed in the lab log 10-24 to 10-26 entry): a 50-item pilot at 10% accuracy (5 correct, 45 incorrect) has a standard error of 0.1368 for one AUROC, so 2 × floor = 0.2735. That exceeds H1's fixed 0.1 by construction and fires §8's collision rule. At the main study (200 / 1,800) the SE is 0.0214. At an assumed AUROC of 0.5 the three figures are 0.1374, 0.2749 and 0.0215, so the conclusion does not depend on the assumed AUROC. Opus's further point, that a floor estimated from five positives is itself noisy, is not computed in the log.
@@ -29,12 +27,13 @@
 6. **Pilot of record.** Delete `pilot_runner_log.jsonl` first, **unopened** (provenance commitment, 2026-10-12: those 300 validation rows are the pilot items on the pilot models). The runner's keep-first check hard-stops on the file anyway. It is still on disk (346,588 bytes, gitignored).
 7. **Then:** fill §5's brackets → choose `draw_seed` → `draw_main.py` (pin the dataset revision) → Slice 3 (full roster) → pre-freeze prose (§5c) → OSF registration → freeze.
 
-**Ordering rule, unchanged since 2026-08-31:** code goes in the uninterrupted blocks, prose in the fragments. Items 2 and 5 are code. Item 1 comes before item 2, because a fixture added after the grader is written changes the rows it must reproduce; naming the output file and deciding whether to add fixtures are small decisions, but building any added fixture is code and goes in an uninterrupted block. Items 3 and 4 are prose and fit any gap before the pilot. The grader does not depend on §8; only item 5's floor computation does.
+**Ordering rule, unchanged since 2026-08-31:** code goes in the uninterrupted blocks, prose in the fragments. Items 2 and 5 are code. Items 3 and 4 are prose and fit any gap before the pilot. The grader does not depend on §8; only item 5's floor computation does.
 
 ### Estimate
 
 - **Whole-study estimate, 2026-10-12 (Claude's, logged as an estimate):** 12–20 sessions to freeze, 8–15 more to posted results.
-- **Since then, days with a commit:** 10-14 (the `FUNDING.yml` housekeeping commit; whether SESSION_PROTOCOL §E exempts such commits is open, see §0b), 10-16, 10-18, 10-19, 10-20, 10-26, 11-23, 11-24 — eight. By SESSION_PROTOCOL §E as written, 12–20 minus 8 leaves **4–12 to freeze**; if 10-14 is exempted as housekeeping, 12–20 minus 7 leaves **5–13**. By subtraction, not re-estimation.
+- **Since then, days with a commit** (from `git log`, 11-26): 10-14 (the `FUNDING.yml` housekeeping commit; whether SESSION_PROTOCOL §E counts such commits is open, see §0b), 10-16, 10-18, 10-19, 10-20, 10-26, 11-23, 11-24, 11-25, 11-26 — ten. 12–20 minus 10 leaves **2–10 to freeze**; minus 9 (10-14 exempted) leaves **3–11**. By subtraction, not re-estimation.
+- **Re-estimated item by item, 11-25 (Opus, in chat; not in the lab log):** about **15–23 sessions to freeze** and **23–38 to posted results**, both counted as sessions remaining from 11-25. Measured pace: 27 commit days in about 18 weeks to 11-25, about 1.5 a week; no month has reached three a week. The subtraction above is optimistic: every finished item has taken longer than its share of the 10-12 estimate (the fixtures alone took about six work days: 10-20, 11-20, 11-22, 11-23, 11-24, 11-25; git shows five commit days touching the fixtures or builders: 10-20, 11-23, 11-24, 11-25, 11-26).
 - **Work days with no commit, which SESSION_PROTOCOL §E says do not count as sessions:** 10-24, 11-20, 11-22.
 - **The variable that has broken every prior estimate is sessions per week, not sessions per task.** Pace goal: three a week. Between 10-26 and 11-20 there were none.
 - The dated external gate is **PNNL CCI, early January 2027**; the recommenders are for CCI. REU deadlines are per-site and unconfirmed; "mid-December" was a July placeholder.
@@ -77,7 +76,7 @@ The fixture rows are constructed, not model output.
 
 **Open protocol questions:**
 - **SESSION_PROTOCOL §A against §E** (lab log 11-20 to 11-23): §A lists the handoff rewrite as a closing step for every session; §E says "Handoff = per chat". Read together, SESSION_PROTOCOL §A's steps 3 and 4 are skipped on days inside a multi-day chat, but neither says so. SESSION_PROTOCOL §E is also headed "carried forward, unchanged" though its first bullets were replaced on 09-09.
-- Parked 10-16: whether SESSION_PROTOCOL §E should exempt housekeeping commits (the 10-14 `FUNDING.yml` commit).
+- Parked 10-16: whether SESSION_PROTOCOL §E counts a housekeeping or handoff-only commit as a work day (the 10-14 `FUNDING.yml` commit; `34ae627` is a further case, though 11-25 also had `8bdcba5`). The lab log 11-24 to 11-25 entry carries it under "Decisions not taken"; earlier wording here: whether SESSION_PROTOCOL §E should exempt housekeeping commits (the 10-14 `FUNDING.yml` commit).
 
 ---
 
@@ -214,14 +213,14 @@ It is a conceptual replication of **Kadavath et al. 2022** (arXiv 2207.05221, *L
 
 **Grader output: E1–E6, decided 2026-11-23** (grader-output decisions; unrelated to the prereg's exploratory hypothesis E1) (lab log 11-20 to 11-23; built into `fixtures/expected.jsonl`, not yet on the page):
 *(By Opus's account, Laz accepted E1–E4 and E6 in Opus's conversation on 11-23 at 20:44 and E5 at 1e-9 at 20:46; at 20:53 he told Sonnet the decisions had been made, without stating them. The built `expected.jsonl` matches Opus's recommendation on E1–E4 and E6.)*
-- **E1, names and shape.** Every row: `question_id`, `model_tag`, `elicitation_method`, `matched`, `matched_aliases`, `negation`, `raw_word_count`, `compliance`, `multi_candidate`, `truncation`, `exclusion_reason`. `p_true` rows add `p_true`, `retained_mass`, `matched_token_logprobs`; `verbalized` rows add `parsed_integer`, `mapped_confidence`. One key set per method. "Blank if not excluded" is JSON `null`. The grader does not exist, so these become its names.
+- **E1, names and shape.** Every row: `question_id`, `model_tag`, `elicitation_method`, `matched`, `matched_aliases`, `negation`, `raw_word_count`, `compliance`, `multi_candidate`, `truncation`, `exclusion_reason`. `p_true` rows add `p_true`, `retained_mass`, `matched_token_logprobs`; `verbalized` rows add `parsed_integer`, `mapped_confidence`. One key set per method. "Blank if not excluded" is JSON `null` (in the E1 sheet Laz accepted on 11-23; on 145 of the 168 rows). The prereg's word is still "blank" (§6 grader-file line); see §5c. The grader does not exist, so these become its names.
 - **E2, answer-level fields on B and C.** `matched` through `multi_candidate` are copied from the same item and model's A row, so every B and C row carries its own correctness label for AUROC. `truncation` belongs to each row's own call (copying A's truncation would put A's rate in the verbalized cell's column). `exclusion_reason` is the row's own call's code (unparseable, timeout, no_valid_response), except that A's own code goes on B and C when A is refused or terminally failed (§9; see E3, E4): fx_016 and fx_018 on the 1b carry `refusal` on all three rows.
 - **E3, no valid response.** If A has none (fx_020, fx_021), its answer-level fields, truncation and derived fields are `null` on the A row and on the synthesized B and C rows, and `exclusion_reason` carries A's code. If a B or C call has none (fx_022 C, fx_042 B), its answer-level fields stay copied from A; its truncation and derived fields are `null`; `exclusion_reason` is that call's code. Grounded in §6's "Check 'done' before reading any other field."
 - **E4, refusal-excluded B and C rows** still carry their computed values; `exclusion_reason` alone decides whether a row enters the analysis.
-- **E5, float tolerance:** `math.isclose(a, b, abs_tol=1e-9)` on `p_true`, `retained_mass`, `mapped_confidence` and each logprob in `matched_token_logprobs`; every other field exactly equal. Rounding error in the fixtures: measured by Opus on 11-23 in his own workspace on 12 of the fixture probabilities, largest 1.4e-17 (p = 0.10; script not in the repo), where the lab log records only his unmeasured estimate of about 1e-16. A grader that forgets `TRUE` in fx_023 is off by 0.0058.
+- **E5, float tolerance:** `math.isclose(a, b, abs_tol=1e-9)` on `p_true`, `retained_mass`, `mapped_confidence` and each logprob in `matched_token_logprobs`; every other field exactly equal. Rounding error in the fixtures: largest 1.4e-17 on 12 fixture probabilities (Opus, 11-23, script not in the repo); Sonnet's recomputation over every candidate in `runner_log.jsonl` gives 1.39e-17 at p = 0.10 (lab log 11-24 to 11-25, which corrects the 11-20 to 11-23 entry's "about 1e-16, not measured"). A grader that forgets `TRUE` in fx_023 is off by 0.0058.
 - **E6, `matched_token_logprobs`:** `{token, logprob}` for every position-0 candidate that normalizes to `true` or `false`, in candidate order; `[]` when none; `null` under E3. §6's P(True) rule now says "all matched tokens" (`887a341`), agreeing with the grader-file line.
 - **Three calls inside the expected rows that E1–E6 did not settle:** an out-of-range C response (`150`) has `parsed_integer: null`; zero retained mass is `0.0`, not `null` (the call succeeded); a whitespace-only answer is `compliance: true` (0 ≤ 10), so the compliance rate counts empty answers as compliant and only `raw_word_count: 0` separates them.
-- **Mean retained mass is over the cell's retained items only** (Laz's answer in Opus's conversation, 11-23 at 20:44, by Opus's account; the lab log does not record the time). §10's "so that the reader can weigh any cell's AUROC accordingly" supports it but does not say which items enter the mean; a sentence is owed (§5c).
+- **Mean retained mass is over the cell's retained items only** (Laz's answer in Opus's conversation, 11-23 at 20:44, by Opus's account, as the 11-24 to 11-25 entry now records). §10's "so that the reader can weigh any cell's AUROC accordingly" supports it but does not say which items enter the mean; a sentence is owed (§5c).
 - **Open:** the prereg's grader-file section is silent on E2, E3, E4 and the three calls. Whether the page should state them, or whether `expected.jsonl` and the log are their only home, is undecided (§5c).
 
 **Grader-rule development against pilot outputs is permitted, with a stated test** (08-26).
@@ -378,13 +377,13 @@ Order: **environment → findings → templates → whitespace rule → parsing 
 
 *Items leave these lists only by landing on the page, or (for the open list) by being decided, "considered and declined" included. Referenced by content, never by number.*
 
-### Closed since the last handoff (10-20 → 11-24), all landed; all logged except the `fc5c977` comment fixes
+### Closed since the last handoff (10-20 → 11-26), all landed; all logged except the runner comment's second fix (`b0d5a38`)
 
-Drafted-date bracket · two stray spaces · Normalize wording (`triviaqa_normalize.py`, license) · rungs/steps in the roster bullet · grader-file grain (item, model, method) · ISO dates · the `127.0.0.1` 900 ms as a difference · the fused P(True) sentence (all in `48482ee`) · README provenance by file (`50acd5f`) · `fixtures/runner_log.jsonl` (`c36b315`) · `fixtures/expected.jsonl` (`bba80da`) · "both" → "all" matched tokens (`887a341`) · four builder comments (`fc5c977`; landed after the 11-20 to 11-23 entry, which still lists them as owed, so the next entry should log it; the runner's candidate comment needs a second fix, see Before freeze) · fx_017's negation and fx_028's position 0, both built as the 10-26 entry predicted.
+Drafted-date bracket · two stray spaces · Normalize wording (`triviaqa_normalize.py`, license) · rungs/steps in the roster bullet · grader-file grain (item, model, method) · ISO dates · the `127.0.0.1` 900 ms as a difference · the fused P(True) sentence (all in `48482ee`) · README provenance by file (`50acd5f`) · `fixtures/runner_log.jsonl` (`c36b315`) · `fixtures/expected.jsonl` (`bba80da`) · "both" → "all" matched tokens (`887a341`) · four builder comments (`fc5c977`, logged in `32a9cca`) · the runner's candidate comment, second fix (`b0d5a38`; landed after the 11-24 to 11-25 entry, which lists it as owed, so the next entry should log it) · the three wrong graders no fixture caught: fx_053 and fx_054 added (`8bdcba5`), the substring-refusal gap accepted by Laz on 11-26 · the 36 and 18 wrong-grader counts, accounted for (`32a9cca`) · fx_017's negation and fx_028's position 0, both built as the 10-26 entry predicted.
 
 ### Pre-pilot — decisions
 
-- **The three wrong graders no fixture catches** (substring refusal phrase, case-sensitive markers, decimal `parsed_integer`): add fixtures or accept the gap. Before the grader (§0).
+- **`exclusion_reason` on a row not excluded:** `expected.jsonl` writes `null` (145 rows), as the E1 sheet Laz accepted on 11-23 recommended; the prereg's §6 grader-file line says "blank". Amend "blank" to "null" (a §D amendment) or record that "blank" means `null`. A blind derivation by a Sonnet sub-agent wrote `""`, so the page's word is read both ways (lab log 11-24 to 11-25).
 - **§8: option A or B** (§0).
 - **Whether the page states E2, E3, E4 and the three calls**, or `expected.jsonl` and the log are their only home.
 
@@ -408,7 +407,7 @@ Drafted-date bracket · two stray spaces · Normalize wording (`triviaqa_normali
 
 ### Before freeze — decided, not yet written
 
-- **Two sentences owed to the prereg** (lab log 11-20 to 11-23, "Decisions taken"): (1) the per-cell mean of retained mass is over each cell's retained items only (§10's retained-mass sentence does not say which items; §9's table only lists the column); (2) A's own truncation rate has no row in §9's exclusion table, which follows from E2 (the table has one row per calibration cell, p_true or verbalized, and none for A). Nothing records what sentence (2) should say, including whether A's rate is reported at all; decide that wording before writing it.
+- **Two sentences owed to the prereg** (lab log 11-20 to 11-23, "Decisions taken"): (1) the per-cell mean of retained mass is over each cell's retained items only (§10's retained-mass sentence does not say which items; §9's table only lists the column); (2) A's own truncation rate has no row in §9's exclusion table (§9 does list a truncation-rate column; the point is that no row is A's), which follows from E2 (the table has one row per calibration cell, p_true or verbalized, and none for A). Nothing records what sentence (2) should say, including whether A's rate is reported at all; decide that wording before writing it.
 - **§10 construction-artifacts bullet.** Three fields carry leftover dataset-construction machinery:
   - answer wiring: `qf_1637`, a valid answer entity on the wrong question
   - `value`: `'(a'` on `qf_1637`, `"A: Basketball"` on `tc_543`
@@ -430,7 +429,6 @@ Drafted-date bracket · two stray spaces · Normalize wording (`triviaqa_normali
   - the status banner ("runner built, grader not yet started") says nothing about the fixtures
 - **08-28 lab-log line** placing the probe scripts under `probe_out/` (they are at repo root): correction goes in a new entry.
 - **`run_pilot.py` stale comments** (checked 11-24): "12b gets used when the full sweep (Step 6+)…" (the 12b is used in the pilot); `KV_CACHE_TYPE`'s comment says "verified via server log", but nothing reads the log.
-- **`build_fixture_runner.py`'s candidate comment** (`fc5c977`) says the candidate shape "is assumed". That overstates it: the 10-19 entry records the nested entries' keys (bytes, logprob, token), their count (10) and their descending order from a real Template B call (response not saved). No entry records the nested key order; the comment takes it from the logprobs entries in `probe_out/api_chat_logprob_warm.json`, which has no nested lists. Fix with the next comments-only commit, and log it.
 
 ### Open — not yet decided
 
@@ -447,6 +445,11 @@ Drafted-date bracket · two stray spaces · Normalize wording (`triviaqa_normali
 - **Digest-prefix equality check:** optional hardening.
 - **Revision pin in `draw_pilot.py`.** It loads the dataset without one, and the revision (`0f7faf33…`) is recorded only on 10-19 (lab log 10-20; restored in the 11-20 to 11-23 entry). Add the pin, or record why not.
 - *Optional:* re-run the 1b throughput cells with a longer window (the two 1b cells swapped order between runs, about 6% either way, on a 22-token window; 08-26 entry, prereg §6 Readings).
+
+**Record-keeping, open** (lab log 11-24 to 11-25):
+- The "0 retries" count and the empty-token candidate at position 1 of the first B row, which earlier versions of this file stated about the 09-20 validation run and no lab-log entry names. Decide whether they are dropped as unsourced (this file no longer states them as fact) or sourced.
+- The audit's unapplied findings: Sonnet's per-finding list from the 11-24 audit (104 findings, 22 plus 4 applied) is a scratch file outside the repository. Decide whether the rest are worked through or let go.
+- Delete `.git/stale-maintenance-lock-from-claude`.
 
 **Unmeasured, and settled only by running a model** (lab log 11-20 to 11-23): what Ollama returns on `done: false` (D2 assumes text and logprobs present); whether seven newlines are seven tokens (D3); whether Ollama omits logprobs on calls that did not ask for them. The fixture `eval_count` values are cosmetic; no grader reads them.
 
@@ -573,15 +576,17 @@ Separate from the draw by design: the draw writes a frozen artifact in `'w'` mod
 
 **Output:** the grader file (gitignored once named), **one row per (item, model, method)**, with the key sets of E1 (handoff §2). That includes synthesized B and C rows for a terminal A failure. The grader stops if A succeeded and B or C is missing.
 
-**Done when:** it reproduces every row of `fixtures/expected.jsonl` (162 at `fc5c977`; more if fixtures are added) under E5, and the whole-split test fails only `qf_1637`.
+**Done when:** it reproduces every row of `fixtures/expected.jsonl` (168 at `b0d5a38`) under E5, and the whole-split test fails only `qf_1637`.
 
-### Fixtures — COMPLETE 2026-11-23
+### Fixtures — COMPLETE 2026-11-23; fx_053 and fx_054 added 2026-11-25
 
 | File | Rows | SHA-256 | Built by | Commit |
 |---|---|---|---|---|
-| `fixtures/items.jsonl` | 52 | `F24DFD1C…FC54FC` (8,353 bytes) | `build_fixture_items.py` | `1c2fa48` |
-| `fixtures/runner_log.jsonl` | 158 | `5B439B84…E214D0` (195,828 bytes) | `build_fixture_runner.py` | `c36b315` |
-| `fixtures/expected.jsonl` | 162 | `3FCD74DF…C9D1FB` (57,451 bytes) | `build_fixture_expected.py` | `bba80da` |
+| `fixtures/items.jsonl` | 54 | `3CE1C3F5…5A992D` (8,668 bytes) | `build_fixture_items.py` | `1c2fa48`, `8bdcba5` |
+| `fixtures/runner_log.jsonl` | 164 | `376AACAA…DEA6AB` (203,286 bytes) | `build_fixture_runner.py` | `c36b315`, `8bdcba5` |
+| `fixtures/expected.jsonl` | 168 | `B865ED1A…BCE7B5` (59,604 bytes) | `build_fixture_expected.py` | `bba80da`, `8bdcba5` |
+
+At `8bdcba5` every earlier row is byte-identical and in order; fx_053 and fx_054's rows sit after fx_052's and before the 12b rows.
 
 All three are LF, pinned by `.gitattributes` (`fixtures/*.jsonl text eol=lf`). Each builder is deterministic; a re-run must reproduce its hash.
 
@@ -592,14 +597,14 @@ All three are LF, pinned by `.gitattributes` (`fixtures/*.jsonl text eol=lf`). E
 - **D2** — a `done: false` row keeps its raw text and logprobs (fx_021 `Paris Paris Paris Paris`; fx_042 the standard B distribution), `attempt_count` 2, no `done_reason` or timing. A grader that reads before checking `done` fails. Whether Ollama returns text on `done: false` is unknown.
 - **D3** — fx_038's C response is `100` + seven newlines, 10 tokens, `done_reason` length: the one truncated C response that still parses.
 - **D4** — fx_046's A response is `?`, which normalizes to empty: the only response that catches a missing empty-alias guard under every whitespace-delimited implementation.
-- **D5** — fx_016 and fx_020 also run on the 12b (the 12b answers `1915` and `Paris`), so a join or a cascade keyed on the item alone fails. 152 1b rows + 6 = 158.
+- **D5** — fx_016 and fx_020 also run on the 12b (the 12b answers `1915` and `Paris`), so a join or a cascade keyed on the item alone fails. 158 1b rows (54 × 3, minus fx_020 and fx_021's four B and C rows) + 6 = 164.
 
-**Expected rows** (`build_fixture_expected.py`): every flag, count and code typed by hand; probabilities written as the hand arithmetic; no grading code. Four asserts: key set per method (E1), 162 distinct triples, every runner row covered, and the only extra rows are fx_020 and fx_021's B and C on the 1b. **Authority:** for any case, `expected.jsonl` governs over the table below.
+**Expected rows** (`build_fixture_expected.py`): every flag, count and code typed by hand; probabilities written as the hand arithmetic; no grading code. Four asserts: key set per method (E1), 168 distinct triples, every runner row covered, and the only extra rows are fx_020 and fx_021's B and C on the 1b. **Authority:** for any case, `expected.jsonl` governs over the table below.
 
-**Evidence the fixtures test what they claim** (lab log 11-20 to 11-23):
-- Two independent derivations (Sonnet's and Opus's, neither in the repo) agree with all 162 rows. Both share the three calls in handoff §2, so on fx_006, fx_027, fx_028 and fx_036 the agreement is not independent; the prereg's words are the support.
-- 24 wrong graders, each breaking one rule, all fail at least one row. Three more fail none (§0).
-- *For the next lab-log entry (Opus's account, now reproduced in full):* Opus's substring (36) and `\b` (18) counts each exceed Sonnet's first reproduction (24 and 6) by 12 rows. Opus's mutant matcher reported every hit at position 0, which empties the negation window, so the four negation-true cases (fx_007, fx_008, fx_017, fx_049) fail on all three rows (4 × 3 = 12). Sonnet's reproduction with that change (11-24) gives 18 for `\b` and 33 for substring (the three fx_051 rows stop failing once the window is empty). The last 3 substring rows are fx_046: Opus's substring mutant also dropped the empty-key guard, and an empty key is a substring of every string. Opus re-ran both variants on 11-24: with the guard dropped, 36 (12 items, fx_046 among them); with it kept, 33 (11 items), Sonnet's figure.
+**Evidence the fixtures test what they claim** (lab log 11-20 to 11-23 and 11-24 to 11-25):
+- Two independent derivations (Sonnet's and Opus's, neither in the repo) agree with all 168 rows. Both share the three calls in handoff §2, so on fx_006, fx_027, fx_028 and fx_036 the agreement is not independent; the prereg's words are the support.
+- 24 wrong graders, each breaking one rule, all fail at least one row. Of the three that failed none at 162 rows, a case-sensitive marker grader now fails fx_053 (3 rows) and a decimal-accepting grader fails fx_054 (1 row); a refusal phrase matched as a substring was accepted as a gap by Laz on 11-26 (no forced short answer is likely to hold one inside a longer word).
+- **The 36 and 18** (Opus's substring and `\b` counts, against Sonnet's 24 and 6) are accounted for (lab log 11-24 to 11-25): Opus's mutants reported every hit at position 0, which empties the negation window, so fx_007, fx_008, fx_017 and fx_049 fail on all three rows (+12; fx_051 stops failing under substring, −3); his substring mutant alone also dropped the empty-alias guard, so fx_046 fails (+3). Sonnet reproduced both effects. This shows the description yields the counts, not that it is what his code did.
 
 **Cases** (1b unless noted; A response unless noted; "✓" = matched true):
 
@@ -650,6 +655,8 @@ All three are LF, pinned by `.gitattributes` (`fixtures/*.jsonl text eol=lf`). E
 | 050 | vancouver | `couldn't ever really be Vancouver` | negation false (straddles the edge) |
 | 051 | vancouver | `I know Vancouver` | negation false (`no` inside `know`) |
 | 052 | casablanca | `“Casablanca”` | not matched (whitespace's cost) |
+| 053 | paris | `Not Paris` | ✓, negation true (capitalised marker; negation is read on the normalized response) |
+| 054 | paris | C `85.5` | unparseable, `parsed_integer` null (decimal) |
 
 Every item has complete A, B and C rows on the 1b except fx_020 and fx_021, whose runner wrote no B or C row; fx_016 and fx_020 also have complete rows on the 12b. Ordinary B rows: True .90, False .05 → p_true .90/.95, retained .95. Ordinary C rows: `90`. Fillers (the window words between a negation marker and the key) in the negation cases contain no articles, other markers, whole-word `or` or refusal phrases. The one deliberate exception is fx_017: its marker `cannot` plus the filler `know` form the refusal phrase `cannot know` (matched, so not excluded).
 
@@ -762,7 +769,7 @@ One call on `1b-q4_K_M` (hand-written question, not in the pool):
 - **Slice 2** — runner + grader. ← here.
   - Runner complete 09-20.
   - Grader spec complete on the page 10-20; output schema decided 11-23 (E1–E6).
-  - Fixtures complete 11-23: items, runner rows, expected rows.
+  - Fixtures complete 11-23: items, runner rows, expected rows; fx_053 and fx_054 added 11-25.
   - Grader not started.
 - **Public release 2026-10-11** (not a slice).
 - **Slice 3** — full nine-model roster.
@@ -810,13 +817,15 @@ One call on `1b-q4_K_M` (hand-written question, not in the pool):
 
 **Standing rule (2026-09-14):** any claim about what a file says arrives as section and bullet plus verbatim text, or as "I haven't checked that." Never "your prereg says X." **Apply it to Claude's own drafts and to this file**; that is where it fails.
 
-**Claude's misses, selected, 10-20 → 11-23 (all caught; the full lists are in the lab log's credit lines):**
+**Claude's misses, selected, 10-20 → 11-24 (all caught; the full lists are in the lab log's credit lines):**
 - Wrote "a missing guard would score every response correct" into this file after the whitespace rule landed; true only for substring or token-list matching.
 - Wrote that "I don't know" collides with all three refusal-phrase keys; it misses `no`.
 - Specified fx_038 as a bare `100` truncated at 10 tokens, and fx_046 as a wrong answer that cannot catch the guard it was for.
 - Cited the lab log for "no metadata fields", which is in the prereg; called the probe JSON the source of the nested candidate shape, which it does not contain; used the 12b's four-token `100` without saying it was the 12b's.
 - Miscounted its own draft: 5 asserts for 4, 21 plain-Paris items for 20.
 - Reported wrong-grader row counts without the mutant definitions that produced them.
+- Wrote that A's truncation rate "has no column" in §9's table (the 11-23 E2 sheet); §9 has the column, and the open point is a row for A.
+- In the first 11-24 rewrite, gave the 1e-17 rounding figure with no source (it had been measured on 11-23, in chat).
 - Five dates in this file's git list, plus a commit (`4254e66`), a "0 retries" count and five-digit probe values that no committed file holds. The 10-24 to 10-26 entry logs the dates, `4254e66` and the P(True) values; the "0 retries" count and the empty-token candidate at position 1 sat in the same validation-run bullet and are not yet named in the log (found in the 11-24 rewrite).
 
 **Rules added from those misses:**
@@ -854,9 +863,13 @@ One call on `1b-q4_K_M` (hand-written question, not in the pool):
 
 **`git log` is the authority; this section no longer copies it.** Earlier versions listed every commit by hand, and five of the dates were wrong (10-26 audit). Run `git log --format="%h %ad %s" --date=short`.
 
-**Since `556b441`, the commit the last handoff (`f136874`) was written against, local dates:**
+**Since `556b441`, the commit the handoff before last (`f136874`) was written against, local dates:**
 
 ```
+b0d5a38  2026-11-26 Fix the runner builder's candidate comment; comment only, code unchanged
+32a9cca  2026-11-26 Lab log 11-24 to 11-25
+8bdcba5  2026-11-25 Fixtures: fx_053 and fx_054; 54 items, 164 runner rows, 168 expected rows
+34ae627  2026-11-25 Handoff rewritten against fc5c977
 fc5c977  2026-11-24 Fix four comments in the two fixture builders; code unchanged
 f016d26  2026-11-24 Lab log 11-20 to 11-23
 887a341  2026-11-23 Prereg amendment 11-23: all matched tokens, not both
@@ -867,9 +880,9 @@ c36b315  2026-11-23 Fixtures: build_fixture_runner.py and fixtures/runner_log.js
 f136874  2026-10-20 Handoff rewritten against 556b441
 ```
 
-**Verified 11-24** (on Laz's machine, by command): HEAD `fc5c977`; `master` in sync with `origin/master`; 64 commits; `git diff --stat 556b441 HEAD` touches eight files and nothing else (`README.md`, `build_fixture_expected.py`, `build_fixture_runner.py`, `calibration_lab_HANDOFF.md`, `calibration_lab_prereg_TEMPLATE.md`, `fixtures/expected.jsonl`, `fixtures/runner_log.jsonl`, `lab_log.md`); the prereg at HEAD equals the 11-20 upload with one word changed; the uploaded handoff and `SESSION_PROTOCOL.md` equal the committed files.
+**Verified 11-26** (on Laz's machine, by command): HEAD `b0d5a38`; `master` in sync with `origin/master`; 68 commits; `git diff --stat 34ae627 HEAD` touches seven files (the three builders, the three fixture files, `lab_log.md`); the prereg, `SESSION_PROTOCOL.md` and the README are unchanged since `34ae627`; the three fixture hashes and row counts match the table in §5e; `expected.jsonl` has `exclusion_reason: null` on 145 rows. `.git/stale-maintenance-lock-from-claude` (0 bytes) is still present; delete it.
 
-**Next open (SESSION_PROTOCOL §C.1 and §C.2):** the header hash is `fc5c977`; once this file is committed, `HEAD` should be exactly one handoff-only commit past it (§C.1). Then `git status` clean and `git status -sb` in sync with origin (§C.2).
+**Next open (SESSION_PROTOCOL §C.1 and §C.2):** the header hash is `b0d5a38`; once this file is committed, `HEAD` should be exactly one handoff-only commit past it (§C.1). Then `git status` clean and `git status -sb` in sync with origin (§C.2).
 
 **Standing git facts:**
 - Remote `origin` = `https://github.com/Lxzxrus/calibration_lab.git`, branch `master`. Any other machine must clone fresh.
